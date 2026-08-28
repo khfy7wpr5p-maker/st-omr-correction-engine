@@ -35,6 +35,7 @@ export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionE
 export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
 export { REAL_OMR_ANNOTATION_STATUS, createRealOmrReviewObservation, buildRealOmrAnnotationBatch, annotateRealOmrObservation } from './benchmark/realOmrAnnotationQueue.js'
 export { createRealOmrEvidenceSplit, summarizeRealOmrEvidenceSplit } from './benchmark/realOmrEvidenceSplit.js'
+export { APPROVED_REAL_OMR_SEED, createApprovedRealOmrSeedFixture, projectApprovedRealOmrNoCorrectionGold, summarizeApprovedRealOmrSeedGold } from './benchmark/approvedRealOmrSeed.js'
 export { hashSourceBytes, evaluateSourceMutationInvariant } from './benchmark/sourceMutationInvariant.js'
 export { evaluateSelectivePrediction, selectMetricAtThreshold } from './benchmark/selectivePredictionMetrics.js'
 export { CALIBRATION_METHOD, evaluateConfidenceCalibration, compareCalibrationTransform } from './benchmark/confidenceCalibration.js'
