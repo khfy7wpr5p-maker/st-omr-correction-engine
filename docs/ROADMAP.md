@@ -20,7 +20,7 @@
 | E10E | Strengthened voice evidence + expanded approved mutation benchmark | Completed | Shadow only |
 | E10F | Scale approved controlled mutation benchmark from 8 to 24 cases | Completed | Shadow only |
 | E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Completed | None |
-| E10H | Record explicit teacher approval for four new bounded excerpts and expand gold-eligible source pool to 6 | Implemented, pending CI/merge | None |
+| E10H | Record explicit teacher approval for four new bounded excerpts and expand gold-eligible source pool to 6 | Completed | None |
 | E10I | Derive source-specific controlled mutations from newly approved excerpts | Not started | Shadow only |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
