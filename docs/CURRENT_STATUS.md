@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `d15446aef430ac46190b07f58d84348512c2a1bf`
+Last verified technical main baseline: `dba302cc4082b1c159d042d422964b862c858f99`
 
 ## Verified autonomous boundary
 
-Stages E0-E10H are completed. E10I is now in progress with its first bounded source-specific guitar benchmark slice merged and exact-main CI verified through workflow run #40 (`33159385019`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10I are completed. E10I source-specific benchmark expansion is merged and exact-main CI verified through workflow run #44 (`33159925397`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -24,20 +24,20 @@ Verified capabilities include:
 - deterministic benchmark reporting correction coverage separately from precision;
 - same-staff temporal voice-continuity evidence;
 - pinned CC0 real-score reference corpus at 6 sources: 3 piano + 3 classical guitar;
-- all six bounded review excerpts are explicitly teacher-approved and `GOLD_ELIGIBLE`;
-- controlled voice benchmark expanded from 24 to 28 cases using source-specific Tárrega and Dowland structure without changing solver policy.
+- all six bounded review excerpts explicitly teacher-approved and `GOLD_ELIGIBLE`;
+- controlled voice benchmark expanded from 24 to 32 cases using source-specific structure from Tárrega, Dowland, Webern and Paradis without changing solver policy.
 
-## Current controlled benchmark result
+## E10I final controlled benchmark result
 
 The resolver threshold remains unchanged at 0.90.
 
-- total controlled cases: 28;
-- piano cases: 12;
+- total controlled cases: 32;
+- piano cases: 16;
 - classical-guitar cases: 16;
-- high-evidence cases: 14;
-- high-evidence correctly resolved: 14 / 14;
-- partial-evidence guard cases: 14;
-- guard cases safely `AMBIGUOUS`: 14 / 14;
+- high-evidence cases: 16;
+- high-evidence correctly resolved: 16 / 16;
+- partial-evidence guard cases: 16;
+- guard cases safely `AMBIGUOUS`: 16 / 16;
 - incorrect resolved corrections: 0;
 - overall controlled coverage: 0.50;
 - precision among resolved controlled cases: 1.00.
@@ -48,34 +48,48 @@ Per-source mutation-case distribution:
 - Sor Op. 35 No. 13: 12 cases — 6 high-evidence + 6 guard;
 - Tárrega, *Lágrima*: 2 cases — 1 high-evidence + 1 guard;
 - Dowland, *Fantasia Number 7*: 2 cases — 1 high-evidence + 1 guard;
-- Webern Op. 4 No. 4: 0 mutation cases in this slice;
-- Paradis, *An das Klavier*: 0 mutation cases in this slice.
+- Webern Op. 4 No. 4: 2 cases — 1 high-evidence + 1 guard;
+- Paradis, *An das Klavier*: 2 cases — 1 high-evidence + 1 guard.
 
 This is a controlled shadow benchmark, not a universal OMR accuracy claim.
 
-## E10I first source-specific slice
-
-The first E10I slice is limited to already teacher-approved measures 1–8 from the two new classical-guitar sources.
+## E10I source-specific completion
 
 Tárrega, *Lágrima*:
 
 - measure 6 uses the source's explicit high-voice beamed eighth-note line;
-- the controlled context retains separate low and middle voice material from the same measure;
-- one high-evidence mutation resolves to the approved upper voice;
-- the matched guard case removes a required symbolic evidence class and remains `AMBIGUOUS`.
+- separate low and middle voice context is preserved;
+- the high-evidence mutation resolves to the approved upper voice;
+- the matched partial-evidence case remains `AMBIGUOUS`.
 
 Dowland, *Fantasia Number 7*:
 
-- measure 7 is represented with simultaneous high, low, upper-middle and lower-middle layers from the source;
-- the high-voice event is evaluated with source-consistent stem/beam and temporal context;
-- one high-evidence mutation resolves to the approved upper voice;
-- the matched guard case removes beam evidence and remains `AMBIGUOUS`.
+- measure 7 preserves simultaneous high, low, upper-middle and lower-middle layers;
+- the high-voice event uses source-consistent stem, beam and temporal context;
+- the high-evidence mutation resolves to the approved upper voice;
+- the matched partial-evidence case remains `AMBIGUOUS`.
 
-Each source-specific benchmark event records a source anchor for traceability. These cases do not mutate the pinned source and do not add new solver rules.
+Webern, Op. 4 No. 4 *So ich traurig bin*:
 
-PR #23 was squash-merged. Exact-main `test-and-build` run #40 passed at `d15446aef430ac46190b07f58d84348512c2a1bf`.
+- the valid irregular opening measure is explicitly preserved and is not treated as an error;
+- staff 2, measure 4 supplies a 2/8 beamed upper-voice pair with an overlapping lower voice;
+- the high-evidence mutation resolves to the approved upper voice;
+- removing beam evidence keeps the paired guard case `AMBIGUOUS`.
 
-E10I remains **in progress**. The next bounded work is source-specific evidence from Webern and then Paradis. Confident voice-3/voice-4 correction behavior must not be added by inventing new guitar stem priors; any such solver-policy expansion requires separate evidence and review.
+Paradis, *An das Klavier*:
+
+- staff 2, measure 3 supplies a source-verified beamed upper line in the 2/4 piano texture;
+- stem, beam and temporal continuity support the high-evidence voice assignment;
+- removing stem evidence keeps the paired guard case `AMBIGUOUS`.
+
+Every E10I source-specific benchmark event records a source anchor for traceability. The pinned sources remain immutable. No new solver rule, confidence relaxation, dependency or production mutation was introduced.
+
+Implementation PRs:
+
+- PR #23 — Tárrega + Dowland source-specific guitar slice;
+- PR #25 — Webern + Paradis source-specific piano slice.
+
+Exact-main `test-and-build` run #44 passed at `dba302cc4082b1c159d042d422964b862c858f99`.
 
 ## Approved real-score corpus state
 
@@ -88,21 +102,23 @@ The pinned CC0 corpus contains six bounded, teacher-approved/gold-eligible excer
 5. Classical guitar — Tárrega, *Lágrima*, measures 1–8.
 6. Classical guitar — Dowland, *Fantasia Number 7*, measures 1–8.
 
-Teacher approval provenance remains unchanged and bounded to the reviewed excerpts.
+Teacher approval provenance remains bounded to the reviewed excerpts.
 
 ## Safety boundary
 
 Not implemented or authorized:
 
+- E11 controlled automatic correction;
 - production MusicXML overwrite;
 - automatic application of correction proposals;
 - Audiveris runtime modification;
+- SesliTab production quality-gate bypass;
 - provider/network execution from the core;
 - inferred relation mutation without a relation model;
 - external AI model dependency;
 - universal 97-99% OMR accuracy claims.
 
-E11 controlled automatic correction is deliberately NOT STARTED. E10I completion does not authorize E11.
+E11 remains deliberately **NOT STARTED** and requires separate explicit user approval. The readiness report is evidence for a future decision only; it is not authorization.
 
 E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
 
