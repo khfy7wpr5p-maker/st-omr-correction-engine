@@ -14,3 +14,8 @@ export { DEFAULT_RESOLUTION_POLICY, resolveCandidates } from './resolver/candida
 export { genericScoreProfile, classicalGuitarProfile, pianoProfile, getInstrumentProfile } from './profiles/index.js'
 export { scoreVoiceAssignment } from './solver/voiceAssignmentScorer.js'
 export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/polyphonicVoiceSolver.js'
+export { projectCorrectionPatches } from './correction/patchProjection.js'
+export { revertCorrectionPatches } from './correction/patchReverter.js'
+export { createTeacherApproval, createTeacherEvidence } from './evidence/teacherEvidence.js'
+export { createGoldCase } from './benchmark/goldCase.js'
+export { runCorrectionBenchmark } from './benchmark/correctionBenchmark.js'
