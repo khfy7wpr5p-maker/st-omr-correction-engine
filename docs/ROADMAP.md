@@ -20,7 +20,9 @@
 | E10E | Strengthened voice evidence + expanded approved mutation benchmark | Completed | Shadow only |
 | E10F | Scale approved controlled mutation benchmark from 8 to 24 cases | Completed | Shadow only |
 | E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Completed | None |
+| E10H | Record explicit teacher approval for four new bounded excerpts and expand gold-eligible source pool to 6 | Implemented, pending CI/merge | None |
+| E10I | Derive source-specific controlled mutations from newly approved excerpts | Not started | Shadow only |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
-E0-E10G preserve source immutability and do not authorize production auto-correction. E11 is a separate authorization boundary. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
+E0-E10H preserve source immutability and do not authorize production auto-correction. E10I must derive expectations from source-verified musical structure rather than duplicating synthetic cases merely to increase counts. E11 is a separate authorization boundary. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.

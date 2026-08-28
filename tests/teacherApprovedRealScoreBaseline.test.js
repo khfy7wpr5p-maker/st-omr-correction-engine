@@ -23,14 +23,16 @@ function solveVoiceMutation(input) {
   return resolveCandidates(generated.candidates)
 }
 
-test('explicit teacher approval promotes only the bounded reviewed sources', () => {
-  assert.equal(APPROVED_REVIEW_PACKETS.length, 2)
+test('explicit teacher approval promotes all six bounded reviewed sources', () => {
+  assert.equal(APPROVED_REVIEW_PACKETS.length, 6)
   assert.equal(APPROVED_REVIEW_PACKETS.every((packet) => packet.status === REVIEW_PACKET_STATUS.APPROVED), true)
-  assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.length, 2)
+  assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.length, 6)
   assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.every((source) => source.status === CORPUS_SOURCE_STATUS.GOLD_ELIGIBLE), true)
+  assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.filter((source) => source.instrumentProfile === 'piano').length, 3)
+  assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.filter((source) => source.instrumentProfile === 'classical-guitar').length, 3)
 })
 
-test('approved mutation benchmark scales to balanced 24-case high-evidence and guard sets', () => {
+test('approved mutation benchmark remains balanced at 24 cases while new gold sources await source-specific mutations', () => {
   assert.equal(TEACHER_APPROVED_HIGH_EVIDENCE_CASES.length, 12)
   assert.equal(TEACHER_APPROVED_GUARD_CASES.length, 12)
   assert.equal(TEACHER_APPROVED_MUTATION_CASES.length, 24)
