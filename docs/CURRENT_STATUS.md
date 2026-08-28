@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified main baseline before E10A: `63cdb956a6b94076dd96ae2f80daf79aa8ccc66e`
+Last verified main baseline: `514a8427e8bf16e269126b2dc021d019fbf7fd7f`
 
 ## Verified autonomous boundary
 
-Stages E0-E10 are merged and exact-main CI passed through workflow run #11 (`33148442403`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10A are merged. Exact-main CI for E10A passed workflow run #13 (`33151035003`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -21,9 +21,11 @@ Verified capabilities include:
 - fail-closed unsupported relation correction;
 - pure SesliTab-shaped shadow adapter contract;
 - explicit teacher-approved provenance;
-- deterministic benchmark reporting correction coverage separately from precision.
+- deterministic benchmark reporting correction coverage separately from precision;
+- pinned CC0 reference-source identities for one piano and one classical-guitar score;
+- reference sources remain non-gold until explicit teacher approval.
 
-E10A adds pinned, rights-audited reference-corpus identities for one piano source and one classical-guitar source. These remain `REFERENCE_ONLY` until explicit teacher approval; no source score bytes are vendored and no accuracy claim is produced from them.
+E10B adds bounded pending review packets for the selected real-source excerpts. It does not invent or assume teacher approval.
 
 ## Safety boundary
 
