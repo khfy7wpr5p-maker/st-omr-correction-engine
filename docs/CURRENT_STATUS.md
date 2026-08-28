@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical baseline: `3c013d3d1eebf03ca1f58e0ee6fbc07ebce69f2e`
+Last verified main baseline before E10A: `63cdb956a6b94076dd96ae2f80daf79aa8ccc66e`
 
 ## Verified autonomous boundary
 
-Stages E0-E10 are technically merged and exact-main CI has passed through workflow run #9 (`33148340492`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10 are merged and exact-main CI passed through workflow run #11 (`33148442403`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -23,6 +23,8 @@ Verified capabilities include:
 - explicit teacher-approved provenance;
 - deterministic benchmark reporting correction coverage separately from precision.
 
+E10A adds pinned, rights-audited reference-corpus identities for one piano source and one classical-guitar source. These remain `REFERENCE_ONLY` until explicit teacher approval; no source score bytes are vendored and no accuracy claim is produced from them.
+
 ## Safety boundary
 
 Not implemented or authorized:
@@ -39,6 +41,6 @@ E11 controlled automatic correction is deliberately NOT STARTED and requires a s
 
 E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
 
-## Repository governance limitation
+## Repository governance
 
-`main` is currently not protected by a GitHub branch protection/ruleset. Security issue #2 tracks enabling pull-request-only changes and required `test-and-build`. Until repository settings enforce this, development policy remains branch -> PR -> exact-head CI -> squash merge -> exact-main CI, with no direct main commits.
+`main` is protected by active repository ruleset `main` (id `21713803`). Pull requests are required, `test-and-build` is a strict required status check, branch deletion and non-fast-forward updates are blocked, and no bypass actor is configured.
