@@ -158,6 +158,82 @@ function dowlandFantasiaMutationInput({ suffix, mutatedVoice, includeStem = true
   })
 }
 
+function webernMutationInput({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  const eventId = `webern-op4-no4-m4-staff2-upper-${suffix}`
+  const beamGroup = includeBeam ? `webern-op4-no4-m4-staff2-upper-beam-${suffix}` : null
+  return Object.freeze({
+    sourceId: 'piano-openscore-lieder-webern-op4-no4',
+    instrumentProfile: 'piano',
+    ambiguousEventIds: Object.freeze([eventId]),
+    validatorFindings: Object.freeze([{ code: 'VOICE_ASSIGNMENT_SUSPECT', weight: 0.8, location: { eventId } }]),
+    events: Object.freeze([
+      createScoreEvent({
+        id: eventId,
+        measureKey: '4',
+        onset: 0,
+        duration: 0.5,
+        voice: mutatedVoice,
+        staff: 2,
+        pitch: 71,
+        metadata: eventMetadata({ stemDirection: includeStem ? 'up' : null, beamGroup, sourceAnchor: 'Staff2:m4:voice1:beam-up:eighth:pitch71' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-peer`,
+        measureKey: '4',
+        onset: 0.5,
+        duration: 0.5,
+        voice: 1,
+        staff: 2,
+        pitch: 70,
+        metadata: eventMetadata({ stemDirection: 'up', beamGroup, sourceAnchor: 'Staff2:m4:voice1:eighth:pitch70' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-lower-overlap`,
+        measureKey: '4',
+        onset: 0,
+        duration: 1,
+        voice: 2,
+        staff: 2,
+        pitch: 60,
+        metadata: eventMetadata({ stemDirection: 'down', sourceAnchor: 'Staff2:m4:voice2:quarter:pitch60' }),
+      }),
+    ]),
+  })
+}
+
+function paradisMutationInput({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  const eventId = `paradis-an-das-klavier-m3-staff2-upper-${suffix}`
+  const beamGroup = includeBeam ? `paradis-an-das-klavier-m3-staff2-upper-beam-${suffix}` : null
+  return Object.freeze({
+    sourceId: 'piano-openscore-lieder-paradis-an-das-klavier',
+    instrumentProfile: 'piano',
+    ambiguousEventIds: Object.freeze([eventId]),
+    validatorFindings: Object.freeze([{ code: 'VOICE_ASSIGNMENT_SUSPECT', weight: 0.8, location: { eventId } }]),
+    events: Object.freeze([
+      createScoreEvent({
+        id: eventId,
+        measureKey: '3',
+        onset: 0,
+        duration: 0.5,
+        voice: mutatedVoice,
+        staff: 2,
+        pitch: 70,
+        metadata: eventMetadata({ stemDirection: includeStem ? 'up' : null, beamGroup, sourceAnchor: 'Staff2:m3:voice1:beam-up:eighth:pitches67+70' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-peer`,
+        measureKey: '3',
+        onset: 0.5,
+        duration: 0.25,
+        voice: 1,
+        staff: 2,
+        pitch: 68,
+        metadata: eventMetadata({ stemDirection: 'up', beamGroup, sourceAnchor: 'Staff2:m3:voice1:16th:pitches65+68' }),
+      }),
+    ]),
+  })
+}
+
 function createVoiceGoldCase({ id, input, correctVoice, teacherApproval }) {
   const eventId = input.ambiguousEventIds[0]
   const event = input.events.find((entry) => entry.id === eventId)
@@ -205,14 +281,36 @@ function makeDowlandCase({ suffix, mutatedVoice, includeStem = true, includeBeam
   })
 }
 
+function makeWebernCase({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  return createVoiceGoldCase({
+    id: `approved-piano-webern-op4-no4-voice-${suffix}`,
+    input: webernMutationInput({ suffix, mutatedVoice, includeStem, includeBeam }),
+    correctVoice: 1,
+    teacherApproval: TEACHER_APPROVALS.webern,
+  })
+}
+
+function makeParadisCase({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  return createVoiceGoldCase({
+    id: `approved-piano-paradis-an-das-klavier-voice-${suffix}`,
+    input: paradisMutationInput({ suffix, mutatedVoice, includeStem, includeBeam }),
+    correctVoice: 1,
+    teacherApproval: TEACHER_APPROVALS.paradis,
+  })
+}
+
 export const TEACHER_APPROVED_SOURCE_SPECIFIC_HIGH_EVIDENCE_CASES = Object.freeze([
   makeTarregaCase({ suffix: 'm6-explicit-beam-full', mutatedVoice: 3 }),
   makeDowlandCase({ suffix: 'm7-four-layer-full', mutatedVoice: 3 }),
+  makeWebernCase({ suffix: 'm4-2-8-upper-beam-full', mutatedVoice: 3 }),
+  makeParadisCase({ suffix: 'm3-2-4-upper-beam-full', mutatedVoice: 3 }),
 ])
 
 export const TEACHER_APPROVED_SOURCE_SPECIFIC_GUARD_CASES = Object.freeze([
   makeTarregaCase({ suffix: 'm6-explicit-beam-no-stem', mutatedVoice: 3, includeStem: false }),
   makeDowlandCase({ suffix: 'm7-four-layer-no-beam', mutatedVoice: 3, includeBeam: false }),
+  makeWebernCase({ suffix: 'm4-2-8-upper-beam-no-beam', mutatedVoice: 3, includeBeam: false }),
+  makeParadisCase({ suffix: 'm3-2-4-upper-beam-no-stem', mutatedVoice: 3, includeStem: false }),
 ])
 
 export const TEACHER_APPROVED_HIGH_EVIDENCE_CASES = Object.freeze([
