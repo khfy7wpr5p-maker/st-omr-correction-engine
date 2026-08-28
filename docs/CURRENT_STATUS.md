@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical baseline: `dc1063efa1e1f200f4834afc063f37871bbebf99`
+Last verified main baseline before E10D: `7cdf084dc1b93232dfdbc4854005fa65ff9051f4`
 
 ## Verified autonomous boundary
 
-Stages E0-E10B are technically merged and exact-main CI passed through workflow run #15 (`33151194218`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10C are merged and exact-main CI passed through workflow run #19 (`33152222483`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -24,17 +24,18 @@ Verified capabilities include:
 - deterministic benchmark reporting correction coverage separately from precision;
 - pinned CC0 reference-source identities for one piano and one classical-guitar score;
 - immutable PENDING / APPROVED / REJECTED teacher-review packets;
-- pending review packets cannot silently become gold;
-- approved packet and source identity must match exactly before gold eligibility.
+- source-verified review complexity for Satie piano and three-layer Sor classical guitar.
 
-## Current human-review boundary
+## E10D approval boundary
 
-Two real-source excerpts are queued as `PENDING`:
+Explicit musical approval was supplied on 2026-08-28 for the two bounded review packets:
 
-1. Piano — Satie, *Je te veux*, opening measures 1–8, piano staves 2–3.
-2. Classical guitar — Sor Op. 35 No. 13, home-theme measures 1–8, staff 1.
+1. Piano — Satie, *Je te veux*, measures 1–8, piano staves 2–3.
+2. Classical guitar — Sor Op. 35 No. 13, measures 1–8, staff 1.
 
-No teacher approval has been invented or assumed. These sources remain reference-only until an actual musical review occurs.
+E10D records that approval immutably, promotes only those pinned sources to `GOLD_ELIGIBLE`, and adds two controlled voice-assignment mutation cases. These cases operate on canonical event copies and never modify the source score.
+
+The first benchmark is intentionally fail-closed: it requires the solver to rank the approved correction direction first while the default resolver must still abstain if confidence remains below its production threshold. No threshold is weakened to manufacture coverage.
 
 ## Safety boundary
 
