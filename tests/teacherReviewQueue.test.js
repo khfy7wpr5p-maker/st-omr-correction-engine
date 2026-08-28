@@ -19,6 +19,20 @@ test('first real-source review queue is pending and instrument balanced', () => 
   assert.equal(sourceIds.has('classical-guitar-sor-op35-no13-study-in-c'), true)
 })
 
+test('review focus reflects verified source complexity without implying approval', () => {
+  const piano = REFERENCE_REVIEW_QUEUE.find((packet) => packet.sourceId === 'piano-openscore-lieder-satie-je-te-veux')
+  const guitar = REFERENCE_REVIEW_QUEUE.find((packet) => packet.sourceId === 'classical-guitar-sor-op35-no13-study-in-c')
+
+  assert.equal(piano.focusTags.includes('multi-voice-upper-staff'), true)
+  assert.equal(piano.focusTags.includes('ties'), true)
+  assert.equal(piano.focusTags.includes('arpeggiated-chords'), true)
+  assert.equal(guitar.focusTags.includes('three-voice-polyphony'), true)
+  assert.equal(guitar.focusTags.includes('middle-arpeggio-voice'), true)
+  assert.equal(guitar.focusTags.includes('sustained-bass'), true)
+  assert.equal(piano.status, REVIEW_PACKET_STATUS.PENDING)
+  assert.equal(guitar.status, REVIEW_PACKET_STATUS.PENDING)
+})
+
 test('pending review cannot silently become gold', () => {
   const packet = REFERENCE_REVIEW_QUEUE[0]
   const source = getReferenceCorpusSource(packet.sourceId)
