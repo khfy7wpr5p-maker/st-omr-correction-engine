@@ -13,7 +13,8 @@
 | E8 | Patch/revert model | Completed | Controlled projection only |
 | E9 | SesliTab adapter | Completed as shadow contract | Shadow only |
 | E10 | Teacher evidence + benchmark | Completed | Shadow only |
+| E10A | Pinned CC0 piano/guitar reference corpus + gold-promotion gate | Implemented, pending CI/merge | None |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
-E0-E10 preserve source immutability and do not authorize production auto-correction. E11 is a separate authorization boundary. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
+E0-E10A preserve source immutability and do not authorize production auto-correction. E11 is a separate authorization boundary. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
