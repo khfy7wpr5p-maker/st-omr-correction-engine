@@ -16,6 +16,7 @@ export { VOICE_EVIDENCE_WEIGHTS, scoreVoiceAssignment } from './solver/voiceAssi
 export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/polyphonicVoiceSolver.js'
 export { projectCorrectionPatches } from './correction/patchProjection.js'
 export { revertCorrectionPatches } from './correction/patchReverter.js'
+export { CONTROLLED_CORRECTION_DECISION, E11A_CONTROLLED_POLICY, applyControlledVoiceCorrection } from './correction/controlledAutoCorrection.js'
 export { createTeacherApproval, createTeacherEvidence } from './evidence/teacherEvidence.js'
 export { createGoldCase } from './benchmark/goldCase.js'
 export { runCorrectionBenchmark } from './benchmark/correctionBenchmark.js'
