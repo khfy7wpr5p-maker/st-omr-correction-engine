@@ -32,6 +32,7 @@ export { createVisualLocalizationEvidence } from './evidence/visualLocalizationE
 export { createGoldCase } from './benchmark/goldCase.js'
 export { runCorrectionBenchmark } from './benchmark/correctionBenchmark.js'
 export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
+export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
 export { hashSourceBytes, evaluateSourceMutationInvariant } from './benchmark/sourceMutationInvariant.js'
 export { evaluateSelectivePrediction, selectMetricAtThreshold } from './benchmark/selectivePredictionMetrics.js'
 export { CALIBRATION_METHOD, evaluateConfidenceCalibration, compareCalibrationTransform } from './benchmark/confidenceCalibration.js'
