@@ -22,6 +22,7 @@ export { VOICE_EVIDENCE_WEIGHTS, scoreVoiceAssignment } from './solver/voiceAssi
 export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/polyphonicVoiceSolver.js'
 export { analyzeCrossStaffContext } from './solver/crossStaffAnalyzer.js'
 export { revalidateProjectedRevisionV2 } from './validation/independentRevalidationV2.js'
+export { CORRECTION_READINESS, evaluateCorrectionReadiness, readinessRequirements } from './readiness/productionReadiness.js'
 export { createTeacherWorkloadTelemetry, aggregateTeacherWorkloadTelemetry } from './telemetry/teacherWorkloadTelemetry.js'
 export { projectCorrectionPatches } from './correction/patchProjection.js'
 export { revertCorrectionPatches } from './correction/patchReverter.js'
