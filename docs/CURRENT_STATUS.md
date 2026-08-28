@@ -1,8 +1,41 @@
 # Current Status
 
-Last verified technical main baseline: `6ad46875d7ac49c3dea0b36e1c8c9ca0ebb3dbeb`
+Last verified technical main baseline entering this status synchronization: `ff39ae05f2de074f2b4dab9a8e62909d372a187e`.
 
-Exact-main `test-and-build`: run #54 (`33175087307`) — SUCCESS.
+Exact-main `test-and-build`: run #103 (`33195531405`) — SUCCESS.
+
+This document is considered synchronized when the PR containing it is merged through protected `main` and that merge's exact-main required CI also passes.
+
+## 2026-08-28 CE-POLY / CE-EVIDENCE expansion
+
+CE-POLY-02 through CE-POLY-20 are completed. The expansion added versioned error taxonomy, teacher-gold correction-event contracts, source-byte mutation invariants, selective-prediction risk/coverage metrics, calibration research metrics, polyphony-complexity metadata, Voice 3/4 readiness benchmarks, research-only cross-staff reasoning, visual-localization evidence, tie/tuplet/duration/onset anomaly detection, bounded research candidate generation, independent revalidation v2, teacher-workload telemetry, a ScoreMosaic shadow bridge, fail-closed external benchmark intake, and cumulative production-readiness evaluation.
+
+CE-EVIDENCE-01 through CE-EVIDENCE-04 are also completed:
+
+- REAL_OMR gold eligibility requires explicit provenance, exact source SHA-256, engine version and non-ambiguous teacher decision;
+- controlled mutation and synthetic cases cannot silently enter real-OMR calibration evidence;
+- event-level REAL_OMR annotation queues keep teacher-owned decisions empty until explicitly supplied;
+- calibration and final evaluation splits cannot share event IDs or source SHA-256 values;
+- one exact-hash, teacher-approved Audiveris 5.11.0 evidence seed from SesliTab is pinned as a bounded real-world regression source;
+- that seed contains 22 score events and projects 54 `NO_CORRECTION_NEEDED` labels: 22 pitch, 22 duration and 10 tie labels;
+- the 54 labels still represent exactly one independent source and are never reported as 54 independent scores;
+- the approved seed produces zero tie, duration or onset anomaly findings and therefore protects against false positives on that known-correct real Audiveris result.
+
+Current real-OMR evidence boundary:
+
+- independent exact-hash teacher-approved REAL_OMR sources usable by this engine: 1;
+- approved real-OMR score events represented in the seed: 22;
+- approved no-correction labels derived from the exact whole-score approval: 54;
+- known correction-needed REAL_OMR event labels: 0;
+- independent polyphonic REAL_OMR correction-event sources: 0;
+- calibration records with correction-engine confidence on real teacher-gold events: 0;
+- a leakage-safe calibration/final-evaluation split cannot yet be populated from the single approved source alone.
+
+This means the evidence infrastructure is complete for safe collection, but expanded correction classes remain data-limited. Voice 3, Voice 4, cross-staff, tie, tuplet, duration, onset and pitch must remain `RESEARCH_ONLY` unless later real teacher-gold evidence satisfies the readiness gates. No numeric production threshold has been invented to bypass the missing data.
+
+The seven SesliTab `tests/fixtures/real-omr/*-clean.xml` files remain `REGRESSION_OUTPUT_ONLY / REVIEW_REQUIRED` on SesliTab main because source PDF, expected golden MusicXML, approval record and integrity chain are incomplete. They are not promoted to musical ground truth.
+
+No CE-POLY or CE-EVIDENCE package broadened the production automatic-correction boundary. E11A remains the only automatic-correction slice: one high-confidence `CHANGE_VOICE` patch, exact immutable projection, mandatory independent host revalidation and explicit `ACCEPT` before in-memory selection.
 
 ## Verified autonomous boundary
 
