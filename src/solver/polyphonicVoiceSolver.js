@@ -25,7 +25,7 @@ export function generateVoiceCandidates({ events, ambiguousEventIds, instrumentP
       if (targetVoice === event.voice) continue
       if (candidates.length >= policy.maxCandidates) return Object.freeze({ candidates: Object.freeze(candidates), exhausted: true, reason: 'candidate-limit-exceeded' })
       const scored = scoreVoiceAssignment(event, targetVoice, events, profile)
-      const patch = createCorrectionPatch({ eventId: event.id, measureKey: event.measureKey, operation: PATCH_OPERATION.CHANGE_VOICE, before: event.voice, after: targetVoice, evidence: [...validatorEvidence, ...scored.evidence], confidence: scored.score, solverVersion: 'E5-shadow' })
+      const patch = createCorrectionPatch({ eventId: event.id, measureKey: event.measureKey, operation: PATCH_OPERATION.CHANGE_VOICE, before: event.voice, after: targetVoice, evidence: [...validatorEvidence, ...scored.evidence], confidence: scored.score, solverVersion: 'E10E-shadow' })
       candidates.push(createCandidate({ id: `${event.id}:voice:${targetVoice}`, patches: [patch], evidence: [...validatorEvidence, ...scored.evidence], confidence: scored.score, hardViolations: scored.hardViolations, rationale: 'shadow-voice-assignment' }))
     }
   }
