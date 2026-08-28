@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `a53ad5cde7709fa6d2c5e4c02c40d74970fc6b02`
+Last verified technical main baseline: `d4c279de5e779b47681687e0f73270a601ae7768`
 
 ## Verified autonomous boundary
 
-Stages E0-E10E are merged and exact-main CI passed through workflow run #26 (`33155843705`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10G are merged and exact-main CI passed through workflow run #32 (`33157106743`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -22,33 +22,45 @@ Verified capabilities include:
 - pure SesliTab-shaped shadow adapter contract;
 - explicit teacher-approved provenance;
 - deterministic benchmark reporting correction coverage separately from precision;
-- pinned CC0 reference-source identities for one piano and one classical-guitar score;
-- teacher-approved `GOLD_ELIGIBLE` bounded reference excerpts;
-- source-verified Satie piano complexity and three-layer Sor classical-guitar structure;
-- controlled teacher-approved voice-assignment mutation baseline;
 - same-staff temporal voice-continuity evidence;
-- expanded 8-case teacher-approved mutation benchmark with explicit guard cases.
+- teacher-approved controlled voice benchmark scaled to 24 balanced cases;
+- pinned CC0 real-score reference corpus scaled to 6 sources: 3 piano + 3 classical guitar;
+- four new source-specific teacher-review packets remain PENDING.
 
-## E10E benchmark result
+## E10F controlled benchmark result
 
 The resolver threshold remains unchanged at 0.90.
 
-Eight controlled mutations derived from the approved Satie and Sor excerpt structures were evaluated:
-
-- total cases: 8;
-- high-evidence cases: 4;
-- guard / partial-evidence cases: 4;
-- correct automatically resolved: 4 / 8;
-- incorrect automatically resolved: 0;
-- safely ambiguous / abstained: 4 / 8;
+- total controlled cases: 24;
+- piano cases: 12;
+- classical-guitar cases: 12;
+- high-evidence cases: 12;
+- high-evidence correctly resolved: 12 / 12;
+- partial-evidence guard cases: 12;
+- guard cases safely `AMBIGUOUS`: 12 / 12;
+- incorrect resolved corrections: 0;
 - overall controlled coverage: 0.50;
 - precision among resolved controlled cases: 1.00.
 
-All 8 cases ranked the teacher-approved correction direction first. The 4 high-evidence cases combined stem, beam and same-staff temporal continuity plus independent validator evidence and crossed the unchanged threshold. The 4 guard cases intentionally lacked one symbolic signal and remained below threshold.
+This is a controlled shadow benchmark, not a universal OMR accuracy claim.
 
-A dedicated safety regression also confirms that even 0.90 symbolic confidence cannot resolve without an independent evidence class: removing validator evidence still forces `AMBIGUOUS`.
+## E10G real-score corpus state
 
-This remains a controlled shadow benchmark, not a universal OMR accuracy claim.
+The pinned CC0 corpus now contains 6 sources:
+
+Teacher-approved/gold-eligible excerpts:
+
+1. Piano — Satie, *Je te veux*, measures 1–8.
+2. Classical guitar — Sor Op. 35 No. 13, measures 1–8.
+
+New `REFERENCE_ONLY` / `PENDING` review sources:
+
+3. Piano — Paradis, *An das Klavier*, measures 1–8.
+4. Piano — Webern, Op. 4 No. 4 *So ich traurig bin*, measures 1–8.
+5. Classical guitar — Tárrega, *Lágrima*, measures 1–8.
+6. Classical guitar — Dowland, *Fantasia Number 7*, measures 1–8.
+
+No musical approval is inferred for the four new sources. They cannot become gold without explicit matching teacher review.
 
 ## Safety boundary
 
@@ -62,7 +74,7 @@ Not implemented or authorized:
 - external AI model dependency;
 - universal 97-99% OMR accuracy claims.
 
-E11 controlled automatic correction is deliberately NOT STARTED. Before E11, teacher-approved benchmark coverage must expand across more real-score excerpts and evidence types.
+E11 controlled automatic correction is deliberately NOT STARTED. Before E11, teacher-approved benchmark evidence must expand across additional real-score excerpts and evidence types.
 
 E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
 

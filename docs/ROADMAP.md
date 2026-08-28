@@ -19,7 +19,7 @@
 | E10D | Explicit teacher approval + controlled real-score mutation baseline | Completed | None |
 | E10E | Strengthened voice evidence + expanded approved mutation benchmark | Completed | Shadow only |
 | E10F | Scale approved controlled mutation benchmark from 8 to 24 cases | Completed | Shadow only |
-| E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Implemented, pending CI/merge | None |
+| E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Completed | None |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
