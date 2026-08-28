@@ -30,11 +30,13 @@ test('explicit teacher approval promotes only the bounded reviewed sources', () 
   assert.equal(GOLD_ELIGIBLE_REFERENCE_CORPUS.every((source) => source.status === CORPUS_SOURCE_STATUS.GOLD_ELIGIBLE), true)
 })
 
-test('approved mutation benchmark expands to balanced high-evidence and guard cases', () => {
-  assert.equal(TEACHER_APPROVED_HIGH_EVIDENCE_CASES.length, 4)
-  assert.equal(TEACHER_APPROVED_GUARD_CASES.length, 4)
-  assert.equal(TEACHER_APPROVED_MUTATION_CASES.length, 8)
+test('approved mutation benchmark scales to balanced 24-case high-evidence and guard sets', () => {
+  assert.equal(TEACHER_APPROVED_HIGH_EVIDENCE_CASES.length, 12)
+  assert.equal(TEACHER_APPROVED_GUARD_CASES.length, 12)
+  assert.equal(TEACHER_APPROVED_MUTATION_CASES.length, 24)
   assert.equal(TEACHER_APPROVED_MUTATION_CASES.every((entry) => entry.teacherApproval?.approved === true), true)
+  assert.equal(TEACHER_APPROVED_MUTATION_CASES.filter((entry) => entry.input.instrumentProfile === 'piano').length, 12)
+  assert.equal(TEACHER_APPROVED_MUTATION_CASES.filter((entry) => entry.input.instrumentProfile === 'classical-guitar').length, 12)
 })
 
 test('voice solver ranks the teacher-approved correction direction first in every controlled mutation', () => {
@@ -54,24 +56,35 @@ test('voice solver ranks the teacher-approved correction direction first in ever
   }
 })
 
-test('high-evidence controlled mutations cross the unchanged resolver threshold safely', async () => {
+test('all 12 high-evidence controlled mutations cross the unchanged resolver threshold safely', async () => {
   const report = await runCorrectionBenchmark(TEACHER_APPROVED_HIGH_EVIDENCE_CASES, solveVoiceMutation)
-  assert.equal(report.total, 4)
-  assert.equal(report.resolved, 4)
-  assert.equal(report.correctResolved, 4)
+  assert.equal(report.total, 12)
+  assert.equal(report.resolved, 12)
+  assert.equal(report.correctResolved, 12)
   assert.equal(report.incorrectResolved, 0)
   assert.equal(report.ambiguous, 0)
   assert.equal(report.coverage, 1)
   assert.equal(report.precision, 1)
 })
 
-test('expanded benchmark keeps partial-evidence guard cases fail-closed', async () => {
-  const report = await runCorrectionBenchmark(TEACHER_APPROVED_MUTATION_CASES, solveVoiceMutation)
-  assert.equal(report.total, 8)
-  assert.equal(report.resolved, 4)
-  assert.equal(report.correctResolved, 4)
+test('all 12 partial-evidence guard mutations remain fail-closed', async () => {
+  const report = await runCorrectionBenchmark(TEACHER_APPROVED_GUARD_CASES, solveVoiceMutation)
+  assert.equal(report.total, 12)
+  assert.equal(report.resolved, 0)
+  assert.equal(report.correctResolved, 0)
   assert.equal(report.incorrectResolved, 0)
-  assert.equal(report.ambiguous, 4)
+  assert.equal(report.ambiguous, 12)
+  assert.equal(report.coverage, 0)
+  assert.equal(report.precision, null)
+})
+
+test('24-case benchmark preserves 50 percent controlled coverage with perfect resolved precision', async () => {
+  const report = await runCorrectionBenchmark(TEACHER_APPROVED_MUTATION_CASES, solveVoiceMutation)
+  assert.equal(report.total, 24)
+  assert.equal(report.resolved, 12)
+  assert.equal(report.correctResolved, 12)
+  assert.equal(report.incorrectResolved, 0)
+  assert.equal(report.ambiguous, 12)
   assert.equal(report.blockedOrUnsupported, 0)
   assert.equal(report.coverage, 0.5)
   assert.equal(report.precision, 1)
