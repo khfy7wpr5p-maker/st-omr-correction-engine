@@ -21,8 +21,8 @@
 | E10F | Scale approved controlled mutation benchmark from 8 to 24 cases | Completed | Shadow only |
 | E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Completed | None |
 | E10H | Record explicit teacher approval for four new bounded excerpts and expand gold-eligible source pool to 6 | Completed | None |
-| E10I | Derive source-specific controlled mutations from newly approved excerpts | In progress — first Tárrega/Dowland slice verified at 28 total cases | Shadow only |
+| E10I | Derive source-specific controlled mutations from newly approved excerpts | Completed — 32 total cases, all four new excerpts covered | Shadow only |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
-E0-E10H preserve source immutability and do not authorize production auto-correction. E10I now includes a first bounded source-specific guitar slice derived from teacher-approved Tárrega and Dowland excerpts; the next safe expansion is Webern followed by Paradis. The resolver threshold remains 0.90 and the benchmark remains fail-closed with zero incorrect resolved corrections in the verified controlled set. E11 is a separate authorization boundary and must not start automatically when E10I completes. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
+E0-E10I preserve source immutability and do not authorize production auto-correction. E10I adds balanced source-specific high-evidence/guard pairs from Tárrega, Dowland, Webern and Paradis while keeping the resolver threshold at 0.90. The verified 32-case controlled benchmark has zero incorrect resolved corrections, 0.50 coverage and 1.00 precision among resolved cases. E11 is a separate authorization boundary and remains NOT STARTED; completing E10I does not authorize it. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
