@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `982882d7e8973a15b79ba187acb5287f7ed76e58`
+Last verified technical main baseline: `d15446aef430ac46190b07f58d84348512c2a1bf`
 
 ## Verified autonomous boundary
 
-Stages E0-E10H are merged and exact-main CI passed through workflow run #36 (`33158016635`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10H are completed. E10I is now in progress with its first bounded source-specific guitar benchmark slice merged and exact-main CI verified through workflow run #40 (`33159385019`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -23,28 +23,61 @@ Verified capabilities include:
 - explicit teacher-approved provenance;
 - deterministic benchmark reporting correction coverage separately from precision;
 - same-staff temporal voice-continuity evidence;
-- teacher-approved controlled voice benchmark at 24 balanced cases;
 - pinned CC0 real-score reference corpus at 6 sources: 3 piano + 3 classical guitar;
-- all six bounded review excerpts are now explicitly teacher-approved and `GOLD_ELIGIBLE`.
+- all six bounded review excerpts are explicitly teacher-approved and `GOLD_ELIGIBLE`;
+- controlled voice benchmark expanded from 24 to 28 cases using source-specific Tárrega and Dowland structure without changing solver policy.
 
-## E10F controlled benchmark result
+## Current controlled benchmark result
 
 The resolver threshold remains unchanged at 0.90.
 
-- total controlled cases: 24;
+- total controlled cases: 28;
 - piano cases: 12;
-- classical-guitar cases: 12;
-- high-evidence cases: 12;
-- high-evidence correctly resolved: 12 / 12;
-- partial-evidence guard cases: 12;
-- guard cases safely `AMBIGUOUS`: 12 / 12;
+- classical-guitar cases: 16;
+- high-evidence cases: 14;
+- high-evidence correctly resolved: 14 / 14;
+- partial-evidence guard cases: 14;
+- guard cases safely `AMBIGUOUS`: 14 / 14;
 - incorrect resolved corrections: 0;
 - overall controlled coverage: 0.50;
 - precision among resolved controlled cases: 1.00.
 
+Per-source mutation-case distribution:
+
+- Satie, *Je te veux*: 12 cases — 6 high-evidence + 6 guard;
+- Sor Op. 35 No. 13: 12 cases — 6 high-evidence + 6 guard;
+- Tárrega, *Lágrima*: 2 cases — 1 high-evidence + 1 guard;
+- Dowland, *Fantasia Number 7*: 2 cases — 1 high-evidence + 1 guard;
+- Webern Op. 4 No. 4: 0 mutation cases in this slice;
+- Paradis, *An das Klavier*: 0 mutation cases in this slice.
+
 This is a controlled shadow benchmark, not a universal OMR accuracy claim.
 
-## E10H approved real-score corpus state
+## E10I first source-specific slice
+
+The first E10I slice is limited to already teacher-approved measures 1–8 from the two new classical-guitar sources.
+
+Tárrega, *Lágrima*:
+
+- measure 6 uses the source's explicit high-voice beamed eighth-note line;
+- the controlled context retains separate low and middle voice material from the same measure;
+- one high-evidence mutation resolves to the approved upper voice;
+- the matched guard case removes a required symbolic evidence class and remains `AMBIGUOUS`.
+
+Dowland, *Fantasia Number 7*:
+
+- measure 7 is represented with simultaneous high, low, upper-middle and lower-middle layers from the source;
+- the high-voice event is evaluated with source-consistent stem/beam and temporal context;
+- one high-evidence mutation resolves to the approved upper voice;
+- the matched guard case removes beam evidence and remains `AMBIGUOUS`.
+
+Each source-specific benchmark event records a source anchor for traceability. These cases do not mutate the pinned source and do not add new solver rules.
+
+PR #23 was squash-merged. Exact-main `test-and-build` run #40 passed at `d15446aef430ac46190b07f58d84348512c2a1bf`.
+
+E10I remains **in progress**. The next bounded work is source-specific evidence from Webern and then Paradis. Confident voice-3/voice-4 correction behavior must not be added by inventing new guitar stem priors; any such solver-policy expansion requires separate evidence and review.
+
+## Approved real-score corpus state
 
 The pinned CC0 corpus contains six bounded, teacher-approved/gold-eligible excerpts:
 
@@ -55,9 +88,7 @@ The pinned CC0 corpus contains six bounded, teacher-approved/gold-eligible excer
 5. Classical guitar — Tárrega, *Lágrima*, measures 1–8.
 6. Classical guitar — Dowland, *Fantasia Number 7*, measures 1–8.
 
-The four E10G review packets were explicitly approved in the project conversation on 2026-08-28 and recorded with source-specific provenance in E10H. Issue #20 is closed as completed.
-
-The controlled mutation benchmark remains at 24 cases for now. E10I must derive new source-specific mutation expectations from verified musical structure in the newly approved excerpts rather than cloning existing cases only to increase the count.
+Teacher approval provenance remains unchanged and bounded to the reviewed excerpts.
 
 ## Safety boundary
 
@@ -71,7 +102,7 @@ Not implemented or authorized:
 - external AI model dependency;
 - universal 97-99% OMR accuracy claims.
 
-E11 controlled automatic correction is deliberately NOT STARTED. Before E11, teacher-approved benchmark evidence must expand across additional real-score excerpts and evidence types.
+E11 controlled automatic correction is deliberately NOT STARTED. E10I completion does not authorize E11.
 
 E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
 
