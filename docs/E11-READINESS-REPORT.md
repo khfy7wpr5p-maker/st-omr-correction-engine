@@ -1,10 +1,10 @@
-# E11 Readiness Report
+# E11 Readiness and Authorization Record
 
 ## Authorization status
 
-**E11 — Controlled Automatic Correction is NOT STARTED and is NOT AUTHORIZED.**
+E11 was explicitly authorized by the user on 2026-08-28 after the E10I readiness checkpoint.
 
-This report is a decision checkpoint after E10I. It does not enable automatic correction, production MusicXML overwrite, or quality-gate bypass.
+The authorization was implemented conservatively as **E11A — a narrowly scoped voice-assignment-only controlled automatic correction gate**. E11A is completed and verified. This does not authorize broad automatic correction, production MusicXML overwrite, or quality-gate bypass.
 
 ## Teacher-approved real-source evidence
 
@@ -33,37 +33,52 @@ Sources:
 - correctly resolved: 16;
 - incorrect resolved: 0;
 - ambiguous: 16;
-- blocked / unsupported in this controlled set: 0;
 - controlled coverage: 0.50;
 - precision among resolved cases: 1.00;
 - ambiguity / abstention rate: 0.50.
 
 These metrics describe the controlled benchmark only. They are not an estimate of general OMR accuracy or production false-positive rate.
 
-## False-positive analysis
+## E11A implemented gate
 
-Observed controlled false-positive count: **0**.
+The automatic in-memory apply path accepts only a correction satisfying every condition below:
 
-The strongest safety signal is the matched guard behavior: all 16 partial-evidence cases remain `AMBIGUOUS` rather than crossing the unchanged 0.90 confidence threshold. The system therefore preserved fail-closed behavior when a required evidence component was intentionally removed.
+- resolver result is `RESOLVED`;
+- result confidence is at least `0.90`;
+- at least two independent evidence sources are retained;
+- exactly one patch is proposed;
+- operation is `CHANGE_VOICE`;
+- patch confidence is at least `0.90`;
+- patch itself retains at least two independent evidence sources;
+- immutable projection succeeds;
+- post-correction revalidation is present and succeeds;
+- host quality gate explicitly returns `ACCEPT`.
 
-This does not prove a zero false-positive rate on unseen scores. The current evidence base is still bounded and teacher-approved rather than population-scale.
+`REVIEW` or `BLOCK` keeps the exact original source graph selected. Projection failure, missing revalidation, invalid revalidation, or a revalidation exception fails closed to `BLOCK`.
 
-## Correction classes with current evidence
+E11A has no raw MusicXML write path and does not modify the Audiveris or SesliTab production runtime.
 
-The controlled benchmark currently provides the strongest evidence for **voice-assignment proposals** when multiple independent signals agree, including combinations of:
+## Controlled E11A verification
 
-- validator suspicion;
-- source-consistent stem direction;
-- beam grouping;
-- same-staff temporal voice continuity;
-- absence of hard temporal conflicts;
-- instrument-profile constraints.
+- 16 / 16 high-evidence teacher-approved cases became eligible only after explicit `ACCEPT` revalidation;
+- 16 / 16 guard cases remained unapplied and did not call the revalidation apply path;
+- incorrect controlled automatic applications: 0;
+- non-voice automatic mutation remains rejected;
+- missing or failed revalidation is blocked;
+- `minConfidence = 0.90` remains unchanged.
 
-Even this class is only a candidate for a future narrowly gated E11 design. It is not yet authorized for automatic production application.
+Technical verification:
 
-## Classes that still require REVIEW / additional evidence
+- issue: #27 — completed;
+- implementation PR: #29 — squash merged;
+- implementation head: `2734fb9f2b1600b315346b1b929ed826fa4d370d`;
+- exact-head `test-and-build`: run #47 (`33164669931`) — SUCCESS;
+- verified implementation main: `0e0e70b7d70bd6b527b0d2b3357ad5ba48a151d5`;
+- exact-main `test-and-build`: run #48 (`33164701779`) — SUCCESS.
 
-The current benchmark does not justify broad automatic correction for:
+## Correction classes still requiring REVIEW / additional evidence
+
+E11A does not justify or authorize automatic correction for:
 
 - duration changes;
 - onset changes;
@@ -76,17 +91,16 @@ The current benchmark does not justify broad automatic correction for:
 - voice-3/voice-4 assignment where no independently supported prior exists;
 - guitar fingering or string-number interpretation;
 - pitch correction not backed by a dedicated evidence model;
+- multiple-patch automatic transactions;
 - any proposal below threshold or without independent evidence classes.
 
-Webern demonstrates a specific guardrail: a valid irregular opening measure must remain valid source structure rather than being normalized simply because it does not fill the nominal meter.
+Webern remains a specific guardrail: a valid irregular opening measure must remain valid source structure rather than being normalized simply because it does not fill the nominal meter.
 
-Tárrega and Dowland demonstrate another guardrail: guitar fingering/string information and physical fret/string choice are not OMR voice-authority signals and must not be conflated with the separate Guitar TAB physical solver.
+Tárrega and Dowland remain another guardrail: guitar fingering/string information and physical fret/string choice are not OMR voice-authority signals and must not be conflated with the separate Guitar TAB physical solver.
 
-## E11 decision boundary
+## Current decision boundary
 
-Current evidence supports considering, at most, a **narrowly scoped voice-assignment-only controlled-correction design** in a future E11 stage, with revalidation and host quality gate remaining mandatory.
-
-Before implementation, explicit user approval is still required for E11. Any approved E11 design must preserve:
+E11A is complete. Expansion beyond the verified voice-only gate requires a new bounded evidence/design decision before implementation. The following invariants remain mandatory:
 
 - `minConfidence = 0.90` unless future benchmark evidence separately justifies a change;
 - independent evidence requirements;
@@ -98,6 +112,4 @@ Before implementation, explicit user approval is still required for E11. Any app
 - no SesliTab quality-gate bypass;
 - no silent invention of musical information.
 
-## Conclusion
-
-E10I provides a stronger and more diverse controlled evidence base, but it does **not** justify broad automatic correction. E11 remains closed pending separate explicit authorization.
+E12 visual second-opinion AI remains not started and is a separate approval boundary.

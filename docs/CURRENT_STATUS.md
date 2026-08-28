@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `dba302cc4082b1c159d042d422964b862c858f99`
+Last verified technical main baseline: `0e0e70b7d70bd6b527b0d2b3357ad5ba48a151d5`
 
 ## Verified autonomous boundary
 
-Stages E0-E10I are completed. E10I source-specific benchmark expansion is merged and exact-main CI verified through workflow run #44 (`33159925397`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10I are completed. E11 has started only through the explicitly authorized, narrowly bounded E11A voice-only controlled automatic correction gate. E11A implementation is merged and exact-main CI is verified through workflow run #48 (`33164701779`).
 
 Verified capabilities include:
 
@@ -25,9 +25,10 @@ Verified capabilities include:
 - same-staff temporal voice-continuity evidence;
 - pinned CC0 real-score reference corpus at 6 sources: 3 piano + 3 classical guitar;
 - all six bounded review excerpts explicitly teacher-approved and `GOLD_ELIGIBLE`;
-- controlled voice benchmark expanded from 24 to 32 cases using source-specific structure from Tárrega, Dowland, Webern and Paradis without changing solver policy.
+- 32-case balanced controlled benchmark using source-specific structure from Tárrega, Dowland, Webern and Paradis;
+- E11A controlled in-memory automatic application for a single high-confidence `CHANGE_VOICE` patch only after mandatory host revalidation returns `ACCEPT`.
 
-## E10I final controlled benchmark result
+## E10I controlled benchmark baseline
 
 The resolver threshold remains unchanged at 0.90.
 
@@ -51,45 +52,42 @@ Per-source mutation-case distribution:
 - Webern Op. 4 No. 4: 2 cases — 1 high-evidence + 1 guard;
 - Paradis, *An das Klavier*: 2 cases — 1 high-evidence + 1 guard.
 
-This is a controlled shadow benchmark, not a universal OMR accuracy claim.
+This remains a controlled benchmark and is not a universal OMR accuracy claim.
 
-## E10I source-specific completion
+## E11A controlled automatic correction
 
-Tárrega, *Lágrima*:
+E11A was explicitly authorized by the user on 2026-08-28 and implemented in PR #29. Issue #27 is closed as completed.
 
-- measure 6 uses the source's explicit high-voice beamed eighth-note line;
-- separate low and middle voice context is preserved;
-- the high-evidence mutation resolves to the approved upper voice;
-- the matched partial-evidence case remains `AMBIGUOUS`.
+A correction reaches the automatic in-memory apply path only when all of these conditions hold:
 
-Dowland, *Fantasia Number 7*:
+- resolver status is `RESOLVED`;
+- result confidence is at least `0.90`;
+- result carries at least two independent evidence sources;
+- exactly one patch is proposed;
+- operation is `CHANGE_VOICE`;
+- patch confidence is at least `0.90`;
+- patch carries at least two independent evidence sources;
+- immutable projection succeeds;
+- post-correction revalidation is supplied and succeeds;
+- host quality gate explicitly returns `ACCEPT`.
 
-- measure 7 preserves simultaneous high, low, upper-middle and lower-middle layers;
-- the high-voice event uses source-consistent stem, beam and temporal context;
-- the high-evidence mutation resolves to the approved upper voice;
-- the matched partial-evidence case remains `AMBIGUOUS`.
+`REVIEW` or `BLOCK` revalidation retains the exact source graph. Missing or failed revalidation fails closed to `BLOCK`. The raw source graph is never overwritten.
 
-Webern, Op. 4 No. 4 *So ich traurig bin*:
+Controlled E11A regression result:
 
-- the valid irregular opening measure is explicitly preserved and is not treated as an error;
-- staff 2, measure 4 supplies a 2/8 beamed upper-voice pair with an overlapping lower voice;
-- the high-evidence mutation resolves to the approved upper voice;
-- removing beam evidence keeps the paired guard case `AMBIGUOUS`.
+- 16 / 16 high-evidence teacher-approved cases reached controlled apply only after explicit `ACCEPT` revalidation;
+- 16 / 16 guard cases remained unapplied and did not enter revalidation;
+- incorrect controlled automatic applications: 0;
+- non-voice automatic operations remain rejected;
+- `minConfidence = 0.90` remains unchanged.
 
-Paradis, *An das Klavier*:
+Technical verification:
 
-- staff 2, measure 3 supplies a source-verified beamed upper line in the 2/4 piano texture;
-- stem, beam and temporal continuity support the high-evidence voice assignment;
-- removing stem evidence keeps the paired guard case `AMBIGUOUS`.
-
-Every E10I source-specific benchmark event records a source anchor for traceability. The pinned sources remain immutable. No new solver rule, confidence relaxation, dependency or production mutation was introduced.
-
-Implementation PRs:
-
-- PR #23 — Tárrega + Dowland source-specific guitar slice;
-- PR #25 — Webern + Paradis source-specific piano slice.
-
-Exact-main `test-and-build` run #44 passed at `dba302cc4082b1c159d042d422964b862c858f99`.
+- implementation PR: #29;
+- implementation head: `2734fb9f2b1600b315346b1b929ed826fa4d370d`;
+- exact-head `test-and-build`: run #47 (`33164669931`) — SUCCESS;
+- squash-merged main: `0e0e70b7d70bd6b527b0d2b3357ad5ba48a151d5`;
+- exact-main `test-and-build`: run #48 (`33164701779`) — SUCCESS.
 
 ## Approved real-score corpus state
 
@@ -106,21 +104,24 @@ Teacher approval provenance remains bounded to the reviewed excerpts.
 
 ## Safety boundary
 
-Not implemented or authorized:
+Still not implemented or authorized by E11A:
 
-- E11 controlled automatic correction;
 - production MusicXML overwrite;
-- automatic application of correction proposals;
+- SesliTab production integration or quality-gate bypass;
 - Audiveris runtime modification;
-- SesliTab production quality-gate bypass;
+- automatic duration correction;
+- automatic onset correction;
+- automatic staff/cross-staff reassignment;
+- automatic tie or tuplet mutation;
+- automatic pitch correction;
+- automatic beam/relation/arpeggio/glissando mutation;
+- multiple-patch automatic transactions;
+- pickup or irregular-measure normalization;
 - provider/network execution from the core;
-- inferred relation mutation without a relation model;
 - external AI model dependency;
 - universal 97-99% OMR accuracy claims.
 
-E11 remains deliberately **NOT STARTED** and requires separate explicit user approval. The readiness report is evidence for a future decision only; it is not authorization.
-
-E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
+E11 expansion beyond the verified E11A voice-only gate requires a separate bounded evidence/design decision. E12 visual second-opinion AI is not started and remains a separate approval boundary.
 
 ## Repository governance
 
