@@ -22,7 +22,10 @@
 | E10G | Expand pinned CC0 real-score reference/review corpus from 2 to 6 sources | Completed | None |
 | E10H | Record explicit teacher approval for four new bounded excerpts and expand gold-eligible source pool to 6 | Completed | None |
 | E10I | Derive source-specific controlled mutations from newly approved excerpts | Completed — 32 total cases, all four new excerpts covered | Shadow only |
-| E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
+| E11 | Controlled automatic correction | In progress only through bounded E11A | Controlled in-memory only |
+| E11A | Single-patch voice-only controlled automatic correction with mandatory revalidation | Completed | In-memory canonical graph only |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
-E0-E10I preserve source immutability and do not authorize production auto-correction. E10I adds balanced source-specific high-evidence/guard pairs from Tárrega, Dowland, Webern and Paradis while keeping the resolver threshold at 0.90. The verified 32-case controlled benchmark has zero incorrect resolved corrections, 0.50 coverage and 1.00 precision among resolved cases. E11 is a separate authorization boundary and remains NOT STARTED; completing E10I does not authorize it. E12 may only provide optional evidence and may not bypass deterministic validation or host quality gates.
+E11A is the only authorized automatic-correction slice currently implemented. It keeps the resolver threshold at 0.90, requires at least two independent evidence sources, allows exactly one `CHANGE_VOICE` patch, preserves source immutability, and requires an explicit post-correction `ACCEPT` quality-gate result. `REVIEW`, `BLOCK`, projection failure, missing revalidation, or revalidation failure leaves the source graph selected.
+
+No production MusicXML overwrite, SesliTab production integration, Audiveris mutation, multi-patch automatic transaction, or automatic duration/onset/staff/tie/tuplet/pitch/relation correction is authorized by E11A. Any expansion beyond E11A requires a new bounded evidence/design decision. E12 remains a separate approval boundary.
