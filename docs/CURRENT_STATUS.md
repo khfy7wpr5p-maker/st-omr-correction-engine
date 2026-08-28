@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `d4c279de5e779b47681687e0f73270a601ae7768`
+Last verified technical main baseline: `982882d7e8973a15b79ba187acb5287f7ed76e58`
 
 ## Verified autonomous boundary
 
-Stages E0-E10G are merged and exact-main CI passed through workflow run #32 (`33157106743`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10H are merged and exact-main CI passed through workflow run #36 (`33158016635`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -23,9 +23,9 @@ Verified capabilities include:
 - explicit teacher-approved provenance;
 - deterministic benchmark reporting correction coverage separately from precision;
 - same-staff temporal voice-continuity evidence;
-- teacher-approved controlled voice benchmark scaled to 24 balanced cases;
-- pinned CC0 real-score reference corpus scaled to 6 sources: 3 piano + 3 classical guitar;
-- four new source-specific teacher-review packets remain PENDING.
+- teacher-approved controlled voice benchmark at 24 balanced cases;
+- pinned CC0 real-score reference corpus at 6 sources: 3 piano + 3 classical guitar;
+- all six bounded review excerpts are now explicitly teacher-approved and `GOLD_ELIGIBLE`.
 
 ## E10F controlled benchmark result
 
@@ -44,23 +44,20 @@ The resolver threshold remains unchanged at 0.90.
 
 This is a controlled shadow benchmark, not a universal OMR accuracy claim.
 
-## E10G real-score corpus state
+## E10H approved real-score corpus state
 
-The pinned CC0 corpus now contains 6 sources:
-
-Teacher-approved/gold-eligible excerpts:
+The pinned CC0 corpus contains six bounded, teacher-approved/gold-eligible excerpts:
 
 1. Piano — Satie, *Je te veux*, measures 1–8.
 2. Classical guitar — Sor Op. 35 No. 13, measures 1–8.
-
-New `REFERENCE_ONLY` / `PENDING` review sources:
-
 3. Piano — Paradis, *An das Klavier*, measures 1–8.
 4. Piano — Webern, Op. 4 No. 4 *So ich traurig bin*, measures 1–8.
 5. Classical guitar — Tárrega, *Lágrima*, measures 1–8.
 6. Classical guitar — Dowland, *Fantasia Number 7*, measures 1–8.
 
-No musical approval is inferred for the four new sources. They cannot become gold without explicit matching teacher review.
+The four E10G review packets were explicitly approved in the project conversation on 2026-08-28 and recorded with source-specific provenance in E10H. Issue #20 is closed as completed.
+
+The controlled mutation benchmark remains at 24 cases for now. E10I must derive new source-specific mutation expectations from verified musical structure in the newly approved excerpts rather than cloning existing cases only to increase the count.
 
 ## Safety boundary
 
