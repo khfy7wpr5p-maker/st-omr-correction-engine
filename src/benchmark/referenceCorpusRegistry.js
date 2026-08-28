@@ -11,8 +11,8 @@ export const REFERENCE_CORPUS = Object.freeze([
     blobSha: 'bd7d6721c841e6b1d88bc9b8c48b1095e301781a',
     license: 'CC0-1.0',
     rights: { benchmarkUse: true, commercialUse: true, trainingUse: true, redistribution: true },
-    challengeTags: ['grand-staff', 'piano-accompaniment', 'multi-staff', '3-4-meter'],
-    notes: 'Reference-only source. The pinned score contains a two-staff Piano part. It is not teacher-gold until separately approved.',
+    challengeTags: ['grand-staff', 'piano-accompaniment', 'multi-staff', '3-4-meter', 'multi-voice-upper-staff', 'ties', 'arpeggiated-chords'],
+    notes: 'Pinned CC0 reference source. Direct source inspection confirms a two-staff Piano part with multiple voices on the upper staff, ties and arpeggiated chord material. Gold eligibility is recorded separately through explicit teacher approval.',
   }),
   createCorpusSource({
     id: 'classical-guitar-sor-op35-no13-study-in-c',
@@ -24,8 +24,8 @@ export const REFERENCE_CORPUS = Object.freeze([
     blobSha: 'c96155e3693c4963c1ebf669ed8e54d17c075e77',
     license: 'CC0-1.0',
     rights: { benchmarkUse: true, commercialUse: true, trainingUse: true, redistribution: true },
-    challengeTags: ['single-staff-polyphony', 'treble-8', '2-4-meter', 'high-low-voices', 'fingering'],
-    notes: 'Reference-only source. The pinned score explicitly separates high and low voices. It is not teacher-gold until separately approved.',
+    challengeTags: ['single-staff-polyphony', 'three-voice-polyphony', 'upper-melody', 'sustained-bass', 'middle-arpeggio-voice', 'treble-8', '2-4-meter', 'fingering', 'string-number'],
+    notes: 'Pinned CC0 reference source. Direct source inspection confirms three notated layers in measures 1-8: upper melody, sustained bass and a middle sixteenth-note arpeggio voice. Gold eligibility is recorded separately through explicit teacher approval.',
   }),
 ])
 

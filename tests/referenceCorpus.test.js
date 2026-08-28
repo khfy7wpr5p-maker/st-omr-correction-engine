@@ -25,8 +25,10 @@ test('piano and classical-guitar reference sources stay instrument-specific', ()
   const guitar = getReferenceCorpusSource('classical-guitar-sor-op35-no13-study-in-c')
   assert.equal(piano.instrumentProfile, 'piano')
   assert.equal(piano.challengeTags.includes('grand-staff'), true)
+  assert.equal(piano.challengeTags.includes('multi-voice-upper-staff'), true)
   assert.equal(guitar.instrumentProfile, 'classical-guitar')
-  assert.equal(guitar.challengeTags.includes('high-low-voices'), true)
+  assert.equal(guitar.challengeTags.includes('three-voice-polyphony'), true)
+  assert.equal(guitar.challengeTags.includes('middle-arpeggio-voice'), true)
 })
 
 test('reference data cannot become gold without explicit teacher approval', () => {
