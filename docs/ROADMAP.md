@@ -3,13 +3,13 @@
 | Stage | Scope | Status | Production mutation |
 |---|---|---|---|
 | E0 | Safe repo, CI, contracts, architecture/safety policy | Completed | None |
-| E1 | Canonical correction data model | Implemented, pending stage CI/merge | None |
-| E2 | Candidate graph + bounded search | Implemented, pending stage CI/merge | None |
-| E3 | Meter/rhythm/onset constraints | Implemented, pending stage CI/merge | None |
-| E4 | Candidate resolver | Implemented, pending stage CI/merge | Shadow only |
-| E5 | Polyphonic voice solver | Not started | Shadow only |
-| E6 | Classical guitar profile | Not started | Shadow only |
-| E7 | Piano profile | Not started | Shadow only |
+| E1 | Canonical correction data model | Completed | None |
+| E2 | Candidate graph + bounded search | Completed | None |
+| E3 | Meter/rhythm/onset constraints | Completed | None |
+| E4 | Candidate resolver | Completed | Shadow only |
+| E5 | Polyphonic voice solver | Implemented, pending stage CI/merge | Shadow only |
+| E6 | Classical guitar profile | Implemented, pending stage CI/merge | Shadow only |
+| E7 | Piano profile | Implemented, pending stage CI/merge | Shadow only |
 | E8 | Patch/revert model | Not started | Controlled, not auto-applied |
 | E9 | SesliTab adapter | Not started | Shadow only |
 | E10 | Teacher evidence + benchmark | Not started | Shadow only |

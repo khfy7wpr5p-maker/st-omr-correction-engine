@@ -11,3 +11,6 @@ export { DEFAULT_CANDIDATE_LIMITS, buildCandidateGraph } from './candidates/cand
 export { CONSTRAINT_STATUS, evaluateMeterConstraint } from './constraints/meterConstraint.js'
 export { evaluateOnsetConstraint } from './constraints/onsetConstraint.js'
 export { DEFAULT_RESOLUTION_POLICY, resolveCandidates } from './resolver/candidateResolver.js'
+export { genericScoreProfile, classicalGuitarProfile, pianoProfile, getInstrumentProfile } from './profiles/index.js'
+export { scoreVoiceAssignment } from './solver/voiceAssignmentScorer.js'
+export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/polyphonicVoiceSolver.js'
