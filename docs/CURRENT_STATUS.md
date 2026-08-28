@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified main baseline: `514a8427e8bf16e269126b2dc021d019fbf7fd7f`
+Last verified technical baseline: `dc1063efa1e1f200f4834afc063f37871bbebf99`
 
 ## Verified autonomous boundary
 
-Stages E0-E10A are merged. Exact-main CI for E10A passed workflow run #13 (`33151035003`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10B are technically merged and exact-main CI passed through workflow run #15 (`33151194218`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -23,9 +23,18 @@ Verified capabilities include:
 - explicit teacher-approved provenance;
 - deterministic benchmark reporting correction coverage separately from precision;
 - pinned CC0 reference-source identities for one piano and one classical-guitar score;
-- reference sources remain non-gold until explicit teacher approval.
+- immutable PENDING / APPROVED / REJECTED teacher-review packets;
+- pending review packets cannot silently become gold;
+- approved packet and source identity must match exactly before gold eligibility.
 
-E10B adds bounded pending review packets for the selected real-source excerpts. It does not invent or assume teacher approval.
+## Current human-review boundary
+
+Two real-source excerpts are queued as `PENDING`:
+
+1. Piano — Satie, *Je te veux*, opening measures 1–8, piano staves 2–3.
+2. Classical guitar — Sor Op. 35 No. 13, home-theme measures 1–8, staff 1.
+
+No teacher approval has been invented or assumed. These sources remain reference-only until an actual musical review occurs.
 
 ## Safety boundary
 

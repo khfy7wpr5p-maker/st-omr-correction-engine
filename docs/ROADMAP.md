@@ -14,7 +14,7 @@
 | E9 | SesliTab adapter | Completed as shadow contract | Shadow only |
 | E10 | Teacher evidence + benchmark | Completed | Shadow only |
 | E10A | Pinned CC0 piano/guitar reference corpus + gold-promotion gate | Completed | None |
-| E10B | Bounded teacher-review queue for real-source excerpts | Implemented, pending CI/merge | None |
+| E10B | Bounded teacher-review queue for real-source excerpts | Completed | None |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
