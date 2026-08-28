@@ -31,6 +31,18 @@ These remain the only teacher-approved/gold-eligible real-score sources.
 
 All files are pinned by repository commit and blob SHA. They are not copied into the repository and remain `REFERENCE_ONLY`.
 
+## Verified result
+
+Technical main `d4c279de5e779b47681687e0f73270a601ae7768` passed exact-main `test-and-build` workflow run #32 (`33157106743`).
+
+- reference corpus: 6 sources total;
+- instrument balance: 3 piano + 3 classical guitar;
+- existing teacher-approved/gold-eligible sources: 2;
+- newly added sources: 4, all `REFERENCE_ONLY`;
+- newly added review packets: 4, all `PENDING`;
+- no new teacher approval inferred;
+- no production score mutation enabled.
+
 ## Review boundary
 
 Each new source has a bounded measures 1–8 teacher-review packet in `PENDING` state. No source can become gold merely because it is CC0 or structurally inspected. Explicit musical approval must match the exact source and review packet.
