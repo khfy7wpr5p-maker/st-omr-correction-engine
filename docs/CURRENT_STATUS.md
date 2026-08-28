@@ -1,10 +1,10 @@
 # Current Status
 
-Last verified technical main baseline: `c01cf43242570c22b4e1bec50bc9dc505a7c2e77`
+Last verified technical main baseline: `a53ad5cde7709fa6d2c5e4c02c40d74970fc6b02`
 
 ## Verified autonomous boundary
 
-Stages E0-E10D are merged and exact-main CI passed through workflow run #22 (`33152779505`). The engine remains non-authoritative and shadow-first.
+Stages E0-E10E are merged and exact-main CI passed through workflow run #26 (`33155843705`). The engine remains non-authoritative and shadow-first.
 
 Verified capabilities include:
 
@@ -25,28 +25,30 @@ Verified capabilities include:
 - pinned CC0 reference-source identities for one piano and one classical-guitar score;
 - teacher-approved `GOLD_ELIGIBLE` bounded reference excerpts;
 - source-verified Satie piano complexity and three-layer Sor classical-guitar structure;
-- controlled teacher-approved voice-assignment mutation baseline.
+- controlled teacher-approved voice-assignment mutation baseline;
+- same-staff temporal voice-continuity evidence;
+- expanded 8-case teacher-approved mutation benchmark with explicit guard cases.
 
-## E10D benchmark result
+## E10E benchmark result
 
-Explicit musical approval was recorded for:
+The resolver threshold remains unchanged at 0.90.
 
-1. Piano — Satie, *Je te veux*, measures 1–8, piano staves 2–3.
-2. Classical guitar — Sor Op. 35 No. 13, measures 1–8, staff 1.
+Eight controlled mutations derived from the approved Satie and Sor excerpt structures were evaluated:
 
-Two controlled voice-assignment mutations were evaluated against the default shadow solver and resolver.
+- total cases: 8;
+- high-evidence cases: 4;
+- guard / partial-evidence cases: 4;
+- correct automatically resolved: 4 / 8;
+- incorrect automatically resolved: 0;
+- safely ambiguous / abstained: 4 / 8;
+- overall controlled coverage: 0.50;
+- precision among resolved controlled cases: 1.00.
 
-Verified outcome:
+All 8 cases ranked the teacher-approved correction direction first. The 4 high-evidence cases combined stem, beam and same-staff temporal continuity plus independent validator evidence and crossed the unchanged threshold. The 4 guard cases intentionally lacked one symbolic signal and remained below threshold.
 
-- total cases: 2;
-- correct correction direction ranked first: 2 / 2;
-- final automatically resolved: 0 / 2;
-- ambiguous / abstained: 2 / 2;
-- incorrect resolved corrections: 0;
-- coverage: 0;
-- precision: not applicable because no case was auto-resolved.
+A dedicated safety regression also confirms that even 0.90 symbolic confidence cannot resolve without an independent evidence class: removing validator evidence still forces `AMBIGUOUS`.
 
-This is an intentionally fail-closed baseline. The evidence points in the correct direction, but current confidence is below the default resolution threshold. The threshold was not weakened to manufacture coverage.
+This remains a controlled shadow benchmark, not a universal OMR accuracy claim.
 
 ## Safety boundary
 
@@ -60,7 +62,7 @@ Not implemented or authorized:
 - external AI model dependency;
 - universal 97-99% OMR accuracy claims.
 
-E11 controlled automatic correction is deliberately NOT STARTED. Before E11, teacher-approved benchmark coverage must expand and stronger independent evidence must justify any automatic resolution.
+E11 controlled automatic correction is deliberately NOT STARTED. Before E11, teacher-approved benchmark coverage must expand across more real-score excerpts and evidence types.
 
 E12 visual second-opinion AI is also not started. Any future AI component must be optional evidence only.
 
