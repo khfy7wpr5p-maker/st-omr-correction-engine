@@ -18,6 +18,15 @@ The benchmark checks two separate properties:
 - whether the shadow voice solver ranks the teacher-approved correction direction first;
 - whether the default resolver remains fail-closed when confidence is below the production-resolution threshold.
 
+## Verified result
+
+Exact-main workflow run #22 (`33152779505`) passed.
+
+- 2 / 2 cases ranked the teacher-approved correction direction first.
+- 0 / 2 cases were automatically resolved.
+- 2 / 2 cases remained `AMBIGUOUS` because confidence stayed below the default 0.90 threshold.
+- 0 incorrect automatic corrections were produced.
+
 This is deliberately a safety baseline, not an OMR accuracy claim. A correct top-ranked candidate with an `AMBIGUOUS` final decision demonstrates useful evidence without authorizing a low-confidence automatic correction.
 
 E11 remains NOT STARTED. Before E11, the benchmark corpus must expand and resolver confidence must be justified by additional independent evidence rather than threshold weakening.
