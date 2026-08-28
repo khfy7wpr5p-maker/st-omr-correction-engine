@@ -3,10 +3,11 @@ import { createScoreEvent } from '../model/scoreEvent.js'
 import { createGoldCase } from './goldCase.js'
 import { TEACHER_APPROVALS } from './approvedReferenceRegistry.js'
 
-function eventMetadata({ stemDirection = null, beamGroup = null } = {}) {
+function eventMetadata({ stemDirection = null, beamGroup = null, sourceAnchor = null } = {}) {
   const metadata = {}
   if (stemDirection) metadata.stemDirection = stemDirection
   if (beamGroup) metadata.beamGroup = beamGroup
+  if (sourceAnchor) metadata.sourceAnchor = sourceAnchor
   return Object.freeze(metadata)
 }
 
@@ -50,6 +51,113 @@ function guitarMutationInput({ suffix, mutatedVoice, includeStem = true, include
   })
 }
 
+function tarregaLagrimaMutationInput({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  const eventId = `tarrega-lagrima-m6-high-cis-${suffix}`
+  const beamGroup = includeBeam ? `tarrega-lagrima-m6-high-explicit-beam-${suffix}` : null
+  return Object.freeze({
+    sourceId: 'classical-guitar-tarrega-lagrima',
+    instrumentProfile: 'classical-guitar',
+    ambiguousEventIds: Object.freeze([eventId]),
+    validatorFindings: Object.freeze([{ code: 'VOICE_ASSIGNMENT_SUSPECT', weight: 0.8, location: { eventId } }]),
+    events: Object.freeze([
+      createScoreEvent({
+        id: eventId,
+        measureKey: '6',
+        onset: 1,
+        duration: 0.5,
+        voice: mutatedVoice,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: includeStem ? 'up' : null, beamGroup, sourceAnchor: 'highVoiceMusic:m6:cis,8[' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-peer`,
+        measureKey: '6',
+        onset: 1.5,
+        duration: 0.5,
+        voice: 1,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: 'up', beamGroup, sourceAnchor: 'highVoiceMusic:m6:<e-0>' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-bass-overlap`,
+        measureKey: '6',
+        onset: 1,
+        duration: 2,
+        voice: 2,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: 'down', sourceAnchor: 'lowVoiceMusic:m6:<cis-3 \\4>2' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-middle-adjacent`,
+        measureKey: '6',
+        onset: 0.5,
+        duration: 0.5,
+        voice: 3,
+        staff: 1,
+        metadata: eventMetadata({ sourceAnchor: "middleVoiceMusic:m6:<gis'-4>" }),
+      }),
+    ]),
+  })
+}
+
+function dowlandFantasiaMutationInput({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  const eventId = `dowland-fantasia7-m7-high-e-${suffix}`
+  const beamGroup = includeBeam ? `dowland-fantasia7-m7-high-quaver-pair-${suffix}` : null
+  return Object.freeze({
+    sourceId: 'classical-guitar-dowland-fantasia-7',
+    instrumentProfile: 'classical-guitar',
+    ambiguousEventIds: Object.freeze([eventId]),
+    validatorFindings: Object.freeze([{ code: 'VOICE_ASSIGNMENT_SUSPECT', weight: 0.8, location: { eventId } }]),
+    events: Object.freeze([
+      createScoreEvent({
+        id: eventId,
+        measureKey: '7',
+        onset: 2,
+        duration: 0.5,
+        voice: mutatedVoice,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: includeStem ? 'up' : null, beamGroup, sourceAnchor: 'highVoiceMusic:m7:e8' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-peer`,
+        measureKey: '7',
+        onset: 1.5,
+        duration: 0.5,
+        voice: 1,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: 'up', beamGroup, sourceAnchor: 'highVoiceMusic:m7:fis8' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-low-overlap`,
+        measureKey: '7',
+        onset: 2,
+        duration: 1,
+        voice: 2,
+        staff: 1,
+        metadata: eventMetadata({ stemDirection: 'down', sourceAnchor: 'lowVoiceMusic:m7:<gis-3>4' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-upper-middle-adjacent`,
+        measureKey: '7',
+        onset: 0,
+        duration: 2,
+        voice: 3,
+        staff: 1,
+        metadata: eventMetadata({ sourceAnchor: 'upperMiddleVoiceMusic:m7:<b-0>2' }),
+      }),
+      createScoreEvent({
+        id: `${eventId}-lower-middle-overlap`,
+        measureKey: '7',
+        onset: 2,
+        duration: 1,
+        voice: 4,
+        staff: 1,
+        metadata: eventMetadata({ sourceAnchor: 'lowerMiddleVoiceMusic:m7:<e-1>4' }),
+      }),
+    ]),
+  })
+}
+
 function createVoiceGoldCase({ id, input, correctVoice, teacherApproval }) {
   const eventId = input.ambiguousEventIds[0]
   const event = input.events.find((entry) => entry.id === eventId)
@@ -79,6 +187,34 @@ function makeGuitarCase({ suffix, mutatedVoice, includeStem = true, includeBeam 
   })
 }
 
+function makeTarregaCase({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  return createVoiceGoldCase({
+    id: `approved-guitar-tarrega-lagrima-voice-${suffix}`,
+    input: tarregaLagrimaMutationInput({ suffix, mutatedVoice, includeStem, includeBeam }),
+    correctVoice: 1,
+    teacherApproval: TEACHER_APPROVALS.lagrima,
+  })
+}
+
+function makeDowlandCase({ suffix, mutatedVoice, includeStem = true, includeBeam = true }) {
+  return createVoiceGoldCase({
+    id: `approved-guitar-dowland-fantasia7-voice-${suffix}`,
+    input: dowlandFantasiaMutationInput({ suffix, mutatedVoice, includeStem, includeBeam }),
+    correctVoice: 1,
+    teacherApproval: TEACHER_APPROVALS.dowland,
+  })
+}
+
+export const TEACHER_APPROVED_SOURCE_SPECIFIC_HIGH_EVIDENCE_CASES = Object.freeze([
+  makeTarregaCase({ suffix: 'm6-explicit-beam-full', mutatedVoice: 3 }),
+  makeDowlandCase({ suffix: 'm7-four-layer-full', mutatedVoice: 3 }),
+])
+
+export const TEACHER_APPROVED_SOURCE_SPECIFIC_GUARD_CASES = Object.freeze([
+  makeTarregaCase({ suffix: 'm6-explicit-beam-no-stem', mutatedVoice: 3, includeStem: false }),
+  makeDowlandCase({ suffix: 'm7-four-layer-no-beam', mutatedVoice: 3, includeBeam: false }),
+])
+
 export const TEACHER_APPROVED_HIGH_EVIDENCE_CASES = Object.freeze([
   makePianoCase({ suffix: 'full-after-v1', mutatedVoice: 1 }),
   makePianoCase({ suffix: 'full-after-v3', mutatedVoice: 3 }),
@@ -92,6 +228,7 @@ export const TEACHER_APPROVED_HIGH_EVIDENCE_CASES = Object.freeze([
   makeGuitarCase({ suffix: 'full-before-v2', mutatedVoice: 2, temporalPlacement: 'before' }),
   makeGuitarCase({ suffix: 'full-before-v3', mutatedVoice: 3, temporalPlacement: 'before' }),
   makeGuitarCase({ suffix: 'full-before-v4', mutatedVoice: 4, temporalPlacement: 'before' }),
+  ...TEACHER_APPROVED_SOURCE_SPECIFIC_HIGH_EVIDENCE_CASES,
 ])
 
 export const TEACHER_APPROVED_GUARD_CASES = Object.freeze([
@@ -107,6 +244,7 @@ export const TEACHER_APPROVED_GUARD_CASES = Object.freeze([
   makeGuitarCase({ suffix: 'guard-no-stem-v4', mutatedVoice: 4, includeStem: false }),
   makeGuitarCase({ suffix: 'guard-no-temporal-v3', mutatedVoice: 3, temporalPlacement: 'none' }),
   makeGuitarCase({ suffix: 'guard-no-temporal-v4', mutatedVoice: 4, temporalPlacement: 'none' }),
+  ...TEACHER_APPROVED_SOURCE_SPECIFIC_GUARD_CASES,
 ])
 
 export const TEACHER_APPROVED_MUTATION_CASES = Object.freeze([

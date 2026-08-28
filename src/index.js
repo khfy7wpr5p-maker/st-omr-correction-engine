@@ -24,4 +24,10 @@ export { REFERENCE_CORPUS, getReferenceCorpusSource } from './benchmark/referenc
 export { REVIEW_PACKET_STATUS, createTeacherReviewPacket, approveTeacherReviewPacket, rejectTeacherReviewPacket, promoteReviewedSourceForGold } from './benchmark/teacherReviewPacket.js'
 export { REFERENCE_REVIEW_QUEUE, getReferenceReviewPacket } from './benchmark/referenceReviewQueue.js'
 export { TEACHER_APPROVALS, APPROVED_REVIEW_PACKETS, GOLD_ELIGIBLE_REFERENCE_CORPUS, getGoldEligibleReferenceSource } from './benchmark/approvedReferenceRegistry.js'
-export { TEACHER_APPROVED_HIGH_EVIDENCE_CASES, TEACHER_APPROVED_GUARD_CASES, TEACHER_APPROVED_MUTATION_CASES } from './benchmark/teacherApprovedMutationCases.js'
+export {
+  TEACHER_APPROVED_SOURCE_SPECIFIC_HIGH_EVIDENCE_CASES,
+  TEACHER_APPROVED_SOURCE_SPECIFIC_GUARD_CASES,
+  TEACHER_APPROVED_HIGH_EVIDENCE_CASES,
+  TEACHER_APPROVED_GUARD_CASES,
+  TEACHER_APPROVED_MUTATION_CASES,
+} from './benchmark/teacherApprovedMutationCases.js'
