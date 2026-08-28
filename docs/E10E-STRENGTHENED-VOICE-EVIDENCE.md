@@ -25,11 +25,16 @@ The teacher-approved Satie and Sor excerpts are reused without changing their so
 - 4 high-evidence cases: stem + beam + temporal continuity;
 - 4 guard cases: one of stem or beam evidence is intentionally absent.
 
-Expected safety behavior:
+## Verified result
 
-- high-evidence cases may resolve only if the approved correction reaches the unchanged threshold and has independent validator + symbolic evidence;
-- guard cases must remain `AMBIGUOUS` below threshold;
-- removing validator evidence must still force abstention even when symbolic confidence reaches the threshold;
-- no source MusicXML is written or modified.
+Exact-main workflow run #26 (`33155843705`) passed on technical main `a53ad5cde7709fa6d2c5e4c02c40d74970fc6b02`.
 
-E10E is still a controlled shadow benchmark. It is not an OMR accuracy claim and does not authorize E11 automatic application.
+- 8 / 8 cases ranked the teacher-approved correction direction first.
+- 4 / 4 high-evidence cases resolved correctly at the unchanged 0.90 threshold.
+- 4 / 4 guard cases remained `AMBIGUOUS` below threshold.
+- incorrect resolved corrections: 0.
+- overall controlled coverage: 0.50.
+- precision among resolved controlled cases: 1.00.
+- removing validator evidence still forces `AMBIGUOUS` even when symbolic confidence reaches 0.90.
+
+This is a controlled shadow benchmark, not a universal OMR accuracy claim. No source MusicXML is written or modified, no threshold was weakened, and E11 automatic application remains NOT STARTED.
