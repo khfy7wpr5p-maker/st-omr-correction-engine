@@ -17,7 +17,13 @@ export function generateVoiceCandidates({ events, ambiguousEventIds, instrumentP
   const ambiguous = ambiguousEventIds.map((id) => eventById.get(id)).filter(Boolean)
   if (ambiguous.length !== ambiguousEventIds.length) return Object.freeze({ candidates: Object.freeze([]), exhausted: false, reason: 'unknown-event-id' })
 
-  const validatorEvidence = validatorFindings.map((finding) => createEvidence({ source: EVIDENCE_SOURCE.VALIDATOR, code: finding.code || 'VALIDATOR_FINDING', weight: finding.weight ?? 0.7, location: finding.location ?? null }))
+  const validatorEvidence = validatorFindings.map((finding) => createEvidence({
+    source: EVIDENCE_SOURCE.VALIDATOR,
+    code: finding.code || 'VALIDATOR_FINDING',
+    weight: finding.weight ?? 0.7,
+    location: finding.location ?? null,
+    details: finding.details ?? null,
+  }))
   const candidates = []
 
   for (const event of ambiguous) {
