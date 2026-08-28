@@ -25,6 +25,7 @@ export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionE
 export { hashSourceBytes, evaluateSourceMutationInvariant } from './benchmark/sourceMutationInvariant.js'
 export { evaluateSelectivePrediction, selectMetricAtThreshold } from './benchmark/selectivePredictionMetrics.js'
 export { CALIBRATION_METHOD, evaluateConfidenceCalibration, compareCalibrationTransform } from './benchmark/confidenceCalibration.js'
+export { describePolyphonyComplexity, polyphonyLevelLabel } from './benchmark/polyphonyComplexity.js'
 export { CORPUS_SOURCE_STATUS, createCorpusSource, promoteCorpusSourceForGold } from './benchmark/corpusSource.js'
 export { REFERENCE_CORPUS, getReferenceCorpusSource } from './benchmark/referenceCorpusRegistry.js'
 export { REVIEW_PACKET_STATUS, createTeacherReviewPacket, approveTeacherReviewPacket, rejectTeacherReviewPacket, promoteReviewedSourceForGold } from './benchmark/teacherReviewPacket.js'
