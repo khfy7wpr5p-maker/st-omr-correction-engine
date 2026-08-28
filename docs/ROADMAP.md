@@ -16,7 +16,7 @@
 | E10A | Pinned CC0 piano/guitar reference corpus + gold-promotion gate | Completed | None |
 | E10B | Bounded teacher-review queue for real-source excerpts | Completed | None |
 | E10C | Refined source-verified musical review evidence | Completed | None |
-| E10D | Explicit teacher approval + controlled real-score mutation baseline | Implemented, pending CI/merge | None |
+| E10D | Explicit teacher approval + controlled real-score mutation baseline | Completed | None |
 | E11 | Controlled automatic correction | NOT STARTED — explicit safety approval required | Safety gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
