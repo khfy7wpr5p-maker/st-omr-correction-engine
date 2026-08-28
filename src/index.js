@@ -15,6 +15,7 @@ export { DEFAULT_RESOLUTION_POLICY, resolveCandidates } from './resolver/candida
 export { genericScoreProfile, classicalGuitarProfile, pianoProfile, getInstrumentProfile } from './profiles/index.js'
 export { VOICE_EVIDENCE_WEIGHTS, scoreVoiceAssignment } from './solver/voiceAssignmentScorer.js'
 export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/polyphonicVoiceSolver.js'
+export { analyzeCrossStaffContext } from './solver/crossStaffAnalyzer.js'
 export { projectCorrectionPatches } from './correction/patchProjection.js'
 export { revertCorrectionPatches } from './correction/patchReverter.js'
 export { CONTROLLED_CORRECTION_DECISION, E11A_CONTROLLED_POLICY, applyControlledVoiceCorrection } from './correction/controlledAutoCorrection.js'
