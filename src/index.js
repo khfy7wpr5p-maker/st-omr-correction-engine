@@ -21,6 +21,8 @@ export { CONTROLLED_CORRECTION_DECISION, E11A_CONTROLLED_POLICY, applyControlled
 export { createTeacherApproval, createTeacherEvidence } from './evidence/teacherEvidence.js'
 export { createGoldCase } from './benchmark/goldCase.js'
 export { runCorrectionBenchmark } from './benchmark/correctionBenchmark.js'
+export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
+export { hashSourceBytes, evaluateSourceMutationInvariant } from './benchmark/sourceMutationInvariant.js'
 export { CORPUS_SOURCE_STATUS, createCorpusSource, promoteCorpusSourceForGold } from './benchmark/corpusSource.js'
 export { REFERENCE_CORPUS, getReferenceCorpusSource } from './benchmark/referenceCorpusRegistry.js'
 export { REVIEW_PACKET_STATUS, createTeacherReviewPacket, approveTeacherReviewPacket, rejectTeacherReviewPacket, promoteReviewedSourceForGold } from './benchmark/teacherReviewPacket.js'
