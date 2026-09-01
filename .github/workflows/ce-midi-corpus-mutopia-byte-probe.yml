@@ -1,0 +1,71 @@
+name: CE MIDI Mutopia byte acquisition probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/ce-midi-corpus-02-mutopia-byte-probe
+
+jobs:
+  acquire:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe exact Mutopia MIDI bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/mutopia
+          urls=(
+            'https://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+            'https://mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+            'http://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+            'http://mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+          )
+          acquired=''
+          for url in "${urls[@]}"; do
+            echo "PROBING=$url"
+            if curl --http1.1 --ipv4 --fail --location --connect-timeout 20 --max-time 90 --retry 2 --retry-all-errors -A 'Mozilla/5.0 CE-MIDI-CORPUS-02 evaluation probe' -D .tmp/mutopia/headers.txt "$url" -o .tmp/mutopia/candidate.mid; then
+              if test "$(head -c 4 .tmp/mutopia/candidate.mid)" = 'MThd'; then
+                acquired="$url"
+                break
+              fi
+              echo 'RESPONSE_WAS_NOT_MIDI'
+              file .tmp/mutopia/candidate.mid || true
+              head -c 200 .tmp/mutopia/candidate.mid | xxd || true
+            fi
+          done
+          if test -z "$acquired"; then
+            echo 'MUTOPIA_EXACT_BYTES_UNAVAILABLE'
+            exit 42
+          fi
+          echo "ACQUIRED_URL=$acquired"
+          echo "MIDI_SHA256=$(sha256sum .tmp/mutopia/candidate.mid | awk '{print $1}')"
+          echo "MIDI_BYTES=$(stat -c%s .tmp/mutopia/candidate.mid)"
+          echo 'MIDI_HEADER_HEX='
+          head -c 14 .tmp/mutopia/candidate.mid | xxd -p
+          echo 'RESPONSE_HEADERS='
+          cat .tmp/mutopia/headers.txt
+      - name: Parse acquired bytes with repository parser
+        if: success()
+        shell: bash
+        run: |
+          npm install --ignore-scripts --package-lock=false
+          node --input-type=module - <<'NODE'
+          import { loadMidiReference } from './adapters/midi/index.js'
+          const parsed = loadMidiReference('.tmp/mutopia/candidate.mid', {
+            sourceId: 'mutopia-sor-op35-no13-midi',
+            sourceType: 'TRUSTED_REFERENCE',
+          })
+          if (!parsed.ok) throw new Error(JSON.stringify(parsed))
+          console.log('MUTOPIA_MIDI_SUMMARY=' + JSON.stringify({
+            sha256: parsed.sha256,
+            format: parsed.format,
+            trackCount: parsed.trackCount,
+            ppq: parsed.ppq,
+            eventCount: parsed.events.length,
+            tracks: parsed.tracks.map((track) => ({ trackIndex: track.trackIndex, noteCount: track.noteCount, channel: track.channel, program: track.program, percussion: track.percussion })),
+            tempos: parsed.tempos,
+            timeSignatures: parsed.timeSignatures,
+          }))
+          NODE
