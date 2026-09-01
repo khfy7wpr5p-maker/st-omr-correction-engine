@@ -39,6 +39,7 @@ export { MIDI_REFERENCE_CANDIDATE_STATUS, MIDI_REFERENCE_CANDIDATES, evaluateMid
 export { REAL_MIDI_ORACLE_STATUS, ASAP_V1_1_BACH_BWV846_REFERENCE, REAL_MIDI_REFERENCE_REGISTRY, evaluateRealMidiReferenceAdmission, getRealMidiReferenceAdmission } from './benchmark/realMidiReferenceRegistry.js'
 export { REAL_MIDI_SCOREGRAPH_ORIGIN, REAL_MIDI_PAIR_STATUS, USER_PROVIDED_REAL_OMR_MANIFESTS, REAL_MIDI_PAIR_CANDIDATES, evaluateRealMidiPairReadiness, getRealMidiPairCandidate, getUserProvidedRealOmrManifest, materializeRealMidiPairCandidate } from './benchmark/realMidiPairReadiness.js'
 export { REAL_MIDI_ORACLE_REVIEW_STATUS, REAL_MIDI_ORACLE_REVIEWER_KIND, createRealMidiOracleReviewItem, resolveRealMidiOracleReviewItem } from './benchmark/realMidiOracleReviewQueue.js'
+export { REAL_OMR_MIDI_SHADOW_REVIEW_BATCH_VERSION, REAL_OMR_MIDI_REVIEW_ITEM_KIND, REAL_OMR_MIDI_SHADOW_REVIEW_BATCH_V1, getRealOmrMidiShadowReviewWork, materializeRealOmrMidiShadowReviewQueue } from './benchmark/realOmrMidiShadowReviewBatch.js'
 export { buildRealMidiTeacherReviewPacket } from './benchmark/realMidiTeacherReviewPacket.js'
 export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
 export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
