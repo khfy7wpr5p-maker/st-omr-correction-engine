@@ -41,6 +41,7 @@ export { REAL_MIDI_SCOREGRAPH_ORIGIN, REAL_MIDI_PAIR_STATUS, USER_PROVIDED_REAL_
 export { REAL_MIDI_ORACLE_REVIEW_STATUS, REAL_MIDI_ORACLE_REVIEWER_KIND, createRealMidiOracleReviewItem, resolveRealMidiOracleReviewItem } from './benchmark/realMidiOracleReviewQueue.js'
 export { REAL_OMR_MIDI_SHADOW_REVIEW_BATCH_VERSION, REAL_OMR_MIDI_REVIEW_ITEM_KIND, REAL_OMR_MIDI_SHADOW_REVIEW_BATCH_V1, getRealOmrMidiShadowReviewWork, materializeRealOmrMidiShadowReviewQueue } from './benchmark/realOmrMidiShadowReviewBatch.js'
 export { buildRealMidiTeacherReviewPacket } from './benchmark/realMidiTeacherReviewPacket.js'
+export { REAL_MIDI_TEACHER_REVIEW_DECISION, REAL_MIDI_TEACHER_REVIEW_IMPORT_STATUS, validateRealMidiTeacherReviewDecision } from './benchmark/realMidiTeacherReviewImport.js'
 export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
 export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
 export { REAL_OMR_ANNOTATION_STATUS, createRealOmrReviewObservation, buildRealOmrAnnotationBatch, annotateRealOmrObservation } from './benchmark/realOmrAnnotationQueue.js'
