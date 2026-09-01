@@ -89,10 +89,15 @@ function normalizedNoteEvent(event, index) {
   })
 }
 
+function hasStandardMidiHeader(bytes) {
+  return bytes.length >= 14 && bytes.subarray(0, 4).toString('ascii') === 'MThd'
+}
+
 export function createAudioDerivedMidiReference(providerResult) {
   if (!providerResult?.ok || providerResult.providerId !== BASIC_PITCH_PROVIDER_ID) throw new TypeError('Successful Basic Pitch provider result is required.')
   const midiInput = Buffer.from(providerResult.generatedMidiBase64, 'base64')
   if (sha256(midiInput) !== providerResult.generatedMidiSha256) throw new Error('Generated MIDI fingerprint mismatch.')
+  if (!hasStandardMidiHeader(midiInput)) throw new Error('Generated MIDI is not a standard MIDI file.')
   return Object.freeze({
     midiInput,
     provenance: Object.freeze({ sourceId: providerResult.sourceId, sourceType: MIDI_REFERENCE_SOURCE_TYPE.AUDIO_DERIVED }),
@@ -170,9 +175,19 @@ export function deriveMidiReferenceFromAudio(audioInput, {
     if (worker.providerId !== BASIC_PITCH_PROVIDER_ID || typeof worker.generatedMidiBase64 !== 'string' || !Array.isArray(worker.noteEvents)) {
       return freezeFailure({ sourceId, audioSha256, status: 'PROVIDER_FAILED', reason: 'INVALID_PROVIDER_CONTRACT' })
     }
+    if (worker.packageVersion !== BASIC_PITCH_PACKAGE_VERSION) {
+      return freezeFailure({
+        sourceId,
+        audioSha256,
+        status: 'PROVIDER_FAILED',
+        reason: 'PROVIDER_VERSION_MISMATCH',
+        details: { expectedPackageVersion: BASIC_PITCH_PACKAGE_VERSION, actualPackageVersion: worker.packageVersion ?? null },
+      })
+    }
 
     const generatedMidiBytes = Buffer.from(worker.generatedMidiBase64, 'base64')
     if (!generatedMidiBytes.length) return freezeFailure({ sourceId, audioSha256, status: 'PROVIDER_FAILED', reason: 'EMPTY_GENERATED_MIDI' })
+    if (!hasStandardMidiHeader(generatedMidiBytes)) return freezeFailure({ sourceId, audioSha256, status: 'PROVIDER_FAILED', reason: 'INVALID_GENERATED_MIDI' })
     const generatedMidiSha256 = sha256(generatedMidiBytes)
     if (worker.generatedMidiSha256 && worker.generatedMidiSha256 !== generatedMidiSha256) {
       return freezeFailure({ sourceId, audioSha256, status: 'PROVIDER_FAILED', reason: 'GENERATED_MIDI_FINGERPRINT_MISMATCH' })
@@ -197,7 +212,7 @@ export function deriveMidiReferenceFromAudio(audioInput, {
       generatedMidiSha256,
       noteEvents,
       provider: Object.freeze({
-        packageVersion: worker.packageVersion ?? null,
+        packageVersion: worker.packageVersion,
         freshReadRepositorySha: BASIC_PITCH_FRESH_READ_SHA,
         modelSerialization: worker.modelSerialization ?? null,
         modelSha256: worker.modelSha256 ?? null,
