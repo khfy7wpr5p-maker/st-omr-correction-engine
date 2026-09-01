@@ -1,0 +1,84 @@
+name: CE MIDI Mutopia reference verify
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/ce-midi-corpus-mutopia-byte-probe.yml'
+      - 'src/benchmark/midiReferenceCandidateRegistry.js'
+      - 'tests/midiReferenceCandidateRegistry.test.js'
+      - 'docs/CE-MIDI-CORPUS-02-MUTOPIA-SOR.md'
+  push:
+    branches:
+      - research/ce-midi-corpus-02-mutopia-byte-probe
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch and verify exact Mutopia MIDI bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/mutopia
+          URL='https://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+          curl --http1.1 --ipv4 --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors -A 'Mozilla/5.0 CE-MIDI-CORPUS-02 evaluation verifier' "$URL" -o .tmp/mutopia/sorf_op35_no13.mid
+          test "$(head -c 4 .tmp/mutopia/sorf_op35_no13.mid)" = 'MThd'
+          printf '%s  %s\n' '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527' '.tmp/mutopia/sorf_op35_no13.mid' | sha256sum -c -
+          test "$(stat -c%s .tmp/mutopia/sorf_op35_no13.mid)" = '2862'
+      - name: Verify MIDI structure with repository parser
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import { loadMidiReference } from './adapters/midi/index.js'
+          const parsed = loadMidiReference('.tmp/mutopia/sorf_op35_no13.mid', {
+            sourceId: 'mutopia-sor-op35-no13-midi',
+            sourceType: 'TRUSTED_REFERENCE',
+          })
+          if (!parsed.ok) throw new Error(JSON.stringify(parsed))
+          if (parsed.sha256 !== '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527') throw new Error('Mutopia MIDI hash mismatch.')
+          if (parsed.format !== 1 || parsed.trackCount !== 2 || parsed.ppq !== 384 || parsed.events.length !== 334) throw new Error('Mutopia MIDI structure changed.')
+          const noteTracks = parsed.tracks.filter((track) => track.noteCount > 0)
+          if (noteTracks.length !== 1 || noteTracks[0].trackIndex !== 1 || noteTracks[0].noteCount !== 334 || noteTracks[0].program !== 24) throw new Error('Mutopia note track structure changed.')
+          const signature = parsed.timeSignatures[0]
+          if (!signature || signature.numerator !== 2 || signature.denominator !== 4) throw new Error('Mutopia meter changed.')
+          console.log('MUTOPIA_MIDI_EXACT_BYTES_OK')
+          NODE
+      - name: Verify pinned same-work source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          MUTOPIA='https://raw.githubusercontent.com/MutopiaProject/MutopiaProject/2144afd6f52d56c5b6995b8b589ef1268b3139f0/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.ly'
+          YAWNOC='https://raw.githubusercontent.com/yawnoc/guitar/fe48dbba46be760fab453b3a72ef35746f20ea48/sor-c-major-35-13/sor-c-major-35-13.ly'
+          curl --fail --location --retry 3 --retry-all-errors "$MUTOPIA" -o .tmp/mutopia/mutopia.ly
+          curl --fail --location --retry 3 --retry-all-errors "$YAWNOC" -o .tmp/mutopia/yawnoc.ly
+          test "$(git hash-object .tmp/mutopia/mutopia.ly)" = 'bb5d652f6ea5f284c901607d4c323c8710a0f7d2'
+          test "$(git hash-object .tmp/mutopia/yawnoc.ly)" = 'c96155e3693c4963c1ebf669ed8e54d17c075e77'
+          python - <<'PY'
+          from pathlib import Path
+          m = Path('.tmp/mutopia/mutopia.ly').read_text()
+          y = Path('.tmp/mutopia/yawnoc.ly').read_text()
+          checks = [
+              ('Mutopia work identity', 'Op. 35 No. 13' in m and 'Fernando Sor' in m),
+              ('Yawnoc work identity', 'Opus 35, Number 13' in y and 'Fernando Sor' in y),
+              ('Mutopia shared source lineage', 'N. Simrock, 1924' in m and 'Boije 482' in m),
+              ('Yawnoc shared source lineage', 'Sheet music from 1924' in y and 'Boije_0482.pdf' in y),
+              ('Mutopia musical signature', '\\time 2/4' in m and '\\key c \\major' in m and '\\clef "treble_8"' in m),
+              ('Yawnoc musical signature', '\\time 2/4' in y and '\\key c \\major' in y and '\\clef "treble_8"' in y),
+              ('Mutopia opening upper voice', 'e4 c |' in m and '<g\'-4>4 e8 c |' in m),
+              ('Yawnoc opening upper voice', '<e-0>4 <c-1> |' in y and '<g\'-4>4 e8 c |' in y),
+              ('Mutopia opening middle voice', '<c-3>16 g\' <e-2> g' in m),
+              ('Yawnoc opening middle voice', '<c-3>16 <g\'-0> <e-2> <g-0>' in y),
+          ]
+          failed = [name for name, ok in checks if not ok]
+          if failed:
+              raise SystemExit('Same-work source verification failed: ' + ', '.join(failed))
+          print('MUTOPIA_YAWNOC_SAME_WORK_SOURCE_PROVENANCE_OK')
+          PY
+      - name: Run candidate registry tests
+        run: node --test tests/midiReferenceCandidateRegistry.test.js
