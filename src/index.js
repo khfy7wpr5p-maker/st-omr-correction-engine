@@ -33,6 +33,7 @@ export { createVisualLocalizationEvidence } from './evidence/visualLocalizationE
 export { createGoldCase } from './benchmark/goldCase.js'
 export { runCorrectionBenchmark } from './benchmark/correctionBenchmark.js'
 export { MIDI_EVALUATION_ORACLE_TYPE, createMidiEvaluationCase, runMidiEvidenceBenchmark } from './benchmark/midiEvidenceBenchmark.js'
+export { MIDI_CORPUS_REQUIRED_SCENARIOS, evaluateMidiCorpusCoverage } from './benchmark/midiCorpusCoverage.js'
 export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
 export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
 export { REAL_OMR_ANNOTATION_STATUS, createRealOmrReviewObservation, buildRealOmrAnnotationBatch, annotateRealOmrObservation } from './benchmark/realOmrAnnotationQueue.js'
