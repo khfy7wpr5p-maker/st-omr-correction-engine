@@ -1,0 +1,47 @@
+name: CE MIDI teacher review packet
+
+on:
+  pull_request:
+    paths:
+      - 'src/benchmark/realMidiTeacherReviewPacket.js'
+      - 'scripts/buildRealMidiTeacherReviewPacket.mjs'
+      - 'scripts/runBachAsapMusicXmlMidiBenchmark.mjs'
+      - 'tests/realMidiTeacherReviewPacket.test.js'
+      - 'src/index.js'
+      - '.github/workflows/ce-midi-teacher-review-packet.yml'
+  workflow_dispatch:
+
+jobs:
+  review-packet:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact pinned real sources
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/teacher-review
+          curl --fail --location --retry 3 'https://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid' -o .tmp/teacher-review/sor.mid
+          curl --fail --location --retry 3 'https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid' -o .tmp/teacher-review/lagrima.mid
+          BASE='https://raw.githubusercontent.com/fosfrancesco/asap-dataset/fad8d1e8078d0ae47ad2f280b5d022bd2de24784/Bach/Prelude/bwv_846'
+          curl --fail --location --retry 3 "$BASE/xml_score.musicxml" -o .tmp/teacher-review/bach.musicxml
+          curl --fail --location --retry 3 "$BASE/midi_score.mid" -o .tmp/teacher-review/bach.mid
+          printf '%s  %s\n' '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527' '.tmp/teacher-review/sor.mid' | sha256sum -c -
+          printf '%s  %s\n' '0c7dcf81b1a291bf0b445dc15b000bafc2660fa14fe93ba9a38f397b6e29d054' '.tmp/teacher-review/lagrima.mid' | sha256sum -c -
+          printf '%s  %s\n' '1572209d1e24e600cc7758a3407a9ad3cb4cfbc5d55b821d452490d98a68307b' '.tmp/teacher-review/bach.musicxml' | sha256sum -c -
+          printf '%s  %s\n' '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f' '.tmp/teacher-review/bach.mid' | sha256sum -c -
+      - name: Re-run benchmark diagnostics
+        run: |
+          node scripts/runSorMidiReferenceBenchmark.mjs .tmp/teacher-review/sor.mid > .tmp/teacher-review/sor.json
+          node scripts/runLagrimaMidiReferenceBenchmark.mjs .tmp/teacher-review/lagrima.mid > .tmp/teacher-review/lagrima.json
+          node scripts/runBachAsapMusicXmlMidiBenchmark.mjs .tmp/teacher-review/bach.musicxml .tmp/teacher-review/bach.mid > .tmp/teacher-review/bach.json
+      - name: Build pending teacher review packet
+        run: node scripts/buildRealMidiTeacherReviewPacket.mjs .tmp/teacher-review/sor.json .tmp/teacher-review/lagrima.json .tmp/teacher-review/bach.json | tee .tmp/teacher-review/review-packet.json
+      - run: node --test tests/realMidiTeacherReviewPacket.test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-midi-teacher-review-packet
+          path: .tmp/teacher-review/review-packet.json
