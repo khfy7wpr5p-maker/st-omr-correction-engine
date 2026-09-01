@@ -1,0 +1,100 @@
+name: CE MIDI corpus ASAP probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/ce-midi-corpus-02-asap-probe
+
+jobs:
+  asap-probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch pinned ASAP v1.1 source pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/asap
+          BASE='https://raw.githubusercontent.com/fosfrancesco/asap-dataset/fad8d1e8078d0ae47ad2f280b5d022bd2de24784/Bach/Prelude/bwv_846'
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/midi_score.mid" -o .tmp/asap/midi_score.mid
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/xml_score.musicxml" -o .tmp/asap/xml_score.musicxml
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/Shi05M.mid" -o .tmp/asap/performance.mid
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/midi_score_annotations.txt" -o .tmp/asap/midi_score_annotations.txt
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/Shi05M_annotations.txt" -o .tmp/asap/performance_annotations.txt
+          echo '--- SHA256 ---'
+          sha256sum .tmp/asap/*
+          echo '--- BYTE SIZES ---'
+          wc -c .tmp/asap/*
+      - name: Inspect MusicXML structure
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          path = '.tmp/asap/xml_score.musicxml'
+          root = ET.parse(path).getroot()
+          parts = root.findall('./part')
+          summary = {'parts': len(parts), 'measures': 0, 'pitched_notes': 0, 'rests': 0, 'voices': set(), 'staves': set(), 'time_signatures': []}
+          for part in parts:
+              divisions = 1
+              for measure in part.findall('./measure'):
+                  summary['measures'] += 1
+                  attrs = measure.find('./attributes')
+                  if attrs is not None:
+                      div = attrs.findtext('./divisions')
+                      if div:
+                          divisions = int(div)
+                      time = attrs.find('./time')
+                      if time is not None:
+                          summary['time_signatures'].append([measure.get('number'), time.findtext('./beats'), time.findtext('./beat-type')])
+                  for note in measure.findall('./note'):
+                      voice = note.findtext('./voice')
+                      staff = note.findtext('./staff')
+                      if voice: summary['voices'].add(voice)
+                      if staff: summary['staves'].add(staff)
+                      if note.find('./rest') is not None:
+                          summary['rests'] += 1
+                      elif note.find('./pitch') is not None:
+                          summary['pitched_notes'] += 1
+          summary['voices'] = sorted(summary['voices'], key=lambda x: int(x))
+          summary['staves'] = sorted(summary['staves'], key=lambda x: int(x))
+          print('MUSICXML_SUMMARY=' + json.dumps(summary, sort_keys=True))
+          PY
+      - name: Inspect MIDI with repository parser
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import { loadMidiReference } from './adapters/midi/index.js'
+          const files = [
+            ['score', '.tmp/asap/midi_score.mid', 'TRUSTED_REFERENCE'],
+            ['performance', '.tmp/asap/performance.mid', 'USER_PROVIDED_REFERENCE'],
+          ]
+          for (const [label, path, sourceType] of files) {
+            const parsed = loadMidiReference(path, { sourceId: `asap-bwv846-${label}`, sourceType })
+            const summary = parsed.ok ? {
+              ok: true,
+              sha256: parsed.sha256,
+              format: parsed.format,
+              trackCount: parsed.trackCount,
+              ppq: parsed.ppq,
+              eventCount: parsed.events.length,
+              tracks: parsed.tracks.map((t) => ({ trackIndex: t.trackIndex, noteCount: t.noteCount, channel: t.channel, program: t.program, percussion: t.percussion })),
+              tempos: parsed.tempos,
+              timeSignatures: parsed.timeSignatures,
+            } : parsed
+            console.log(`MIDI_${label.toUpperCase()}_SUMMARY=${JSON.stringify(summary)}`)
+          }
+          NODE
+      - name: Safety assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(head -c 4 .tmp/asap/midi_score.mid)" = 'MThd'
+          test "$(head -c 4 .tmp/asap/performance.mid)" = 'MThd'
+          grep -q '<score-partwise' .tmp/asap/xml_score.musicxml
+          echo 'ASAP_PROBE_OK'
