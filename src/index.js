@@ -1,5 +1,6 @@
 export { CORRECTION_STATUS, isCorrectionStatus } from './contracts/status.js'
 export { EVIDENCE_SOURCE, createEvidence } from './contracts/evidence.js'
+export { MIDI_REFERENCE_SOURCE_TYPE, MIDI_COMPARISON_CODE, isMidiReferenceSourceType, isMidiComparisonCode, createMidiReferenceDiagnostic } from './contracts/midiReferenceEvidence.js'
 export { PATCH_OPERATION, createCorrectionPatch } from './contracts/correctionPatch.js'
 export { POLYPHONIC_ERROR_CLASS, POLYPHONIC_ERROR_TAXONOMY_VERSION, createErrorTaxonomyRef, isPolyphonicErrorClass } from './contracts/errorTaxonomy.js'
 export { createCorrectionRequest } from './contracts/correctionRequest.js'
