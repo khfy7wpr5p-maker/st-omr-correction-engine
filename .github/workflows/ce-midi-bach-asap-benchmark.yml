@@ -1,0 +1,38 @@
+name: CE MIDI Bach ASAP benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'adapters/musicxml/**'
+      - 'scripts/runBachAsapMusicXmlMidiBenchmark.mjs'
+      - 'tests/boundedMusicXmlScoreGraphAdapter.test.js'
+      - 'src/index.js'
+      - '.github/workflows/ce-midi-bach-asap-benchmark.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact ASAP BWV846 score sources
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/bach-asap
+          BASE='https://raw.githubusercontent.com/fosfrancesco/asap-dataset/fad8d1e8078d0ae47ad2f280b5d022bd2de24784/Bach/Prelude/bwv_846'
+          curl --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors "$BASE/xml_score.musicxml" -o .tmp/bach-asap/xml_score.musicxml
+          curl --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors "$BASE/midi_score.mid" -o .tmp/bach-asap/midi_score.mid
+          printf '%s  %s\n' '1572209d1e24e600cc7758a3407a9ad3cb4cfbc5d55b821d452490d98a68307b' '.tmp/bach-asap/xml_score.musicxml' | sha256sum -c -
+          printf '%s  %s\n' '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f' '.tmp/bach-asap/midi_score.mid' | sha256sum -c -
+      - name: Run bounded MusicXML adapter tests
+        run: node --test tests/boundedMusicXmlScoreGraphAdapter.test.js
+      - name: Compare ASAP score MusicXML with score MIDI
+        run: node scripts/runBachAsapMusicXmlMidiBenchmark.mjs .tmp/bach-asap/xml_score.musicxml .tmp/bach-asap/midi_score.mid | tee .tmp/bach-asap-benchmark.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bach-asap-musicxml-midi-benchmark
+          path: .tmp/bach-asap-benchmark.json
