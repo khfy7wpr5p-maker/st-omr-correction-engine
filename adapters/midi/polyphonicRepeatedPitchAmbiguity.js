@@ -1,5 +1,6 @@
 import { MIDI_COMPARISON_CODE, createMidiReferenceDiagnostic } from '../../src/contracts/midiReferenceEvidence.js'
 import { analyzeMidiScoreAlignment } from './midiScoreAlignment.js'
+import { reclassifyConservativeMidiAssignmentAmbiguity } from './conservativeAssignmentAmbiguity.js'
 
 const EPSILON = 1e-9
 
@@ -151,7 +152,8 @@ export function reclassifyPolyphonicRepeatedPitchAmbiguity(inputResult) {
 }
 
 export function analyzeMidiScoreAlignmentConservatively(scoreGraph, midiReference, alignmentContext = {}, optionOverrides = {}) {
-  return reclassifyPolyphonicRepeatedPitchAmbiguity(
+  const polyphonic = reclassifyPolyphonicRepeatedPitchAmbiguity(
     analyzeMidiScoreAlignment(scoreGraph, midiReference, alignmentContext, optionOverrides),
   )
+  return reclassifyConservativeMidiAssignmentAmbiguity(polyphonic, scoreGraph, optionOverrides)
 }
