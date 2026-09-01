@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { EVIDENCE_SOURCE, createEvidence } from '../../src/contracts/evidence.js'
 import { MIDI_COMPARISON_CODE, createMidiReferenceDiagnostic } from '../../src/contracts/midiReferenceEvidence.js'
 import { loadMidiReference } from './midiReferenceAdapter.js'
-import { analyzeMidiScoreAlignment } from './midiScoreAlignment.js'
+import { analyzeMidiScoreAlignmentWithInstrumentContract } from './midiInstrumentContract.js'
 
 function scoreFingerprint(scoreGraph) {
   return createHash('sha256').update(JSON.stringify(scoreGraph)).digest('hex')
@@ -32,6 +32,12 @@ function toEvidence(diagnostic, midiReference, alignmentConfidence) {
     instrumentName: raw.instrumentName ?? null,
     authority: 'SHADOW_EVIDENCE_ONLY',
     ...(raw.scorePitch == null ? {} : { scorePitch: raw.scorePitch }),
+    ...(raw.scoreComparisonPitch == null ? {} : { scoreComparisonPitch: raw.scoreComparisonPitch }),
+    ...(raw.scorePitchDomain == null ? {} : { scorePitchDomain: raw.scorePitchDomain }),
+    ...(raw.writtenToSoundingSemitones == null ? {} : { writtenToSoundingSemitones: raw.writtenToSoundingSemitones }),
+    ...(raw.scorePartId == null ? {} : { scorePartId: raw.scorePartId }),
+    ...(raw.scoreInstrumentId == null ? {} : { scoreInstrumentId: raw.scoreInstrumentId }),
+    ...(raw.scoreInstrumentName == null ? {} : { scoreInstrumentName: raw.scoreInstrumentName }),
     ...(raw.midiPitch == null ? {} : { midiPitch: raw.midiPitch }),
     ...(raw.candidateMidiEventIds == null ? {} : { candidateMidiEventIds: raw.candidateMidiEventIds }),
     ...(raw.sustainContext == null ? {} : { sustainContext: raw.sustainContext }),
@@ -67,6 +73,7 @@ function parserFailureAnalysis(parsed) {
       extra_note_diagnostic_rate: 0,
       missing_note_diagnostic_rate: 0,
     }),
+    instrumentMapping: null,
   })
 }
 
@@ -76,7 +83,7 @@ export function analyzeMidiReferenceEvidence({ scoreGraph, midiInput, provenance
   const midiBefore = midiBytesSnapshot(midiInput)
   const midiReference = loadMidiReference(midiInput, provenance)
   const analysis = midiReference.ok
-    ? analyzeMidiScoreAlignment(scoreGraph, midiReference, alignmentContext, options)
+    ? analyzeMidiScoreAlignmentWithInstrumentContract(scoreGraph, midiReference, alignmentContext, options)
     : parserFailureAnalysis(midiReference)
 
   const scoreAfter = scoreFingerprint(scoreGraph)
@@ -96,6 +103,7 @@ export function analyzeMidiReferenceEvidence({ scoreGraph, midiInput, provenance
       format: midiReference.format ?? midiReference.header?.format ?? null,
       ppq: midiReference.ppq ?? midiReference.header?.ppq ?? null,
     }),
+    instrumentMapping: analysis.instrumentMapping ?? null,
     alignment: analysis.alignment,
     diagnostics: analysis.diagnostics,
     evidence,

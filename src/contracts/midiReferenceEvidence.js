@@ -5,6 +5,12 @@ export const MIDI_REFERENCE_SOURCE_TYPE = Object.freeze({
   UNKNOWN: 'UNKNOWN',
 })
 
+export const MIDI_SCORE_PITCH_DOMAIN = Object.freeze({
+  SOUNDING: 'SOUNDING',
+  WRITTEN: 'WRITTEN',
+  UNKNOWN: 'UNKNOWN',
+})
+
 export const MIDI_COMPARISON_CODE = Object.freeze({
   EXACT_MATCH: 'MIDI_EXACT_MATCH',
   PITCH_MATCH: 'MIDI_PITCH_MATCH',
@@ -20,6 +26,10 @@ export const MIDI_COMPARISON_CODE = Object.freeze({
 
 export function isMidiReferenceSourceType(value) {
   return Object.values(MIDI_REFERENCE_SOURCE_TYPE).includes(value)
+}
+
+export function isMidiScorePitchDomain(value) {
+  return Object.values(MIDI_SCORE_PITCH_DOMAIN).includes(value)
 }
 
 export function isMidiComparisonCode(value) {
