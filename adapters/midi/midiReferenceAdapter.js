@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { extname } from 'node:path'
-import { Midi } from '@tonejs/midi'
+import ToneMidiPackage from '@tonejs/midi'
 import { MIDI_COMPARISON_CODE, isMidiReferenceSourceType } from '../../src/contracts/midiReferenceEvidence.js'
 import { normalizeParsedMidiReference } from './midiNormalizer.js'
+
+const { Midi } = ToneMidiPackage
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex')
