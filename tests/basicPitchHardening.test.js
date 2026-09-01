@@ -43,6 +43,12 @@ function runnerFor(response) {
   return () => ({ status: 0, stdout: JSON.stringify(response), stderr: '' })
 }
 
+function malformedSmfLikeMidi() {
+  const bytes = Buffer.alloc(14)
+  bytes.write('MThd', 0, 'ascii')
+  return bytes
+}
+
 test('Basic Pitch package version mismatch fails closed at the JS provider boundary', () => {
   const result = deriveMidiReferenceFromAudio(Buffer.from('audio'), {
     sourceId: 'version-mismatch',
@@ -59,8 +65,8 @@ test('Basic Pitch package version mismatch fails closed at the JS provider bound
   })
 })
 
-test('non-SMF generated MIDI fails closed before symbolic evidence analysis', () => {
-  const invalidMidi = Buffer.from('not-a-standard-midi-file')
+test('SMF-like but structurally malformed generated MIDI fails closed before symbolic evidence analysis', () => {
+  const invalidMidi = malformedSmfLikeMidi()
   const response = workerResponse({
     generatedMidiBase64: invalidMidi.toString('base64'),
     generatedMidiSha256: sha256(invalidMidi),
@@ -74,6 +80,7 @@ test('non-SMF generated MIDI fails closed before symbolic evidence analysis', ()
   assert.equal(result.ok, false)
   assert.equal(result.status, 'PROVIDER_FAILED')
   assert.equal(result.reason, 'INVALID_GENERATED_MIDI')
+  assert.equal(result.details.midiReason, 'MALFORMED_MIDI_HEADER')
 })
 
 test('invalid generated MIDI cannot produce diagnostics or correction authority', () => {
