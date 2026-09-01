@@ -42,11 +42,12 @@ test('ASAP admission is evaluation-eligible but cannot enter benchmark labels be
   }
 })
 
-test('observed source challenges do not masquerade as required benchmark scenario coverage', () => {
-  const coverage = evaluateMidiCorpusCoverage(REAL_MIDI_REFERENCE_REGISTRY)
-  assert.equal(coverage.gatePassed, false)
-  assert.equal(coverage.coverage, 0)
-  assert.ok(coverage.missing.length > 0)
+test('reference registry cannot masquerade as required benchmark scenario cases', () => {
+  assert.throws(
+    () => evaluateMidiCorpusCoverage(REAL_MIDI_REFERENCE_REGISTRY),
+    /Corpus case scenarios must be an array/,
+  )
+  assert.equal(Object.hasOwn(ASAP_V1_1_BACH_BWV846_REFERENCE, 'scenarios'), false)
 })
 
 test('ASAP probe observations are preserved without converting MusicXML counts into MIDI truth', () => {
