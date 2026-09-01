@@ -1,4 +1,4 @@
-import { loadMidiReference, analyzeMidiScoreAlignment } from '../adapters/midi/index.js'
+import { loadMidiReference, analyzeMidiScoreAlignmentConservatively } from '../adapters/midi/index.js'
 import { createMeasure, createScoreEvent, createScoreGraph } from '../src/index.js'
 
 const midiPath = process.argv[2]
@@ -51,17 +51,23 @@ const scoreGraph = createScoreGraph({ sourceId: 'teacher-approved-yawnoc-sor-op3
 const midi = loadMidiReference(midiPath, { sourceId: 'mutopia-sor-op35-no13-midi', sourceType: 'TRUSTED_REFERENCE' })
 if (!midi.ok) throw new Error(JSON.stringify(midi))
 const firstEightMidi = Object.freeze({ ...midi, events: Object.freeze(midi.events.filter((event) => event.startBeats < 16)) })
-const result = analyzeMidiScoreAlignment(scoreGraph, firstEightMidi, { pitchDomain: 'MIDI', trackSelection: [1], knownGlobalBeatOffset: 0 })
+const result = analyzeMidiScoreAlignmentConservatively(scoreGraph, firstEightMidi, { pitchDomain: 'MIDI', trackSelection: [1], knownGlobalBeatOffset: 0 })
 const counts = {}
 for (const diagnostic of result.diagnostics ?? []) counts[diagnostic.code] = (counts[diagnostic.code] ?? 0) + 1
 const summary = {
-  schema: 'st_omr_sor_midi_reference_benchmark_v1',
+  schema: 'st_omr_sor_midi_reference_benchmark_v2',
   scoreEvents: scoreGraph.events.length,
   midiEvents: firstEightMidi.events.length,
   midiSha256: midi.sha256,
   alignment: result.alignment,
   diagnosticCounts: counts,
-  diagnostics: (result.diagnostics ?? []).map((item) => ({ code: item.code, scoreEventId: item.details?.scoreEventId ?? item.location?.eventId ?? null, midiEventId: item.details?.midiEventId ?? null })),
+  metrics: result.metrics,
+  diagnostics: (result.diagnostics ?? []).map((item) => ({
+    code: item.code,
+    scoreEventId: item.details?.scoreEventId ?? item.location?.eventId ?? null,
+    midiEventId: item.details?.midiEventId ?? null,
+    ambiguityReason: item.details?.ambiguityReason ?? null,
+  })),
   authority: 'EVALUATION_ONLY',
   automaticCorrectionAuthority: false,
 }
