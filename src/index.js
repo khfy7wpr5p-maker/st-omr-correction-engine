@@ -37,6 +37,7 @@ export { MIDI_CORPUS_REQUIRED_SCENARIOS, evaluateMidiCorpusCoverage } from './be
 export { MIDI_RELIABILITY_STATUS, MIDI_RELIABILITY_REQUIRED_SOURCE_TYPES, createMidiTeacherGoldReliabilityReport } from './benchmark/midiTeacherGoldReliability.js'
 export { MIDI_REFERENCE_CANDIDATE_STATUS, MIDI_REFERENCE_CANDIDATES, evaluateMidiReferenceCandidateAdmission, getMidiReferenceCandidate } from './benchmark/midiReferenceCandidateRegistry.js'
 export { REAL_MIDI_ORACLE_STATUS, ASAP_V1_1_BACH_BWV846_REFERENCE, REAL_MIDI_REFERENCE_REGISTRY, evaluateRealMidiReferenceAdmission, getRealMidiReferenceAdmission } from './benchmark/realMidiReferenceRegistry.js'
+export { REAL_MIDI_SCOREGRAPH_ORIGIN, REAL_MIDI_PAIR_STATUS, USER_PROVIDED_REAL_OMR_MANIFESTS, REAL_MIDI_PAIR_CANDIDATES, evaluateRealMidiPairReadiness, getRealMidiPairCandidate } from './benchmark/realMidiPairReadiness.js'
 export { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION, createTeacherGoldCorrectionEvent } from './benchmark/teacherGoldCorrectionEvent.js'
 export { REAL_OMR_GOLD_REQUIRED_PROVENANCE, evaluateRealOmrGoldEligibility, createRealOmrCalibrationRecord, buildRealOmrCalibrationRecords } from './benchmark/realOmrGoldEligibility.js'
 export { REAL_OMR_ANNOTATION_STATUS, createRealOmrReviewObservation, buildRealOmrAnnotationBatch, annotateRealOmrObservation } from './benchmark/realOmrAnnotationQueue.js'
