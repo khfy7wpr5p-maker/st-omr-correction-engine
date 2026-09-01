@@ -1,0 +1,39 @@
+name: CE MIDI Lagrima byte probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ce-midi-lagrima-byte-probe.yml'
+      - 'src/benchmark/midiReferenceCandidateRegistry.js'
+      - 'docs/CE-MIDI-CORPUS-03-LAGRIMA.md'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch pinned musiclab Lagrima MIDI
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/lagrima
+          URL='https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid'
+          curl --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors "$URL" -o .tmp/lagrima/lagrima-tarrega.mid
+          test "$(wc -c < .tmp/lagrima/lagrima-tarrega.mid)" -eq 4535
+          printf 'sha256=' && sha256sum .tmp/lagrima/lagrima-tarrega.mid | awk '{print $1}'
+          printf 'bytes=' && wc -c < .tmp/lagrima/lagrima-tarrega.mid
+      - name: Parse through repository MIDI adapter
+        run: |
+          node --input-type=module <<'NODE'
+          import { loadMidiReference } from './adapters/midi/midiReferenceAdapter.js'
+          const ref = loadMidiReference('.tmp/lagrima/lagrima-tarrega.mid', { sourceId: 'musiclab-lagrima', sourceType: 'TRUSTED_REFERENCE' })
+          if (!ref.ok) throw new Error(JSON.stringify(ref))
+          const noteTracks = [...new Set(ref.events.map((e) => e.trackIndex))]
+          const programs = [...new Set(ref.events.map((e) => e.program).filter((v) => v != null))]
+          const firstTimeSignature = ref.timeSignatures?.[0] ?? null
+          console.log(JSON.stringify({ sha256: ref.sha256, format: ref.header.format, trackCount: ref.header.trackCount, ppq: ref.header.ppq, eventCount: ref.events.length, noteTracks, programs, firstTimeSignature }, null, 2))
+          NODE
