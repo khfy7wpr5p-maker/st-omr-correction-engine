@@ -7,18 +7,29 @@ export const MIDI_REFERENCE_CANDIDATE_STATUS = Object.freeze({
 const SHA40 = /^[0-9a-f]{40}$/i
 const SHA256 = /^[0-9a-f]{64}$/i
 
+function hasPinnedComparisonSource(verification) {
+  return SHA40.test(verification?.comparisonSource?.commitSha ?? '')
+    && SHA40.test(verification?.comparisonSource?.blobSha ?? '')
+}
+
 function hasSameWorkVerification(candidate) {
   const verification = candidate?.sameWorkVerification
-  return candidate?.sameWorkVerified === true
-    && verification
-    && verification.scope === 'WORK_IDENTITY_AND_SHARED_SOURCE_LINEAGE'
-    && verification.workIdentityMatched === true
-    && verification.sharedSourceLineageMatched === true
-    && verification.musicalSignatureMatched === true
-    && verification.openingStructureMatched === true
-    && verification.editionIdentityVerified === false
-    && SHA40.test(verification.comparisonSource?.commitSha ?? '')
-    && SHA40.test(verification.comparisonSource?.blobSha ?? '')
+  if (candidate?.sameWorkVerified !== true || !verification || !hasPinnedComparisonSource(verification)) return false
+  if (verification.workIdentityMatched !== true
+    || verification.musicalSignatureMatched !== true
+    || verification.openingStructureMatched !== true
+    || verification.editionIdentityVerified !== false) return false
+
+  if (verification.scope === 'WORK_IDENTITY_AND_SHARED_SOURCE_LINEAGE') {
+    return verification.sharedSourceLineageMatched === true
+  }
+
+  if (verification.scope === 'WORK_IDENTITY_AND_PINNED_MUSICAL_SIGNATURE') {
+    return verification.independentSourceLineageClaimed !== true
+      && verification.pinnedSourceIdentityMatched === true
+  }
+
+  return false
 }
 
 export const MIDI_REFERENCE_CANDIDATES = Object.freeze([
@@ -71,6 +82,54 @@ export const MIDI_REFERENCE_CANDIDATES = Object.freeze([
     teacherVerification: null,
     status: MIDI_REFERENCE_CANDIDATE_STATUS.ADMISSIBLE_REFERENCE_ONLY,
     notes: 'Exact web MIDI bytes and same-work identity are now source-verified. This remains reference-only: edition identity is not asserted, independence is false, teacher verification is absent, and the MIDI cannot become gold or measured reliability evidence.',
+  }),
+  Object.freeze({
+    id: 'musiclab-tarrega-lagrima-midi',
+    workIdentity: Object.freeze({ composer: 'Francisco Tárrega', title: 'Lágrima' }),
+    scoreSourceId: 'classical-guitar-tarrega-lagrima',
+    sourcePage: 'https://github.com/drgolem/musiclab/tree/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi',
+    midiUrl: 'https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid',
+    sourceRepository: 'drgolem/musiclab',
+    sourceCommitSha: '553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b',
+    sourceFilePath: 'scores_midi/lagrima-tarrega.mid',
+    sourceBlobSha: 'a39724fdd6d07a27d1d097329b0f66995e0373c3',
+    license: 'MIT',
+    rights: Object.freeze({ benchmarkUse: true, redistribution: true }),
+    midiSha256: '0c7dcf81b1a291bf0b445dc15b000bafc2660fa14fe93ba9a38f397b6e29d054',
+    midiByteSize: 4535,
+    exactBytesVerified: true,
+    exactByteVerification: Object.freeze({
+      method: 'PINNED_GITHUB_BLOB_SHA256_AND_PARSER_GATE',
+      acquiredUrl: 'https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid',
+      contentLength: 4535,
+      parserSummary: Object.freeze({ format: 1, trackCount: 3, ppq: 1024, eventCount: 385, noteTrackIndex: 1, noteCount: 385, program: 24, timeSignature: '3/4' }),
+    }),
+    sameWorkVerified: true,
+    sameWorkVerification: Object.freeze({
+      scope: 'WORK_IDENTITY_AND_PINNED_MUSICAL_SIGNATURE',
+      workIdentityMatched: true,
+      pinnedSourceIdentityMatched: true,
+      independentSourceLineageClaimed: false,
+      musicalSignatureMatched: true,
+      openingStructureMatched: true,
+      editionIdentityVerified: false,
+      comparisonSource: Object.freeze({
+        repository: 'yawnoc/guitar',
+        commitSha: 'fe48dbba46be760fab453b3a72ef35746f20ea48',
+        filePath: 'lagrima/lagrima.ly',
+        blobSha: '74fa494398f652a8e2f8e275d401a28f2fff66c7',
+      }),
+      evidence: Object.freeze([
+        'Both pinned sources identify Francisco Tárrega — Lágrima.',
+        'The yawnoc score encodes treble-8 guitar in E major and 3/4; the parsed MIDI reports 3/4 and nylon-guitar program 24.',
+        'Pinned source inspection matches the opening G#–A–B upper line over E–F#–G# bass motion with the open-B/middle-voice pattern.',
+        'No common edition or independent-source lineage is asserted; this verification proves same-work reference identity only.',
+      ]),
+    }),
+    independenceVerified: false,
+    teacherVerification: null,
+    status: MIDI_REFERENCE_CANDIDATE_STATUS.ADMISSIBLE_REFERENCE_ONLY,
+    notes: 'Pinned GitHub bytes and same-work musical signature are verified. This is reference-only: no edition identity, independence, teacher approval, measured reliability, or automatic correction authority is asserted.',
   }),
 ])
 
