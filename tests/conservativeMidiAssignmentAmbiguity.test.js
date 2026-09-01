@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { createMeasure, createScoreEvent, createScoreGraph } from '../src/index.js'
 import { MIDI_COMPARISON_CODE } from '../src/contracts/midiReferenceEvidence.js'
 import { analyzeMidiScoreAlignmentConservatively } from '../adapters/midi/polyphonicRepeatedPitchAmbiguity.js'
+import { reclassifyConservativeMidiAssignmentAmbiguity } from '../adapters/midi/conservativeAssignmentAmbiguity.js'
 
 function graph(notes) {
   const measure = createMeasure({ key: 'm1', beats: 4, beatType: 4 })
@@ -67,23 +68,34 @@ test('nearby exact-pitch alternatives abstain instead of reporting a shifted pit
 })
 
 test('same-onset distinct voices make the assignment ambiguity voice-aware', () => {
-  const result = analyzeMidiScoreAlignmentConservatively(
-    graph([
-      { pitch: 60, onset: 0, voice: 1 },
-      { pitch: 64, onset: 0, voice: 2 },
-      { pitch: 67, onset: 0.25, voice: 1 },
+  const source = graph([
+    { id: 's0', pitch: 60, onset: 0, voice: 1 },
+    { id: 's1', pitch: 64, onset: 0, voice: 2 },
+  ])
+  const score0 = Object.freeze({ eventId: 's0', measureKey: 'm1', partId: null, voice: 1, staff: 1, pitch: 60, globalOnsetBeats: 0, durationBeats: 1 })
+  const score1 = Object.freeze({ eventId: 's1', measureKey: 'm1', partId: null, voice: 2, staff: 1, pitch: 64, globalOnsetBeats: 0, durationBeats: 1 })
+  const midi0 = Object.freeze({ eventId: 'm0', midiPitch: 64, startBeats: 0, durationBeats: 1, trackIndex: 0, instrumentName: 'piano' })
+  const midi1 = Object.freeze({ eventId: 'm1', midiPitch: 60, startBeats: 0.25, durationBeats: 1, trackIndex: 0, instrumentName: 'piano' })
+  const inputResult = Object.freeze({
+    alignment: Object.freeze({ status: 'ALIGNED', method: 'host_offset', scale: 1, offsetBeats: 0, confidence: 1 }),
+    scoreEvents: Object.freeze([score0, score1]),
+    midiEvents: Object.freeze([midi0, midi1]),
+    matches: Object.freeze([Object.freeze({ score: score0, midi: midi0, cost: 0.1 })]),
+    diagnostics: Object.freeze([
+      Object.freeze({ code: MIDI_COMPARISON_CODE.PITCH_CONFLICT, location: null, details: Object.freeze({ scoreEventId: 's0', midiEventId: 'm0' }) }),
+      Object.freeze({ code: MIDI_COMPARISON_CODE.SCORE_NOTE_MISSING, location: null, details: Object.freeze({ scoreEventId: 's1', midiEventId: null }) }),
+      Object.freeze({ code: MIDI_COMPARISON_CODE.EXTRA_NOTE, location: null, details: Object.freeze({ scoreEventId: null, midiEventId: 'm1' }) }),
     ]),
-    midi([
-      { pitch: 64, onset: 0 },
-      { pitch: 60, onset: 0.25 },
-      { pitch: 67, onset: 0.25 },
-    ]),
-    { globalBeatOffset: 0 },
-  )
+    metrics: Object.freeze({}),
+  })
 
+  const result = reclassifyConservativeMidiAssignmentAmbiguity(inputResult, source)
   const voiceAware = result.diagnostics.find((diagnostic) => diagnostic.details?.ambiguityReason === 'VOICE_ONSET_ASSIGNMENT_CONFLICT')
   assert.ok(voiceAware)
-  assert.equal(result.diagnostics.some((diagnostic) => diagnostic.code === MIDI_COMPARISON_CODE.PITCH_CONFLICT && diagnostic.details?.scoreEventId === voiceAware.details.scoreEventId), false)
+  assert.equal(voiceAware.details.scoreEventId, 's0')
+  assert.equal(result.diagnostics.some((diagnostic) => diagnostic.code === MIDI_COMPARISON_CODE.PITCH_CONFLICT && diagnostic.details?.scoreEventId === 's0'), false)
+  assert.equal(source.events[0].pitch, 60)
+  assert.equal(source.events[1].pitch, 64)
 })
 
 test('isolated pitch disagreement stays a pitch conflict when no exact-pitch alternative exists', () => {
