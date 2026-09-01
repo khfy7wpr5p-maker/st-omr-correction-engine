@@ -55,7 +55,7 @@ test('input bytes are unchanged by parsing and normalization', () => {
   assert.deepEqual(bytes, before)
 })
 
-test('multi-track source ordering is deterministic', () => {
+test('multi-track normalized note-track ordering is deterministic', () => {
   const bytes = buildMidiFile({
     format: 1,
     trackEventGroups: [
@@ -64,8 +64,10 @@ test('multi-track source ordering is deterministic', () => {
       [programChange(24, 1), noteOn(67, 96, 1), noteOff(67, 64, 1, 480), endOfTrack()],
     ],
   })
-  const result = loadMidiReference(bytes, provenance)
-  assert.deepEqual(result.events.map((event) => event.trackIndex), [1, 2])
+  const first = loadMidiReference(bytes, provenance)
+  const second = loadMidiReference(bytes, provenance)
+  assert.deepEqual(first.events.map((event) => event.trackIndex), [0, 1])
+  assert.deepEqual(second.events.map((event) => event.trackIndex), [0, 1])
 })
 
 test('overlapping same-pitch events are not deduplicated', () => {
