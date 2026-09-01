@@ -1,0 +1,35 @@
+name: CE MIDI Sor reference benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/runSorMidiReferenceBenchmark.mjs'
+      - '.github/workflows/ce-midi-sor-reference-benchmark.yml'
+  push:
+    branches:
+      - research/ce-midi-sor-reference-benchmark
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact admitted Mutopia MIDI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/mutopia
+          URL='https://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid'
+          curl --http1.1 --ipv4 --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors -A 'Mozilla/5.0 CE-MIDI-CORPUS-03 evaluator' "$URL" -o .tmp/mutopia/sorf_op35_no13.mid
+          printf '%s  %s\n' '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527' '.tmp/mutopia/sorf_op35_no13.mid' | sha256sum -c -
+      - name: Compare teacher-approved score excerpt with trusted MIDI
+        run: node scripts/runSorMidiReferenceBenchmark.mjs .tmp/mutopia/sorf_op35_no13.mid | tee .tmp/sor-midi-reference-benchmark.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sor-midi-reference-benchmark
+          path: .tmp/sor-midi-reference-benchmark.json
