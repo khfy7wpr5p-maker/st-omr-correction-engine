@@ -1,0 +1,77 @@
+name: basic-pitch-provider-smoke
+
+on:
+  pull_request:
+    paths:
+      - 'providers/basic-pitch/**'
+      - '.github/workflows/basic-pitch-provider-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  real-provider-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: providers/basic-pitch/requirements.txt
+
+      - name: Install pinned Basic Pitch provider runtime
+        run: python -m pip install --disable-pip-version-check -r providers/basic-pitch/requirements.txt
+
+      - name: Generate rights-clean synthetic WAV fixture
+        run: |
+          python - <<'PY'
+          import math
+          import struct
+          import wave
+
+          sample_rate = 22050
+          segments = [(440.0, 1.5), (523.251, 1.5)]
+          with wave.open('/tmp/ce-basic-pitch-smoke.wav', 'wb') as output:
+              output.setnchannels(1)
+              output.setsampwidth(2)
+              output.setframerate(sample_rate)
+              frames = bytearray()
+              for frequency, seconds in segments:
+                  for index in range(int(sample_rate * seconds)):
+                      envelope = min(1.0, index / 400, (int(sample_rate * seconds) - index) / 400)
+                      value = int(0.35 * envelope * 32767 * math.sin(2 * math.pi * frequency * index / sample_rate))
+                      frames.extend(struct.pack('<h', value))
+              output.writeframes(frames)
+          PY
+
+      - name: Run real Basic Pitch worker inference
+        run: |
+          printf '%s' '{"audioPath":"/tmp/ce-basic-pitch-smoke.wav","expectedPackageVersion":"0.4.0","providerId":"spotify_basic_pitch","config":{"onset_threshold":0.3,"frame_threshold":0.2,"minimum_note_length":60}}' \
+            | python providers/basic-pitch/basic_pitch_worker.py > /tmp/basic-pitch-result.json
+
+      - name: Verify provider output contract
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('/tmp/basic-pitch-result.json').read_text())
+          assert result['ok'] is True, result
+          assert result['providerId'] == 'spotify_basic_pitch', result
+          assert result['packageVersion'] == '0.4.0', result
+          assert isinstance(result['modelSha256'], str) and len(result['modelSha256']) == 64, result
+          assert isinstance(result['generatedMidiSha256'], str) and len(result['generatedMidiSha256']) == 64, result
+          midi_bytes = base64.b64decode(result['generatedMidiBase64'])
+          assert midi_bytes[:4] == b'MThd', result
+          assert len(result['noteEvents']) >= 1, result
+          assert result['modelOutputSummary'], result
+          print(json.dumps({
+              'packageVersion': result['packageVersion'],
+              'noteEventCount': len(result['noteEvents']),
+              'generatedMidiSha256': result['generatedMidiSha256'],
+              'modelSha256': result['modelSha256'],
+              'python': result['runtime']['python'],
+          }, sort_keys=True))
+          PY
