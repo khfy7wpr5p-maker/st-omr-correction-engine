@@ -25,11 +25,10 @@ jobs:
           printf '%s  %s\n' '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f' '.tmp/real-pair/bach.mid' | sha256sum -c -
           test "$(stat -c%s .tmp/real-pair/sor.mid)" = '2862'
           test "$(stat -c%s .tmp/real-pair/bach.mid)" = '3525'
-          echo "SOR_MIDI_BASE64_BEGIN"
-          base64 -w0 .tmp/real-pair/sor.mid
-          echo
-          echo "SOR_MIDI_BASE64_END"
-          echo "BACH_MIDI_BASE64_BEGIN"
-          base64 -w0 .tmp/real-pair/bach.mid
-          echo
-          echo "BACH_MIDI_BASE64_END"
+      - name: Upload exact MIDI bytes for local analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: ce-midi-real-pair-exact-midi
+          path: .tmp/real-pair/*.mid
+          if-no-files-found: error
+          retention-days: 1
