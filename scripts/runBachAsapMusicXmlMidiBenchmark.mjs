@@ -27,7 +27,7 @@ const diagnosticCounts = {}
 for (const diagnostic of result.diagnostics ?? []) diagnosticCounts[diagnostic.code] = (diagnosticCounts[diagnostic.code] ?? 0) + 1
 
 console.log(JSON.stringify({
-  schema: 'st_omr_bach_asap_musicxml_midi_benchmark_v1',
+  schema: 'st_omr_bach_asap_musicxml_midi_benchmark_v2',
   source: {
     dataset: 'ASAP v1.1',
     work: 'J.S. Bach BWV 846 Prelude No.1',
@@ -45,6 +45,13 @@ console.log(JSON.stringify({
   alignment: result.alignment,
   diagnosticCounts,
   metrics: result.metrics,
+  diagnostics: (result.diagnostics ?? []).map((item) => ({
+    code: item.code,
+    scoreEventId: item.details?.scoreEventId ?? item.location?.eventId ?? null,
+    midiEventId: item.details?.midiEventId ?? null,
+    ambiguityReason: item.details?.ambiguityReason ?? null,
+    location: item.location ?? null,
+  })),
   authority: 'EVALUATION_ONLY',
   measuredReliabilityEligible: false,
   automaticCorrectionAuthority: false,
