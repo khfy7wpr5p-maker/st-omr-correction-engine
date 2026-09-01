@@ -48,6 +48,10 @@ export const USER_PROVIDED_REAL_OMR_MANIFESTS = Object.freeze([
     sourceBytes: 70470,
     software: Object.freeze(['Audiveris 5.11.0', 'ProxyMusic 4.0.3']),
     observedStructure: Object.freeze({ measureCount: 32, pitchedNoteCount: 175, restCount: 0, voices: Object.freeze([1, 2]), staves: Object.freeze([1]) }),
+    importerVersion: 'audiveris-musicxml-scoregraph-v1',
+    expectedCanonicalGraphSha256: 'e93d2ac8f6488b986dc4fbd2ce2ef4d13531b389cd9c17c8786bf8d2716f49a2',
+    expectedCanonicalEventCount: 175,
+    expectedImportWarningCount: 22,
     midiReferenceId: 'mutopia-sor-op35-no13-midi',
     midiSha256: '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527',
     manualEditStatus: 'UNKNOWN',
@@ -62,6 +66,10 @@ export const USER_PROVIDED_REAL_OMR_MANIFESTS = Object.freeze([
     sourceBytes: 265350,
     software: Object.freeze(['Audiveris 5.11.0', 'ProxyMusic 4.0.3']),
     observedStructure: Object.freeze({ measureCount: 35, pitchedNoteCount: 577, restCount: 132, voices: Object.freeze([1, 2, 3, 4, 5, 6, 7]), staves: Object.freeze([1, 2]) }),
+    importerVersion: 'audiveris-musicxml-scoregraph-v1',
+    expectedCanonicalGraphSha256: '5c5b6bf8eb8f5c25ae37bfd4f5e2f5316e22248f37ab32776244fed6ba839b1e',
+    expectedCanonicalEventCount: 709,
+    expectedImportWarningCount: 9,
     midiReferenceId: 'asap-v1.1-bach-bwv846',
     midiSha256: '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f',
     manualEditStatus: 'UNKNOWN',
@@ -106,6 +114,42 @@ export const REAL_MIDI_PAIR_CANDIDATES = Object.freeze([
     automaticCorrectionAuthority: false,
   }),
 ])
+
+export function getUserProvidedRealOmrManifest(id) {
+  const manifest = USER_PROVIDED_REAL_OMR_MANIFESTS.find((item) => item.id === id)
+  if (!manifest) throw new TypeError(`Unknown user-provided real OMR manifest: ${id}`)
+  return manifest
+}
+
+export function materializeRealMidiPairCandidate(candidate, importResult) {
+  if (!candidate || typeof candidate !== 'object') throw new TypeError('candidate is required.')
+  if (!importResult || importResult.ok !== true) throw new TypeError('A successful canonical MusicXML import result is required.')
+  const manifestId = candidate.scoreGraphIdentity?.sourceId
+  const manifest = getUserProvidedRealOmrManifest(manifestId)
+  if (importResult.sourceSha256 !== manifest.sourceSha256) throw new TypeError('Imported MusicXML source hash does not match the real OMR manifest.')
+  if (importResult.sourceByteLength !== manifest.sourceBytes) throw new TypeError('Imported MusicXML byte length does not match the real OMR manifest.')
+  if (importResult.identity?.sourceId !== manifest.id) throw new TypeError('Imported ScoreGraph sourceId does not match the real OMR manifest.')
+  if (importResult.identity?.revisionId !== manifest.importerVersion) throw new TypeError('Imported ScoreGraph revision does not match the pinned importer version.')
+  if (importResult.canonicalGraphSha256 !== manifest.expectedCanonicalGraphSha256) throw new TypeError('Imported canonical ScoreGraph hash does not match the pinned real OMR result.')
+  if (importResult.scoreGraph.events.length !== manifest.expectedCanonicalEventCount) throw new TypeError('Imported canonical ScoreGraph event count does not match the pinned real OMR result.')
+  if (importResult.warnings.length !== manifest.expectedImportWarningCount) throw new TypeError('Imported warning count does not match the pinned real OMR result.')
+  if (importResult.automaticCorrectionAuthority !== false) throw new TypeError('Canonical import must not create correction authority.')
+
+  return Object.freeze({
+    ...candidate,
+    scoreGraph: importResult.scoreGraph,
+    scoreGraphIdentity: Object.freeze({ ...importResult.identity, origin: REAL_MIDI_SCOREGRAPH_ORIGIN.OMR_CANONICAL }),
+    benchmarkInput: importResult.benchmarkInput,
+    materialization: Object.freeze({
+      sourceManifestId: manifest.id,
+      sourceSha256: manifest.sourceSha256,
+      canonicalGraphSha256: manifest.expectedCanonicalGraphSha256,
+      importerVersion: manifest.importerVersion,
+      warningCount: importResult.warnings.length,
+    }),
+    automaticCorrectionAuthority: false,
+  })
+}
 
 export function evaluateRealMidiPairReadiness(candidate) {
   if (!candidate || typeof candidate !== 'object') throw new TypeError('candidate is required.')
