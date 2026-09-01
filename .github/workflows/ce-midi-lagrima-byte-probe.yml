@@ -1,0 +1,45 @@
+name: CE MIDI Lagrima byte probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ce-midi-lagrima-byte-probe.yml'
+      - 'src/benchmark/midiReferenceCandidateRegistry.js'
+      - 'tests/midiReferenceCandidateRegistry.test.js'
+      - 'docs/CE-MIDI-CORPUS-03-LAGRIMA.md'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact pinned musiclab Lagrima MIDI
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/lagrima
+          URL='https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid'
+          curl --fail --location --connect-timeout 20 --max-time 90 --retry 3 --retry-all-errors "$URL" -o .tmp/lagrima/lagrima-tarrega.mid
+          test "$(wc -c < .tmp/lagrima/lagrima-tarrega.mid)" -eq 4535
+          printf '%s  %s\n' '0c7dcf81b1a291bf0b445dc15b000bafc2660fa14fe93ba9a38f397b6e29d054' '.tmp/lagrima/lagrima-tarrega.mid' | sha256sum -c -
+      - name: Verify parser contract
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { loadMidiReference } from './adapters/midi/midiReferenceAdapter.js'
+          const ref = loadMidiReference('.tmp/lagrima/lagrima-tarrega.mid', { sourceId: 'musiclab-lagrima', sourceType: 'TRUSTED_REFERENCE' })
+          assert.equal(ref.ok, true)
+          assert.equal(ref.sha256, '0c7dcf81b1a291bf0b445dc15b000bafc2660fa14fe93ba9a38f397b6e29d054')
+          assert.equal(ref.format, 1)
+          assert.equal(ref.trackCount, 3)
+          assert.equal(ref.ppq, 1024)
+          assert.equal(ref.events.length, 385)
+          assert.deepEqual([...new Set(ref.events.map((e) => e.trackIndex))], [1])
+          assert.deepEqual([...new Set(ref.events.map((e) => e.program).filter((v) => v != null))], [24])
+          assert.equal(ref.timeSignatures[0]?.numerator, 3)
+          assert.equal(ref.timeSignatures[0]?.denominator, 4)
+          NODE
