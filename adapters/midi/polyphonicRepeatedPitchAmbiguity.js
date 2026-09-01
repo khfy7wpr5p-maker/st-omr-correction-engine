@@ -11,8 +11,81 @@ function isDistinctVoice(a, b) {
   return a.voice != null && b.voice != null && String(a.voice) !== String(b.voice)
 }
 
+function sameVoice(a, b) {
+  return a.voice != null && b.voice != null && String(a.voice) === String(b.voice)
+}
+
 function locationFor(score) {
   return Object.freeze({ eventId: score.eventId, measureKey: score.measureKey, partId: score.partId, voice: score.voice, staff: score.staff })
+}
+
+function diagnosticWithReason(code, score, details, ambiguityReason) {
+  return createMidiReferenceDiagnostic({
+    code,
+    location: locationFor(score),
+    details: {
+      scoreEventId: score.eventId,
+      midiEventId: null,
+      candidateMidiEventIds: details?.candidateMidiEventIds ?? Object.freeze([]),
+      pitchDeltaSemitones: null,
+      onsetDeltaBeats: null,
+      durationDeltaBeats: null,
+      trackIndex: details?.trackIndex ?? null,
+      instrumentName: details?.instrumentName ?? null,
+      ambiguityReason,
+    },
+  })
+}
+
+/**
+ * The global one-to-one matcher can legitimately report a near tie when two
+ * score events compete for one MIDI event. For distinct notation voices that
+ * may represent a MIDI serialization collapse; for the same notation voice it
+ * is instead a multiplicity mismatch. Keep one deterministic identity
+ * ambiguous, but preserve the remaining same-voice duplicate(s) as missing so
+ * the conservative polyphonic pass cannot hide a genuine duplicate count.
+ */
+function preserveSameVoiceDuplicateMultiplicity(result) {
+  const scoreById = new Map((result.scoreEvents ?? []).map((event) => [event.eventId, event]))
+  const groups = new Map()
+
+  for (const diagnostic of result.diagnostics ?? []) {
+    if (diagnostic.code !== MIDI_COMPARISON_CODE.AMBIGUOUS_MATCH) continue
+    if (diagnostic.details?.ambiguityReason !== 'GLOBAL_ASSIGNMENT_NEAR_TIE') continue
+    const score = scoreById.get(diagnostic.details?.scoreEventId)
+    const candidateIds = [...(diagnostic.details?.candidateMidiEventIds ?? [])].sort()
+    if (!score || candidateIds.length !== 1) continue
+    const key = `${candidateIds[0]}\u0000${score.pitch}\u0000${score.globalOnsetBeats}\u0000${score.voice ?? ''}`
+    const group = groups.get(key) ?? []
+    group.push({ diagnostic, score })
+    groups.set(key, group)
+  }
+
+  const toMissing = new Set()
+  for (const group of groups.values()) {
+    if (group.length < 2) continue
+    const [first, ...rest] = [...group].sort((a, b) => a.score.eventId.localeCompare(b.score.eventId))
+    if (!rest.every((item) => sameVoice(first.score, item.score) && item.score.pitch === first.score.pitch && sameOnset(first.score, item.score))) continue
+    for (const item of rest) toMissing.add(item.score.eventId)
+  }
+  if (!toMissing.size) return result
+
+  const diagnostics = result.diagnostics.map((diagnostic) => {
+    const scoreId = diagnostic.details?.scoreEventId
+    if (!toMissing.has(scoreId)) return diagnostic
+    const score = scoreById.get(scoreId)
+    return diagnosticWithReason(MIDI_COMPARISON_CODE.SCORE_NOTE_MISSING, score, diagnostic.details, 'SAME_VOICE_DUPLICATE_MULTIPLICITY')
+  })
+
+  const scoreCount = Math.max(1, result.scoreEvents?.length ?? 0)
+  const previousAmbiguous = Math.round((result.metrics?.ambiguous_match_rate ?? 0) * scoreCount)
+  const previousMissing = Math.round((result.metrics?.missing_note_diagnostic_rate ?? 0) * scoreCount)
+  const metrics = Object.freeze({
+    ...result.metrics,
+    ambiguous_match_rate: Math.max(0, previousAmbiguous - toMissing.size) / scoreCount,
+    missing_note_diagnostic_rate: (previousMissing + toMissing.size) / scoreCount,
+  })
+  return Object.freeze({ ...result, diagnostics: Object.freeze(diagnostics), metrics })
 }
 
 /**
@@ -27,9 +100,10 @@ function locationFor(score) {
  * pitch + global onset and an explicitly different voice. It never creates a
  * match, never changes the score, and never grants correction authority.
  */
-export function reclassifyPolyphonicRepeatedPitchAmbiguity(result) {
-  if (!result || result.alignment?.status !== 'ALIGNED' || !Array.isArray(result.diagnostics)) return result
+export function reclassifyPolyphonicRepeatedPitchAmbiguity(inputResult) {
+  if (!inputResult || inputResult.alignment?.status !== 'ALIGNED' || !Array.isArray(inputResult.diagnostics)) return inputResult
 
+  const result = preserveSameVoiceDuplicateMultiplicity(inputResult)
   const scoreById = new Map((result.scoreEvents ?? []).map((event) => [event.eventId, event]))
   const exactWitnesses = (result.matches ?? []).filter(({ score, midi }) =>
     score.pitch === midi.midiPitch && Math.abs((result.alignment.scale * midi.startBeats + result.alignment.offsetBeats) - score.globalOnsetBeats) <= EPSILON)
@@ -37,6 +111,7 @@ export function reclassifyPolyphonicRepeatedPitchAmbiguity(result) {
   let reclassified = 0
   const diagnostics = result.diagnostics.map((diagnostic) => {
     if (diagnostic.code !== MIDI_COMPARISON_CODE.SCORE_NOTE_MISSING) return diagnostic
+    if (diagnostic.details?.ambiguityReason === 'SAME_VOICE_DUPLICATE_MULTIPLICITY') return diagnostic
     const score = scoreById.get(diagnostic.details?.scoreEventId)
     if (!score) return diagnostic
 
