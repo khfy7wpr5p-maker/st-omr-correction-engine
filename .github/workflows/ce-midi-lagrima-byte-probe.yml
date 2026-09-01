@@ -35,5 +35,5 @@ jobs:
           const noteTracks = [...new Set(ref.events.map((e) => e.trackIndex))]
           const programs = [...new Set(ref.events.map((e) => e.program).filter((v) => v != null))]
           const firstTimeSignature = ref.timeSignatures?.[0] ?? null
-          console.log(JSON.stringify({ sha256: ref.sha256, format: ref.header.format, trackCount: ref.header.trackCount, ppq: ref.header.ppq, eventCount: ref.events.length, noteTracks, programs, firstTimeSignature }, null, 2))
+          console.log(JSON.stringify({ sha256: ref.sha256, format: ref.format, trackCount: ref.trackCount, ppq: ref.ppq, eventCount: ref.events.length, noteTracks, programs, firstTimeSignature }, null, 2))
           NODE
