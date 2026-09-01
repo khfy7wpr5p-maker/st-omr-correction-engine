@@ -1,0 +1,91 @@
+name: CE MIDI corpus ASAP verify
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/ce-midi-corpus-asap-probe.yml'
+      - 'src/benchmark/realMidiReferenceRegistry.js'
+      - 'tests/realMidiReferenceRegistry.test.js'
+      - 'docs/CE-MIDI-CORPUS-02-ASAP-SEED.md'
+  push:
+    branches:
+      - research/ce-midi-corpus-02-asap-probe
+
+jobs:
+  asap-verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact ASAP v1.1 source pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/asap
+          BASE='https://raw.githubusercontent.com/fosfrancesco/asap-dataset/fad8d1e8078d0ae47ad2f280b5d022bd2de24784/Bach/Prelude/bwv_846'
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/midi_score.mid" -o .tmp/asap/midi_score.mid
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/xml_score.musicxml" -o .tmp/asap/xml_score.musicxml
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/Shi05M.mid" -o .tmp/asap/performance.mid
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/midi_score_annotations.txt" -o .tmp/asap/midi_score_annotations.txt
+          curl --fail --location --retry 3 --retry-all-errors "$BASE/Shi05M_annotations.txt" -o .tmp/asap/performance_annotations.txt
+      - name: Verify exact hashes and byte sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f' '.tmp/asap/midi_score.mid' | sha256sum -c -
+          printf '%s  %s\n' '1572209d1e24e600cc7758a3407a9ad3cb4cfbc5d55b821d452490d98a68307b' '.tmp/asap/xml_score.musicxml' | sha256sum -c -
+          printf '%s  %s\n' '0e98c7ff76e11e3c75df36897e2b5bf32127fb737bbf6625a666970fe103d371' '.tmp/asap/performance.mid' | sha256sum -c -
+          printf '%s  %s\n' 'a3faa7727013d73caea9d08480402d79d985fea44e7c9e9bd89917931b741306' '.tmp/asap/midi_score_annotations.txt' | sha256sum -c -
+          printf '%s  %s\n' '43e179e671f049442dd45654a9be2aa3a5eb28fd1a2a10cf27038cc27150df81' '.tmp/asap/performance_annotations.txt' | sha256sum -c -
+          test "$(stat -c%s .tmp/asap/midi_score.mid)" = '3525'
+          test "$(stat -c%s .tmp/asap/xml_score.musicxml)" = '267546'
+          test "$(stat -c%s .tmp/asap/performance.mid)" = '11595'
+          test "$(stat -c%s .tmp/asap/midi_score_annotations.txt)" = '1645'
+          test "$(stat -c%s .tmp/asap/performance_annotations.txt)" = '3519'
+      - name: Verify source structure
+        shell: bash
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('.tmp/asap/xml_score.musicxml').getroot()
+          parts = root.findall('./part')
+          measures = sum(len(part.findall('./measure')) for part in parts)
+          pitched = 0
+          rests = 0
+          voices = set()
+          staves = set()
+          for part in parts:
+              for measure in part.findall('./measure'):
+                  for note in measure.findall('./note'):
+                      voice = note.findtext('./voice')
+                      staff = note.findtext('./staff')
+                      if voice: voices.add(int(voice))
+                      if staff: staves.add(int(staff))
+                      if note.find('./rest') is not None: rests += 1
+                      elif note.find('./pitch') is not None: pitched += 1
+          assert len(parts) == 1
+          assert measures == 35
+          assert pitched == 619
+          assert rests == 132
+          assert sorted(voices) == [1, 2, 5, 6]
+          assert sorted(staves) == [1, 2]
+          print('ASAP_MUSICXML_STRUCTURE_OK')
+          PY
+          node --input-type=module - <<'NODE'
+          import { loadMidiReference } from './adapters/midi/index.js'
+          const score = loadMidiReference('.tmp/asap/midi_score.mid', { sourceId: 'asap-bwv846-score', sourceType: 'TRUSTED_REFERENCE' })
+          const performance = loadMidiReference('.tmp/asap/performance.mid', { sourceId: 'asap-bwv846-performance', sourceType: 'USER_PROVIDED_REFERENCE' })
+          if (!score.ok || !performance.ok) throw new Error('Pinned ASAP MIDI failed repository parser.')
+          if (score.sha256 !== '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f') throw new Error('Score MIDI parser hash mismatch.')
+          if (performance.sha256 !== '0e98c7ff76e11e3c75df36897e2b5bf32127fb737bbf6625a666970fe103d371') throw new Error('Performance MIDI parser hash mismatch.')
+          if (score.events.length !== 549) throw new Error(`Expected 549 score MIDI events, got ${score.events.length}.`)
+          if (performance.events.length !== 548) throw new Error(`Expected 548 performance MIDI events, got ${performance.events.length}.`)
+          if (score.tracks.filter((track) => track.noteCount > 0).map((track) => track.noteCount).join(',') !== '416,133') throw new Error('Score MIDI track structure changed.')
+          console.log('ASAP_MIDI_STRUCTURE_OK')
+          NODE
+      - name: Run registry tests
+        run: node --test tests/realMidiReferenceRegistry.test.js
