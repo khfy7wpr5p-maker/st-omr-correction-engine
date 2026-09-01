@@ -7,4 +7,5 @@ export {
   prepareScoreGraphForMidiInstrumentContract,
   analyzeMidiScoreAlignmentWithInstrumentContract,
 } from './midiInstrumentContract.js'
+export { analyzeMidiScoreAlignmentWithInstrumentContractConservatively } from './instrumentContractConservative.js'
 export { analyzeMidiReferenceEvidence } from './midiEvidenceBridge.js'

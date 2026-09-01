@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { EVIDENCE_SOURCE, createEvidence } from '../../src/contracts/evidence.js'
 import { MIDI_COMPARISON_CODE, createMidiReferenceDiagnostic } from '../../src/contracts/midiReferenceEvidence.js'
 import { loadMidiReference } from './midiReferenceAdapter.js'
-import { analyzeMidiScoreAlignmentWithInstrumentContract } from './midiInstrumentContract.js'
+import { analyzeMidiScoreAlignmentWithInstrumentContractConservatively } from './instrumentContractConservative.js'
 
 function scoreFingerprint(scoreGraph) {
   return createHash('sha256').update(JSON.stringify(scoreGraph)).digest('hex')
@@ -83,7 +83,7 @@ export function analyzeMidiReferenceEvidence({ scoreGraph, midiInput, provenance
   const midiBefore = midiBytesSnapshot(midiInput)
   const midiReference = loadMidiReference(midiInput, provenance)
   const analysis = midiReference.ok
-    ? analyzeMidiScoreAlignmentWithInstrumentContract(scoreGraph, midiReference, alignmentContext, options)
+    ? analyzeMidiScoreAlignmentWithInstrumentContractConservatively(scoreGraph, midiReference, alignmentContext, options)
     : parserFailureAnalysis(midiReference)
 
   const scoreAfter = scoreFingerprint(scoreGraph)
