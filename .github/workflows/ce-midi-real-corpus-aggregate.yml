@@ -1,0 +1,47 @@
+name: CE MIDI real corpus aggregate
+
+on:
+  pull_request:
+    paths:
+      - 'src/benchmark/realMidiCorpusAggregate.js'
+      - 'tests/realMidiCorpusAggregate.test.js'
+      - 'scripts/aggregateRealMidiCorpusBenchmarks.mjs'
+      - '.github/workflows/ce-midi-real-corpus-aggregate.yml'
+      - 'src/index.js'
+  workflow_dispatch:
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --package-lock=false
+      - name: Fetch exact pinned real sources
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/real-midi
+          curl --fail --location --retry 3 'https://www.mutopiaproject.org/ftp/SorF/O35/sorf_op35_no13/sorf_op35_no13.mid' -o .tmp/real-midi/sor.mid
+          curl --fail --location --retry 3 'https://raw.githubusercontent.com/drgolem/musiclab/553fd1e72fb6a2cfdfb00d57052e0ee868abcf0b/scores_midi/lagrima-tarrega.mid' -o .tmp/real-midi/lagrima.mid
+          BASE='https://raw.githubusercontent.com/fosfrancesco/asap-dataset/fad8d1e8078d0ae47ad2f280b5d022bd2de24784/Bach/Prelude/bwv_846'
+          curl --fail --location --retry 3 "$BASE/xml_score.musicxml" -o .tmp/real-midi/bach.musicxml
+          curl --fail --location --retry 3 "$BASE/midi_score.mid" -o .tmp/real-midi/bach.mid
+          printf '%s  %s\n' '35ac900c3dd049272e670af166a443251e0a61d829a5badc17bf9cf564bcd527' '.tmp/real-midi/sor.mid' | sha256sum -c -
+          printf '%s  %s\n' '0c7dcf81b1a291bf0b445dc15b000bafc2660fa14fe93ba9a38f397b6e29d054' '.tmp/real-midi/lagrima.mid' | sha256sum -c -
+          printf '%s  %s\n' '1572209d1e24e600cc7758a3407a9ad3cb4cfbc5d55b821d452490d98a68307b' '.tmp/real-midi/bach.musicxml' | sha256sum -c -
+          printf '%s  %s\n' '3e2f8b9f3cf6c710788f1963066b04850e0335e94a9558f642fa2cd6eb3fb45f' '.tmp/real-midi/bach.mid' | sha256sum -c -
+      - name: Re-run all three real benchmarks
+        run: |
+          node scripts/runSorMidiReferenceBenchmark.mjs .tmp/real-midi/sor.mid > .tmp/real-midi/sor.json
+          node scripts/runLagrimaMidiReferenceBenchmark.mjs .tmp/real-midi/lagrima.mid > .tmp/real-midi/lagrima.json
+          node scripts/runBachAsapMusicXmlMidiBenchmark.mjs .tmp/real-midi/bach.musicxml .tmp/real-midi/bach.mid > .tmp/real-midi/bach.json
+      - name: Aggregate descriptively
+        run: node scripts/aggregateRealMidiCorpusBenchmarks.mjs .tmp/real-midi/sor.json .tmp/real-midi/lagrima.json .tmp/real-midi/bach.json | tee .tmp/real-midi/aggregate.json
+      - name: Run aggregate unit tests
+        run: node --test tests/realMidiCorpusAggregate.test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-midi-corpus-aggregate
+          path: .tmp/real-midi/*.json
