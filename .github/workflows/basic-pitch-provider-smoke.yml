@@ -4,6 +4,23 @@ on:
   pull_request:
     paths:
       - 'providers/basic-pitch/**'
+      - 'adapters/midi/**'
+      - 'src/contracts/midiReferenceEvidence.js'
+      - 'tests/basicPitchProvider.test.js'
+      - 'tests/basicPitchHardening.test.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/basic-pitch-provider-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'providers/basic-pitch/**'
+      - 'adapters/midi/**'
+      - 'src/contracts/midiReferenceEvidence.js'
+      - 'tests/basicPitchProvider.test.js'
+      - 'tests/basicPitchHardening.test.js'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/basic-pitch-provider-smoke.yml'
   workflow_dispatch:
 
@@ -14,16 +31,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: providers/basic-pitch/requirements.txt
 
+      - name: Install JavaScript dependencies
+        run: npm ci
+
       - name: Install pinned Basic Pitch provider runtime
         run: python -m pip install --disable-pip-version-check -r providers/basic-pitch/requirements.txt
 
-      - name: Generate rights-clean synthetic WAV fixture
+      - name: Generate rights-clean WAV and MP3 fixtures
         run: |
           python - <<'PY'
           import math
@@ -31,19 +56,26 @@ jobs:
           import wave
 
           sample_rate = 22050
-          segments = [(440.0, 1.5), (523.251, 1.5)]
+          segments = [(440.0, 1.0), (523.251, 1.0)]
           with wave.open('/tmp/ce-basic-pitch-smoke.wav', 'wb') as output:
               output.setnchannels(1)
               output.setsampwidth(2)
               output.setframerate(sample_rate)
               frames = bytearray()
               for frequency, seconds in segments:
-                  for index in range(int(sample_rate * seconds)):
-                      envelope = min(1.0, index / 400, (int(sample_rate * seconds) - index) / 400)
+                  frame_count = int(sample_rate * seconds)
+                  for index in range(frame_count):
+                      envelope = min(1.0, index / 400, (frame_count - index) / 400)
                       value = int(0.35 * envelope * 32767 * math.sin(2 * math.pi * frequency * index / sample_rate))
                       frames.extend(struct.pack('<h', value))
               output.writeframes(frames)
           PY
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -y -loglevel error -i /tmp/ce-basic-pitch-smoke.wav -codec:a libmp3lame -q:a 4 /tmp/ce-basic-pitch-smoke.mp3
+          test -s /tmp/ce-basic-pitch-smoke.mp3
 
       - name: Run real Basic Pitch worker inference
         run: |
@@ -75,3 +107,91 @@ jobs:
               'python': result['runtime']['python'],
           }, sort_keys=True))
           PY
+
+      - name: Run real JS provider, determinism, MP3 and shadow evidence E2E
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createHash } from 'node:crypto'
+          import { readFileSync } from 'node:fs'
+          import { createMeasure, createScoreEvent, createScoreGraph } from './src/index.js'
+          import {
+            BASIC_PITCH_PACKAGE_VERSION,
+            deriveMidiReferenceFromAudio,
+            analyzeAudioDerivedMidiEvidence,
+          } from './providers/basic-pitch/index.js'
+
+          const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+          const config = { onset_threshold: 0.3, frame_threshold: 0.2, minimum_note_length: 60 }
+          const wav = readFileSync('/tmp/ce-basic-pitch-smoke.wav')
+          const wavShaBefore = sha256(wav)
+
+          const first = deriveMidiReferenceFromAudio(wav, {
+            sourceId: 'real-wav-determinism-a',
+            fileName: 'synthetic.wav',
+            providerConfig: config,
+          })
+          const second = deriveMidiReferenceFromAudio(wav, {
+            sourceId: 'real-wav-determinism-b',
+            fileName: 'synthetic.wav',
+            providerConfig: config,
+          })
+          assert.equal(first.ok, true, JSON.stringify(first))
+          assert.equal(second.ok, true, JSON.stringify(second))
+          assert.equal(first.provider.packageVersion, BASIC_PITCH_PACKAGE_VERSION)
+          assert.equal(first.audioSha256, wavShaBefore)
+          assert.equal(second.audioSha256, wavShaBefore)
+          assert.equal(first.generatedMidiSha256, second.generatedMidiSha256)
+          assert.deepEqual(first.noteEvents, second.noteEvents)
+          assert.equal(sha256(wav), wavShaBefore)
+
+          const scoreGraph = createScoreGraph({
+            sourceId: 'real-e2e-score',
+            measures: [createMeasure({ key: 'P1:0', beats: 4, beatType: 4 })],
+            events: [
+              createScoreEvent({ id: 'a4', measureKey: 'P1:0', onset: 0, duration: 1.5, pitch: 69 }),
+              createScoreEvent({ id: 'c5', measureKey: 'P1:0', onset: 2, duration: 1.5, pitch: 72 }),
+            ],
+          })
+          const analysis = analyzeAudioDerivedMidiEvidence({
+            scoreGraph,
+            audioInput: wav,
+            sourceId: 'real-js-e2e',
+            fileName: 'synthetic.wav',
+            providerOptions: { providerConfig: config },
+          })
+          assert.equal(analysis.providerResult.ok, true, JSON.stringify(analysis.providerResult))
+          assert.ok(analysis.midiEvidence)
+          assert.equal(analysis.mode, 'SHADOW_ONLY')
+          assert.equal(analysis.authority, 'SHADOW_EVIDENCE_ONLY')
+          assert.equal(analysis.invariants.audioBytesUnchanged, true)
+          assert.equal(analysis.invariants.scoreUnchanged, true)
+          assert.equal(analysis.invariants.midiBytesUnchanged, true)
+          assert.equal(analysis.invariants.automaticCorrectionAuthority, false)
+          assert.equal(analysis.invariants.correctionPatchesProduced, false)
+          assert.ok(analysis.evidence.every((item) => item.weight === 0))
+          const e2eMidi = Buffer.from(analysis.providerResult.generatedMidiBase64, 'base64')
+          assert.equal(e2eMidi.subarray(0, 4).toString('ascii'), 'MThd')
+          assert.equal(sha256(wav), wavShaBefore)
+
+          const mp3 = readFileSync('/tmp/ce-basic-pitch-smoke.mp3')
+          const mp3ShaBefore = sha256(mp3)
+          const mp3Result = deriveMidiReferenceFromAudio(mp3, {
+            sourceId: 'real-mp3-smoke',
+            fileName: 'synthetic.mp3',
+            providerConfig: config,
+          })
+          assert.equal(mp3Result.ok, true, JSON.stringify(mp3Result))
+          assert.equal(mp3Result.audioSha256, mp3ShaBefore)
+          assert.equal(Buffer.from(mp3Result.generatedMidiBase64, 'base64').subarray(0, 4).toString('ascii'), 'MThd')
+          assert.equal(sha256(mp3), mp3ShaBefore)
+
+          console.log(JSON.stringify({
+            wavNoteEventCount: first.noteEvents.length,
+            deterministicMidiSha256: first.generatedMidiSha256,
+            e2eAlignmentStatus: analysis.midiEvidence.alignment?.status ?? null,
+            e2eEvidenceCount: analysis.evidence.length,
+            mp3NoteEventCount: mp3Result.noteEvents.length,
+            mp3MidiSha256: mp3Result.generatedMidiSha256,
+          }, null, 2))
+          JS
