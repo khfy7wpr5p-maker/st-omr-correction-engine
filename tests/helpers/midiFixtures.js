@@ -27,8 +27,8 @@ export function event(delta, bytes) {
 }
 
 export const endOfTrack = () => event(0, [0xff, 0x2f, 0x00])
-export const tempo = (microsecondsPerQuarter = 500000) => event(0, [0xff, 0x51, 0x03, (microsecondsPerQuarter >>> 16) & 0xff, (microsecondsPerQuarter >>> 8) & 0xff, microsecondsPerQuarter & 0xff])
-export const timeSignature = (numerator = 4, denominator = 4) => event(0, [0xff, 0x58, 0x04, numerator, Math.log2(denominator), 24, 8])
+export const tempo = (microsecondsPerQuarter = 500000, delta = 0) => event(delta, [0xff, 0x51, 0x03, (microsecondsPerQuarter >>> 16) & 0xff, (microsecondsPerQuarter >>> 8) & 0xff, microsecondsPerQuarter & 0xff])
+export const timeSignature = (numerator = 4, denominator = 4, delta = 0) => event(delta, [0xff, 0x58, 0x04, numerator, Math.log2(denominator), 24, 8])
 export const programChange = (program = 0, channel = 0, delta = 0) => event(delta, [0xc0 | channel, program])
 export const noteOn = (note, velocity = 96, channel = 0, delta = 0) => event(delta, [0x90 | channel, note, velocity])
 export const noteOff = (note, velocity = 64, channel = 0, delta = 0) => event(delta, [0x80 | channel, note, velocity])
