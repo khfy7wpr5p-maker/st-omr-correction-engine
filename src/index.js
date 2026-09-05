@@ -72,3 +72,4 @@ export {
 } from './benchmark/teacherApprovedMutationCases.js'
 export { AUDIVERIS_MUSICXML_IMPORTER_VERSION, importAudiverisMusicXml } from '../adapters/musicxml/index.js'
 export { parseBoundedMusicXmlScoreGraph } from '../adapters/musicxml/boundedMusicXmlScoreGraphAdapter.js'
+export { analyzeSesliTabShadow, analyzeSesliTabCorrectionShadow } from '../adapters/seslitab/shadowAdapter.js'
