@@ -1,7 +1,9 @@
 import { PATCH_OPERATION } from '../contracts/correctionPatch.js'
 import { revertCorrectionPatches } from '../correction/patchReverter.js'
+import { detectPitchAnomalies } from '../constraints/pitchAnomalyDetector.js'
 import { detectOnsetAnomalies } from '../constraints/onsetAnomalyDetector.js'
 import { detectDurationAnomalies } from '../constraints/durationConstraint.js'
+import { detectStaffAnomalies } from '../constraints/staffAnomalyDetector.js'
 import { detectTieAnomalies } from '../constraints/tieConstraint.js'
 import { detectTupletAnomalies } from '../constraints/tupletConstraint.js'
 
@@ -98,8 +100,10 @@ export function revalidateProjectedRevisionV2({ sourceGraph, projectedGraph, pat
   validateEventDiffs(sourceGraph, projectedGraph, patches, findings)
   detectVoiceOverlap(projectedGraph.events, tolerance, findings)
 
+  appendDetectorFindings(findings, 'PITCH', detectPitchAnomalies(projectedGraph.events))
   appendDetectorFindings(findings, 'ONSET', detectOnsetAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
   appendDetectorFindings(findings, 'DURATION', detectDurationAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
+  appendDetectorFindings(findings, 'STAFF', detectStaffAnomalies(projectedGraph.events))
   appendDetectorFindings(findings, 'TIE', detectTieAnomalies(projectedGraph.events, { tolerance }))
   appendDetectorFindings(findings, 'TUPLET', detectTupletAnomalies(projectedGraph.events))
 
