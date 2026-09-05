@@ -1,5 +1,6 @@
 import { generateVoiceCandidates } from '../../src/solver/polyphonicVoiceSolver.js'
 import { resolveCandidates } from '../../src/resolver/candidateResolver.js'
+import { analyzeOmrCorrections } from '../../src/correction/omrCorrectionAnalyzer.js'
 
 /**
  * Pure shadow adapter contract for SesliTab-shaped host evidence.
@@ -22,4 +23,33 @@ export function analyzeSesliTabShadow({ scoreGraph, validatorFindings = [], ambi
 
   const resolution = resolveCandidates(generated.candidates, resolverOptions)
   return Object.freeze({ mode: 'shadow', generated, resolution, sourceGraph: scoreGraph })
+}
+
+/**
+ * Expanded SesliTab shadow entrypoint. In addition to the legacy voice-only
+ * analysis, this returns bounded pitch/duration/onset/staff/tie proposals and
+ * research findings for tuplets/cross-staff. It never applies a patch.
+ */
+export function analyzeSesliTabCorrectionShadow({
+  scoreGraph,
+  validatorFindings = [],
+  ambiguousEventIds = null,
+  instrumentProfile = 'generic',
+  expectedPitches = null,
+  expectedStaffs = null,
+  tolerance = 0.01,
+  structuralSuggestionConfidence = 0,
+  resolverOptions = {},
+} = {}) {
+  return analyzeOmrCorrections({
+    scoreGraph,
+    validatorFindings,
+    ambiguousVoiceEventIds: ambiguousEventIds,
+    instrumentProfile,
+    expectedPitches,
+    expectedStaffs,
+    tolerance,
+    structuralSuggestionConfidence,
+    resolverOptions,
+  })
 }
