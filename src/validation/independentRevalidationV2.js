@@ -6,9 +6,12 @@ import { detectTieAnomalies } from '../constraints/tieConstraint.js'
 import { detectTupletAnomalies } from '../constraints/tupletConstraint.js'
 
 const FIELD_FOR_OPERATION = Object.freeze({
+  [PATCH_OPERATION.CHANGE_PITCH]: 'pitch',
+  [PATCH_OPERATION.CHANGE_ONSET]: 'onset',
   [PATCH_OPERATION.CHANGE_VOICE]: 'voice',
   [PATCH_OPERATION.CHANGE_DURATION]: 'duration',
   [PATCH_OPERATION.CHANGE_STAFF]: 'staff',
+  [PATCH_OPERATION.CHANGE_RELATION]: 'metadata',
 })
 
 function stable(value) {
@@ -52,7 +55,7 @@ function validateEventDiffs(sourceGraph, projectedGraph, patches, findings) {
     const fields = ['measureKey', 'onset', 'duration', 'voice', 'staff', 'pitch', 'isRest', 'isChordTone', 'metadata']
     for (const field of fields) {
       if (permitted.has(field)) {
-        if (!Object.is(projectedEvent[field], permitted.get(field))) addFinding(findings, 'PATCH_AFTER_NOT_PROJECTED', { eventId: sourceEvent.id, field })
+        if (stable(projectedEvent[field]) !== stable(permitted.get(field))) addFinding(findings, 'PATCH_AFTER_NOT_PROJECTED', { eventId: sourceEvent.id, field })
       } else if (stable(projectedEvent[field]) !== stable(sourceEvent[field])) {
         addFinding(findings, 'UNINTENDED_EVENT_CHANGE', { eventId: sourceEvent.id, field })
       }
@@ -96,8 +99,8 @@ export function revalidateProjectedRevisionV2({ sourceGraph, projectedGraph, pat
   detectVoiceOverlap(projectedGraph.events, tolerance, findings)
 
   appendDetectorFindings(findings, 'ONSET', detectOnsetAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
-  appendDetectorFindings(findings, 'DURATION', detectDurationAnomalies(projectedGraph.measures, projectedGraph.events))
-  appendDetectorFindings(findings, 'TIE', detectTieAnomalies(projectedGraph.events))
+  appendDetectorFindings(findings, 'DURATION', detectDurationAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
+  appendDetectorFindings(findings, 'TIE', detectTieAnomalies(projectedGraph.events, { tolerance }))
   appendDetectorFindings(findings, 'TUPLET', detectTupletAnomalies(projectedGraph.events))
 
   const reverted = revertCorrectionPatches(projectedGraph, patches)
