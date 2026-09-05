@@ -1,8 +1,10 @@
 function tieFlags(event) {
-  const ties = Array.isArray(event.metadata?.ties) ? event.metadata.ties : []
+  const legacyTies = Array.isArray(event.metadata?.ties) ? event.metadata.ties : []
+  const importedTieTypes = Array.isArray(event.metadata?.tieTypes) ? event.metadata.tieTypes : []
+  const ties = new Set([...legacyTies, ...importedTieTypes])
   return {
-    start: event.metadata?.tieStart === true || ties.includes('start'),
-    stop: event.metadata?.tieStop === true || ties.includes('stop'),
+    start: event.metadata?.tieStart === true || ties.has('start'),
+    stop: event.metadata?.tieStop === true || ties.has('stop'),
   }
 }
 
@@ -10,25 +12,46 @@ function sameTieLane(a, b) {
   return a.pitch === b.pitch && a.voice === b.voice && a.staff === b.staff
 }
 
-export function detectTieAnomalies(events) {
+function sourceOrder(event) {
+  return Number.isFinite(event.metadata?.sourceOrder) ? event.metadata.sourceOrder : Number.MAX_SAFE_INTEGER
+}
+
+function orderedLaneCandidates(notes, event) {
+  return notes
+    .filter((candidate) => candidate.id !== event.id && sameTieLane(event, candidate))
+    .sort((a, b) => a.onset - b.onset || sourceOrder(a) - sourceOrder(b) || a.id.localeCompare(b.id))
+}
+
+export function detectTieAnomalies(events, options = {}) {
   if (!Array.isArray(events)) throw new TypeError('events must be an array.')
+  const tolerance = options.tolerance ?? 0.01
+  if (!Number.isFinite(tolerance) || tolerance < 0) throw new RangeError('tolerance must be finite and non-negative.')
+
   const notes = events.filter((event) => event && !event.isRest && event.pitch != null)
   const findings = []
 
-  for (let index = 0; index < notes.length; index += 1) {
-    const event = notes[index]
+  for (const event of notes) {
     const flags = tieFlags(event)
     if (!flags.start && !flags.stop) continue
 
+    const lane = orderedLaneCandidates(notes, event)
+
     if (flags.start) {
-      const target = notes.slice(index + 1).find((candidate) => sameTieLane(event, candidate))
-      if (!target) findings.push(Object.freeze({ code: 'TIE_TARGET_MISSING', eventId: event.id }))
-      else if (!tieFlags(target).stop) findings.push(Object.freeze({ code: 'TIE_STOP_MISSING', eventId: event.id, targetEventId: target.id }))
+      const target = lane.find((candidate) => candidate.onset > event.onset + tolerance)
+      if (!target) {
+        findings.push(Object.freeze({ code: 'TIE_TARGET_MISSING', eventId: event.id }))
+      } else if (!tieFlags(target).stop) {
+        findings.push(Object.freeze({ code: 'TIE_STOP_MISSING', eventId: event.id, targetEventId: target.id }))
+      }
     }
 
     if (flags.stop) {
-      const source = notes.slice(0, index).reverse().find((candidate) => sameTieLane(event, candidate))
-      if (!source || !tieFlags(source).start) findings.push(Object.freeze({ code: 'TIE_START_MISSING', eventId: event.id }))
+      const source = [...lane].reverse().find((candidate) => candidate.onset < event.onset - tolerance)
+      if (!source) {
+        findings.push(Object.freeze({ code: 'TIE_START_MISSING', eventId: event.id }))
+      } else if (!tieFlags(source).start) {
+        findings.push(Object.freeze({ code: 'TIE_START_MISSING', eventId: event.id, sourceEventId: source.id }))
+      }
     }
   }
 
