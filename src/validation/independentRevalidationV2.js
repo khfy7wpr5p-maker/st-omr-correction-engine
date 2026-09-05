@@ -13,11 +13,21 @@ const FIELD_FOR_OPERATION = Object.freeze({
   [PATCH_OPERATION.CHANGE_VOICE]: 'voice',
   [PATCH_OPERATION.CHANGE_DURATION]: 'duration',
   [PATCH_OPERATION.CHANGE_STAFF]: 'staff',
-  [PATCH_OPERATION.CHANGE_RELATION]: 'metadata',
+  [PATCH_OPERATION.CHANGE_TIE]: 'tieTypes',
 })
 
 function stable(value) {
   return JSON.stringify(value)
+}
+
+function rawTieTypes(event) {
+  return Object.hasOwn(event.metadata ?? {}, 'tieTypes') ? event.metadata.tieTypes : null
+}
+
+function metadataWithoutTieTypes(event) {
+  const metadata = { ...(event.metadata ?? {}) }
+  delete metadata.tieTypes
+  return metadata
 }
 
 function addFinding(findings, code, detail = {}) {
@@ -54,13 +64,20 @@ function validateEventDiffs(sourceGraph, projectedGraph, patches, findings) {
     }
 
     const permitted = allowed.get(key) ?? new Map()
-    const fields = ['measureKey', 'onset', 'duration', 'voice', 'staff', 'pitch', 'isRest', 'isChordTone', 'metadata']
+    const fields = ['measureKey', 'onset', 'duration', 'voice', 'staff', 'pitch', 'isRest', 'isChordTone']
     for (const field of fields) {
       if (permitted.has(field)) {
         if (stable(projectedEvent[field]) !== stable(permitted.get(field))) addFinding(findings, 'PATCH_AFTER_NOT_PROJECTED', { eventId: sourceEvent.id, field })
       } else if (stable(projectedEvent[field]) !== stable(sourceEvent[field])) {
         addFinding(findings, 'UNINTENDED_EVENT_CHANGE', { eventId: sourceEvent.id, field })
       }
+    }
+
+    if (permitted.has('tieTypes')) {
+      if (stable(rawTieTypes(projectedEvent)) !== stable(permitted.get('tieTypes'))) addFinding(findings, 'PATCH_AFTER_NOT_PROJECTED', { eventId: sourceEvent.id, field: 'tieTypes' })
+      if (stable(metadataWithoutTieTypes(projectedEvent)) !== stable(metadataWithoutTieTypes(sourceEvent))) addFinding(findings, 'UNINTENDED_EVENT_CHANGE', { eventId: sourceEvent.id, field: 'metadata' })
+    } else if (stable(projectedEvent.metadata) !== stable(sourceEvent.metadata)) {
+      addFinding(findings, 'UNINTENDED_EVENT_CHANGE', { eventId: sourceEvent.id, field: 'metadata' })
     }
   }
 }
@@ -78,9 +95,7 @@ function detectVoiceOverlap(events, tolerance, findings) {
     const ordered = [...group].sort((a, b) => a.onset - b.onset || a.end - b.end || a.id.localeCompare(b.id))
     let previous = null
     for (const event of ordered) {
-      if (previous && event.onset < previous.end - tolerance) {
-        addFinding(findings, 'INDEPENDENT_VOICE_OVERLAP', { voiceKey, previousEventId: previous.id, eventId: event.id })
-      }
+      if (previous && event.onset < previous.end - tolerance) addFinding(findings, 'INDEPENDENT_VOICE_OVERLAP', { voiceKey, previousEventId: previous.id, eventId: event.id })
       if (!previous || event.end > previous.end) previous = event
     }
   }
@@ -99,7 +114,6 @@ export function revalidateProjectedRevisionV2({ sourceGraph, projectedGraph, pat
   const findings = []
   validateEventDiffs(sourceGraph, projectedGraph, patches, findings)
   detectVoiceOverlap(projectedGraph.events, tolerance, findings)
-
   appendDetectorFindings(findings, 'PITCH', detectPitchAnomalies(projectedGraph.events))
   appendDetectorFindings(findings, 'ONSET', detectOnsetAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
   appendDetectorFindings(findings, 'DURATION', detectDurationAnomalies(projectedGraph.measures, projectedGraph.events, { tolerance }))
@@ -108,16 +122,8 @@ export function revalidateProjectedRevisionV2({ sourceGraph, projectedGraph, pat
   appendDetectorFindings(findings, 'TUPLET', detectTupletAnomalies(projectedGraph.events))
 
   const reverted = revertCorrectionPatches(projectedGraph, patches)
-  if (!reverted.ok) {
-    addFinding(findings, 'REVERT_FAILED', { code: reverted.code })
-  } else if (stable(reverted.graph) !== stable(sourceGraph)) {
-    addFinding(findings, 'REVERSIBILITY_MISMATCH')
-  }
+  if (!reverted.ok) addFinding(findings, 'REVERT_FAILED', { code: reverted.code })
+  else if (stable(reverted.graph) !== stable(sourceGraph)) addFinding(findings, 'REVERSIBILITY_MISMATCH')
 
-  return Object.freeze({
-    mode: 'INDEPENDENT_REVALIDATION_V2',
-    decision: findings.length === 0 ? 'PASS' : 'FAIL',
-    findings: Object.freeze(findings),
-    solverReused: false,
-  })
+  return Object.freeze({ mode: 'INDEPENDENT_REVALIDATION_V2', decision: findings.length === 0 ? 'PASS' : 'FAIL', findings: Object.freeze(findings), solverReused: false })
 }
