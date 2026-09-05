@@ -10,7 +10,7 @@ function stable(value) {
   return JSON.stringify(value)
 }
 
-function tieTypes(event) {
+function canonicalTieTypes(event) {
   const values = new Set()
   for (const type of event.metadata?.tieTypes ?? []) if (type === 'start' || type === 'stop') values.add(type)
   for (const type of event.metadata?.ties ?? []) if (type === 'start' || type === 'stop') values.add(type)
@@ -19,14 +19,14 @@ function tieTypes(event) {
   return ['start', 'stop'].filter((type) => values.has(type))
 }
 
-function metadataWithTieType(event, type) {
-  const current = event.metadata && typeof event.metadata === 'object' && !Array.isArray(event.metadata) ? event.metadata : {}
-  const nextTypes = new Set(tieTypes(event))
-  nextTypes.add(type)
-  return Object.freeze({
-    ...current,
-    tieTypes: Object.freeze(['start', 'stop'].filter((candidate) => nextTypes.has(candidate))),
-  })
+function rawTieTypes(event) {
+  return Object.hasOwn(event.metadata ?? {}, 'tieTypes') ? [...event.metadata.tieTypes] : null
+}
+
+function tieTypesWith(event, type) {
+  const next = new Set(canonicalTieTypes(event))
+  next.add(type)
+  return Object.freeze(['start', 'stop'].filter((candidate) => next.has(candidate)))
 }
 
 function evidenceFor(errorClass, finding, eventId) {
@@ -127,9 +127,15 @@ export function buildStructuralCorrectionSuggestions({ scoreGraph, analyses = {}
       continue
     }
 
-    const before = target.metadata ?? null
-    const after = metadataWithTieType(target, type)
-    pushIfPresent(suggestions, buildSuggestion({ target, event: target, errorClass: 'TIE', operation: PATCH_OPERATION.CHANGE_RELATION, before, after, finding, confidence }))
+    pushIfPresent(suggestions, buildSuggestion({
+      event: target,
+      errorClass: 'TIE',
+      operation: PATCH_OPERATION.CHANGE_TIE,
+      before: rawTieTypes(target),
+      after: tieTypesWith(target, type),
+      finding,
+      confidence,
+    }))
   }
 
   const unique = []
