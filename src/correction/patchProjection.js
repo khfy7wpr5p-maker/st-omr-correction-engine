@@ -3,17 +3,31 @@ import { createScoreEvent } from '../model/scoreEvent.js'
 import { createScoreGraph } from '../model/scoreGraph.js'
 
 function fieldForOperation(operation) {
+  if (operation === PATCH_OPERATION.CHANGE_PITCH) return 'pitch'
+  if (operation === PATCH_OPERATION.CHANGE_ONSET) return 'onset'
   if (operation === PATCH_OPERATION.CHANGE_VOICE) return 'voice'
   if (operation === PATCH_OPERATION.CHANGE_DURATION) return 'duration'
   if (operation === PATCH_OPERATION.CHANGE_STAFF) return 'staff'
+  if (operation === PATCH_OPERATION.CHANGE_RELATION) return 'metadata'
   return null
 }
 
+function stable(value) {
+  return JSON.stringify(value)
+}
+
 function sameValue(a, b) {
-  return Object.is(a, b)
+  return stable(a) === stable(b)
 }
 
 function cloneEventWith(event, field, value) {
+  if (field === 'metadata' && value != null && (typeof value !== 'object' || Array.isArray(value))) {
+    throw new TypeError('metadata must be an object or null.')
+  }
+  if (field === 'pitch' && event.isRest && value != null) {
+    throw new TypeError('rest events cannot receive a pitch correction.')
+  }
+
   const next = {
     id: event.id,
     measureKey: event.measureKey,
