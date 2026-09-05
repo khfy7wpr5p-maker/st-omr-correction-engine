@@ -39,8 +39,8 @@ Examples:
 - `expectedDurationQuarterBeats` -> `CHANGE_DURATION` proposal;
 - `expectedOnsetQuarterBeats` or a deterministic chord anchor -> `CHANGE_ONSET` proposal;
 - `expectedStaff` -> `CHANGE_STAFF` proposal;
-- a tie start with a unique same-lane following note lacking a stop -> bounded relation proposal that adds the missing stop;
-- a tie stop with a unique preceding same-lane note lacking a start -> bounded relation proposal that adds the missing start.
+- a tie start with a unique same-lane following note lacking a stop -> bounded `CHANGE_TIE` proposal that adds the missing stop;
+- a tie stop with a unique preceding same-lane note lacking a start -> bounded `CHANGE_TIE` proposal that adds the missing start.
 
 If the tie counterpart is missing or not uniquely correctable, the engine records an abstention instead of guessing.
 
@@ -48,7 +48,7 @@ If the tie counterpart is missing or not uniquely correctable, the engine record
 
 The Audiveris MusicXML adapter stores imported tie information in `metadata.tieTypes`. The previous tie detector read only legacy `metadata.ties` / `tieStart` / `tieStop` fields, so real imported tie evidence could be invisible to tie anomaly analysis.
 
-CE-E2E-01 makes `tieTypes` a first-class input to tie detection and uses onset/lane ordering rather than raw serialization order when locating counterpart notes.
+CE-E2E-01 makes `tieTypes` a first-class input to tie detection and preserves importer/source ordering when locating counterpart notes, including ties that cross measure boundaries where note onsets are measure-local.
 
 ## Projection and revalidation
 
@@ -59,9 +59,11 @@ The reversible patch layer now supports:
 - `CHANGE_VOICE`;
 - `CHANGE_DURATION`;
 - `CHANGE_STAFF`;
-- `CHANGE_RELATION`.
+- dedicated bounded `CHANGE_TIE` updates to `metadata.tieTypes`.
 
-Independent revalidation v2 understands all of those fields, reruns pitch/onset/duration/staff/tie/tuplet anomaly checks, checks unintended event changes, and verifies reversibility.
+Generic `CHANGE_RELATION` projection deliberately remains unsupported so a tie proposal cannot become arbitrary metadata mutation authority.
+
+Independent revalidation v2 understands all supported projected fields, reruns pitch/onset/duration/staff/tie/tuplet anomaly checks, checks unintended event changes, and verifies reversibility.
 
 ## SesliTab boundary
 
