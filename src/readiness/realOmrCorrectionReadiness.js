@@ -1,3 +1,4 @@
+import { evaluateRealOmrGoldEligibility } from '../benchmark/realOmrGoldEligibility.js'
 import { CORRECTION_EVENT_ORIGIN, TEACHER_DECISION } from '../benchmark/teacherGoldCorrectionEvent.js'
 import { CORRECTION_READINESS, evaluateCorrectionReadiness } from './productionReadiness.js'
 
@@ -23,7 +24,7 @@ function increment(record, key) {
 }
 
 function isAcceptedCorrectionNeeded(event) {
-  return event.origin === CORRECTION_EVENT_ORIGIN.REAL_OMR
+  return evaluateRealOmrGoldEligibility(event).eligible
     && event.correctionNeeded === true
     && event.teacherDecision === TEACHER_DECISION.ACCEPT_CORRECTION
     && event.evidenceAvailable === true
@@ -33,20 +34,23 @@ export function summarizeRealOmrCorrectionEvidence(events = []) {
   ensureEvents(events)
 
   const realOmrEvents = events.filter((event) => event.origin === CORRECTION_EVENT_ORIGIN.REAL_OMR)
-  const acceptedCorrectionNeeded = realOmrEvents.filter(isAcceptedCorrectionNeeded)
+  const eligibleRealOmrEvents = realOmrEvents.filter((event) => evaluateRealOmrGoldEligibility(event).eligible)
+  const acceptedCorrectionNeeded = eligibleRealOmrEvents.filter(isAcceptedCorrectionNeeded)
   const safeAcceptedCorrectionNeeded = acceptedCorrectionNeeded.filter((event) => event.correctionSafe === true)
-  const noCorrectionNeeded = realOmrEvents.filter((event) => event.teacherDecision === TEACHER_DECISION.NO_CORRECTION_NEEDED)
+  const noCorrectionNeeded = eligibleRealOmrEvents.filter((event) => event.teacherDecision === TEACHER_DECISION.NO_CORRECTION_NEEDED)
   const ambiguous = realOmrEvents.filter((event) => event.teacherDecision === TEACHER_DECISION.AMBIGUOUS)
 
   const byClass = {}
   const correctionNeededByClass = {}
-  for (const event of realOmrEvents) increment(byClass, event.errorClass)
+  for (const event of eligibleRealOmrEvents) increment(byClass, event.errorClass)
   for (const event of acceptedCorrectionNeeded) increment(correctionNeededByClass, event.errorClass)
 
   return Object.freeze({
     scope: REAL_OMR_CORRECTION_EVIDENCE_SCOPE,
     realOmrLabelCount: realOmrEvents.length,
-    independentRealOmrSourceCount: new Set(realOmrEvents.map((event) => event.sourceId)).size,
+    eligibleRealOmrLabelCount: eligibleRealOmrEvents.length,
+    ineligibleRealOmrLabelCount: realOmrEvents.length - eligibleRealOmrEvents.length,
+    independentRealOmrSourceCount: new Set(eligibleRealOmrEvents.map((event) => event.sourceId)).size,
     acceptedCorrectionNeededCount: acceptedCorrectionNeeded.length,
     acceptedCorrectionNeededSourceCount: new Set(acceptedCorrectionNeeded.map((event) => event.sourceId)).size,
     safeAcceptedCorrectionNeededCount: safeAcceptedCorrectionNeeded.length,
@@ -56,6 +60,7 @@ export function summarizeRealOmrCorrectionEvidence(events = []) {
     byClass: Object.freeze({ ...byClass }),
     correctionNeededByClass: Object.freeze({ ...correctionNeededByClass }),
     noCorrectionLabelsCanPromoteAutomaticCorrection: false,
+    ineligibleLabelsCanPromoteAutomaticCorrection: false,
   })
 }
 
@@ -116,6 +121,7 @@ export function evaluateRealOmrCorrectionReadiness({
     correctionNeededTeacherGoldAvailable,
     correctionSafeTeacherGoldAvailable,
     noCorrectionLabelsUsedForAutomaticPromotion: false,
+    ineligibleLabelsUsedForAutomaticPromotion: false,
     summary,
   })
 }
