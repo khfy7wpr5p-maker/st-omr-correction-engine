@@ -33,7 +33,12 @@ const autoEvidence = {
   policyDerivedFromTeacherGold: true,
 }
 
-function correctionEvent({ origin = CORRECTION_EVENT_ORIGIN.REAL_OMR, safe = true, sourceId = 'real-source-1' } = {}) {
+function correctionEvent({
+  origin = CORRECTION_EVENT_ORIGIN.REAL_OMR,
+  safe = true,
+  sourceId = 'real-source-1',
+  sourceHash = 'a'.repeat(64),
+} = {}) {
   return createTeacherGoldCorrectionEvent({
     eventId: `${sourceId}:pitch:1`,
     sourceId,
@@ -52,7 +57,12 @@ function correctionEvent({ origin = CORRECTION_EVENT_ORIGIN.REAL_OMR, safe = tru
     correctionSafe: safe,
     evidenceAvailable: true,
     teacherDecision: TEACHER_DECISION.ACCEPT_CORRECTION,
-    provenance: { sourceHash: 'abc', engineVersion: '5.11.0', teacherApprovalId: 'approval-1' },
+    provenance: {
+      sourceHash,
+      sourceRevisionId: 'revision-1',
+      engineVersion: '5.11.0',
+      teacherApprovalId: 'approval-1',
+    },
   })
 }
 
@@ -69,6 +79,7 @@ test('approved no-correction REAL_OMR seed cannot promote correction readiness',
   assert.equal(result.correctionNeededTeacherGoldAvailable, false)
   assert.equal(result.noCorrectionLabelsUsedForAutomaticPromotion, false)
   assert.equal(result.summary.realOmrLabelCount, 54)
+  assert.equal(result.summary.eligibleRealOmrLabelCount, 54)
   assert.equal(result.summary.noCorrectionNeededCount, 54)
   assert.equal(result.summary.acceptedCorrectionNeededCount, 0)
   assert.equal(result.blockers.some((item) => item.requirement === 'teacherGoldEvidenceAvailable'), true)
@@ -85,6 +96,25 @@ test('controlled mutation corrections do not count as real OMR correction-needed
 
   assert.equal(summary.realOmrLabelCount, 0)
   assert.equal(summary.acceptedCorrectionNeededCount, 0)
+  assert.equal(result.achievedStatus, CORRECTION_READINESS.SHADOW_READY)
+  assert.equal(result.approved, false)
+})
+
+test('ineligible real OMR provenance cannot promote correction readiness', () => {
+  const events = [correctionEvent({ sourceHash: 'not-a-sha256' })]
+  const summary = summarizeRealOmrCorrectionEvidence(events)
+  const result = evaluateRealOmrCorrectionReadiness({
+    events,
+    requestedStatus: CORRECTION_READINESS.TEACHER_REVIEW_READY,
+    evidence: shadowEvidence,
+  })
+
+  assert.equal(summary.realOmrLabelCount, 1)
+  assert.equal(summary.eligibleRealOmrLabelCount, 0)
+  assert.equal(summary.ineligibleRealOmrLabelCount, 1)
+  assert.equal(summary.acceptedCorrectionNeededCount, 0)
+  assert.equal(result.correctionNeededTeacherGoldAvailable, false)
+  assert.equal(result.ineligibleLabelsUsedForAutomaticPromotion, false)
   assert.equal(result.achievedStatus, CORRECTION_READINESS.SHADOW_READY)
   assert.equal(result.approved, false)
 })
