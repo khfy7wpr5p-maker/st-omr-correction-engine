@@ -26,6 +26,7 @@ export { DEFAULT_VOICE_SOLVER_LIMITS, generateVoiceCandidates } from './solver/p
 export { analyzeCrossStaffContext } from './solver/crossStaffAnalyzer.js'
 export { revalidateProjectedRevisionV2 } from './validation/independentRevalidationV2.js'
 export { CORRECTION_READINESS, evaluateCorrectionReadiness, readinessRequirements } from './readiness/productionReadiness.js'
+export { REAL_OMR_CORRECTION_EVIDENCE_SCOPE, summarizeRealOmrCorrectionEvidence, evaluateRealOmrCorrectionReadiness } from './readiness/realOmrCorrectionReadiness.js'
 export { createTeacherWorkloadTelemetry, aggregateTeacherWorkloadTelemetry } from './telemetry/teacherWorkloadTelemetry.js'
 export { projectCorrectionPatches } from './correction/patchProjection.js'
 export { revertCorrectionPatches } from './correction/patchReverter.js'
