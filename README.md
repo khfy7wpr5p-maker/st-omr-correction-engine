@@ -10,6 +10,8 @@ The end-to-end shadow proposal surface covers pitch, duration/rhythm, onset, voi
 
 Production automatic correction remains narrower than proposal generation: E11A authorizes only a single high-confidence `CHANGE_VOICE` patch after independent evidence and explicit post-projection revalidation. Expanded proposal support does not silently grant automatic write-back authority.
 
+The REAL_OMR readiness gate additionally requires gold-eligible, teacher-accepted **correction-needed** real OMR evidence before expanded classes can advance toward automatic correction. Known-correct `NO_CORRECTION_NEEDED`, controlled-mutation and synthetic labels cannot substitute for that evidence.
+
 ## Safety invariants
 
 - Raw/source MusicXML is immutable.
@@ -19,5 +21,14 @@ Production automatic correction remains narrower than proposal generation: E11A 
 - AI is optional evidence, never semantic authority.
 - All correction patches must be reversible and auditable before any production promotion.
 - Structural proposals are shadow-only unless a separately approved readiness policy grants apply authority.
+- Teacher-gold provenance is human-owned and must not be fabricated by automation.
 
-See `docs/ARCHITECTURE.md`, `docs/SAFETY.md`, `docs/ROADMAP.md`, and `docs/CE-E2E-01-END-TO-END-CORRECTION-PROPOSALS.md`.
+See:
+
+- `docs/ARCHITECTURE.md`
+- `docs/CURRENT_STATUS.md`
+- `docs/ROADMAP.md`
+- `docs/SAFETY.md`
+- `docs/CE-E2E-01-END-TO-END-CORRECTION-PROPOSALS.md`
+- `docs/CE-E2E-02-REAL-OMR-CORRECTION-READINESS-GATE.md`
+- `docs/ARCHITECTURE-REALITY-REFRESH-2026-09-20.md`
