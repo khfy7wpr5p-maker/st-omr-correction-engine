@@ -1,10 +1,32 @@
 # Current Status
 
-Last verified technical main baseline entering this status synchronization: `ff39ae05f2de074f2b4dab9a8e62909d372a187e`.
+Last verified technical main baseline entering this architecture synchronization: `122725676cb1f2cb0eddb05d791bd11abea13b32`.
 
-Exact-main `test-and-build`: run #103 (`33195531405`) — SUCCESS.
+Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
-This document is considered synchronized when the PR containing it is merged through protected `main` and that merge's exact-main required CI also passes.
+This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
+
+## 2026-09-20 CE-E2E architecture synchronization
+
+CE-E2E-01 (PR #90) completed the bounded end-to-end correction proposal path for exact deterministic targets:
+
+`ScoreGraph / host evidence → anomaly detection → correction proposal → reversible patch → safe projection → independent revalidation → exact revert when needed`.
+
+The executable proposal surface now covers pitch, duration/rhythm, onset, voice, staff and bounded tie changes. Tuplet and cross-staff remain analysis/evidence surfaces where the engine abstains when an exact safe mutation is not established.
+
+CE-E2E-02 (PR #91) then separated implementation capability from production readiness. Expanded correction classes can advance only from gold-eligible, teacher-accepted, correction-needed REAL_OMR evidence. `NO_CORRECTION_NEEDED`, controlled-mutation, synthetic and provenance-ineligible labels cannot substitute for positive real-world correction evidence. Automatic-correction candidacy additionally requires admitted evidence with `correctionSafe === true`.
+
+Current approved REAL_OMR evidence remains:
+
+- 1 independent exact-hash teacher-approved Audiveris source;
+- 22 approved score events;
+- 54 bounded `NO_CORRECTION_NEEDED` labels;
+- 0 accepted correction-needed REAL_OMR labels;
+- 0 correction-safe accepted correction-needed REAL_OMR labels;
+- 0 independent polyphonic REAL_OMR correction-event sources;
+- 0 real teacher-gold calibration records carrying correction-engine confidence.
+
+Therefore E11A remains the only automatic-correction slice. The main remaining blocker is acquisition and teacher review of genuine correction-needed REAL_OMR cases, followed by source-separated calibration/risk evaluation.
 
 ## 2026-08-28 CE-POLY / CE-EVIDENCE expansion
 

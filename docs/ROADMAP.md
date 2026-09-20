@@ -50,13 +50,20 @@
 | CE-EVIDENCE-02 | Event-level REAL_OMR annotation queue | Completed | None |
 | CE-EVIDENCE-03 | Source-level calibration/final-evaluation leakage guard | Completed | None |
 | CE-EVIDENCE-04 | Exact-hash teacher-approved Audiveris real-OMR seed + negative detector regression | Completed | None |
+| CE-E2E-01 | End-to-end deterministic correction proposal, reversible projection and independent revalidation surface | Completed — PR #90 | Shadow/proposal; E11A unchanged |
+| CE-E2E-02 | REAL_OMR correction-needed readiness gate | Completed — PR #91 | None |
+| CE-DATA-01 | Collect exact-provenance teacher-reviewed correction-needed REAL_OMR cases | Next evidence milestone | None |
+| CE-CAL-01 | Per-class source-separated calibration + risk/coverage evaluation | Blocked on CE-DATA-01 | None |
+| CE-PROMOTE-* | Promote individual correction classes through readiness ladder | Blocked on evidence | Only after explicit gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
 ## Current automatic-correction boundary
 
 E11A remains the only authorized automatic-correction slice. It keeps the resolver threshold at `0.90`, requires at least two independent evidence sources, allows exactly one `CHANGE_VOICE` patch, preserves source immutability, and requires an explicit post-correction `ACCEPT` revalidation result. `REVIEW`, `BLOCK`, projection failure, missing revalidation or revalidation failure leaves the source graph selected.
 
-CE-POLY and CE-EVIDENCE do **not** broaden E11A. Tie, tuplet, duration, onset, cross-staff, pitch, Voice 3 and Voice 4 expansion remain research/evidence work until class-specific readiness is established from real teacher-gold data.
+CE-POLY, CE-EVIDENCE and CE-E2E do **not** broaden E11A. The engine can now detect/propose/project/revalidate deterministic pitch, duration, onset, voice, staff and bounded tie corrections, but proposal capability is not automatic-apply authority. Tuplet, cross-staff, Voice 3/4 and all expanded production mutation remain evidence-gated.
+
+CE-E2E-02 requires gold-eligible, teacher-accepted, correction-needed REAL_OMR evidence for expanded automatic-correction promotion. Known-correct `NO_CORRECTION_NEEDED`, controlled-mutation, synthetic and provenance-ineligible labels cannot substitute for that evidence.
 
 ## Real OMR evidence status
 
@@ -66,6 +73,7 @@ The collection/evaluation infrastructure is ready, but the current real-OMR evid
 - 22 approved score events;
 - 54 bounded `NO_CORRECTION_NEEDED` labels: 22 pitch, 22 duration, 10 tie;
 - 0 known correction-needed REAL_OMR event labels;
+- 0 correction-safe accepted correction-needed REAL_OMR labels;
 - 0 independent polyphonic REAL_OMR correction-event sources;
 - 0 real teacher-gold calibration records carrying correction-engine confidence.
 
@@ -84,6 +92,10 @@ No numeric threshold is invented by the readiness evaluator. Automatic/productio
 INT-S1 provides deterministic exact-revision-local event IDs, immutable reverse mapping, fail-closed `NoteObject[]` ↔ timeline ↔ structural-evidence binding, reuse of read-only beam evidence, no fabricated stem evidence, unique `VOICE_OVERLAP` target mapping, isolated per-target validator evidence and no apply/write-back capability.
 
 CE-POLY-18 additionally provides a ScoreMosaic shadow evidence packet while preserving ScoreMosaic's locked boundaries: no winner selection, no automatic merge/correction, no Teacher Review mutation and no publication authority.
+
+## Next evidence milestone
+
+The next scientifically valid milestone is **CE-DATA-01**: collect exact-provenance real Audiveris failure cases and obtain genuine event-level teacher decisions for correction-needed examples. After source-separated evidence exists, **CE-CAL-01** can measure class-specific precision, coverage, selective risk and confidence calibration before any promotion decision.
 
 ## Closed production boundaries
 
