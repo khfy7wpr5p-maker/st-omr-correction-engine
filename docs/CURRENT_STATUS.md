@@ -1,130 +1,248 @@
 # Current Status
 
-Last verified production baseline before this documentation refresh:
+Last verified technical main baseline entering this architecture synchronization: `122725676cb1f2cb0eddb05d791bd11abea13b32`.
 
-- `main` commit: `122725676cb1f2cb0eddb05d791bd11abea13b32`;
-- merge source: PR #91 — **CE-E2E-02: gate readiness on correction-needed real OMR evidence**;
-- merge-post `test-and-build`: run #187 — **SUCCESS**;
-- preceding feature: PR #90 — **CE-E2E-01: complete end-to-end OMR correction proposal surface**.
+Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
-This document describes repository behavior at that verified baseline. The architecture-refresh PR changes documentation only and does not widen runtime correction authority.
+This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
 
-## Current engineering state
+## 2026-09-20 CE-E2E architecture synchronization
 
-### Completed
+CE-E2E-01 (PR #90) completed the bounded end-to-end correction proposal path for exact deterministic targets:
 
-- E0-E10I baseline architecture and benchmark/evidence infrastructure;
-- E11A bounded voice-only controlled automatic correction;
-- CE-POLY-02 through CE-POLY-20;
-- CE-EVIDENCE-01 through CE-EVIDENCE-04;
-- CE-E2E-01 end-to-end correction proposal/projection/revalidation surface;
-- CE-E2E-02 REAL_OMR correction-needed readiness gate;
-- SesliTab shadow correction entrypoint;
-- reversible patch projection for pitch, onset, voice, duration, staff and bounded tie changes;
-- independent revalidation v2;
-- fail-closed REAL_OMR provenance and correction-safety gating.
+`ScoreGraph / host evidence → anomaly detection → correction proposal → reversible patch → safe projection → independent revalidation → exact revert when needed`.
 
-## CE-E2E-01 result
+The executable proposal surface now covers pitch, duration/rhythm, onset, voice, staff and bounded tie changes. Tuplet and cross-staff remain analysis/evidence surfaces where the engine abstains when an exact safe mutation is not established.
 
-The engine can now execute this bounded engineering chain for exact targets:
+CE-E2E-02 (PR #91) then separated implementation capability from production readiness. Expanded correction classes can advance only from gold-eligible, teacher-accepted, correction-needed REAL_OMR evidence. `NO_CORRECTION_NEEDED`, controlled-mutation, synthetic and provenance-ineligible labels cannot substitute for positive real-world correction evidence. Automatic-correction candidacy additionally requires admitted evidence with `correctionSafe === true`.
 
-```text
-OMR/ScoreGraph evidence
-→ detect anomaly
-→ build correction proposal
-→ create reversible patch
-→ project safely
-→ independently revalidate
-→ revert exactly when needed
-```
+Current approved REAL_OMR evidence remains:
 
-Supported deterministic proposal classes include:
-
-- pitch;
-- duration/rhythm;
-- onset;
-- voice;
-- staff;
-- bounded tie changes.
-
-Tuplets and cross-staff remain analysis/research surfaces where exact safe correction is not established.
-
-## CE-E2E-02 result
-
-Readiness promotion is now explicitly separated from mere implementation capability.
-
-For expanded automatic-correction promotion, positive evidence must be:
-
-- `origin === REAL_OMR`;
-- gold-eligible under exact provenance/integrity rules;
-- `correctionNeeded === true`;
-- teacher decision `ACCEPT_CORRECTION`;
-- `evidenceAvailable === true`;
-- and, for auto-correction candidacy, at least one admitted event must carry `correctionSafe === true`.
-
-The gate explicitly prevents these from being treated as positive automatic-correction evidence:
-
-- `NO_CORRECTION_NEEDED` labels;
-- controlled mutation labels;
-- synthetic labels;
-- ineligible or incomplete-provenance REAL_OMR labels.
-
-## Current REAL_OMR evidence
-
-The approved real-OMR seed currently provides:
-
-- 1 independent exact-hash teacher-approved Audiveris 5.11.0 source;
+- 1 independent exact-hash teacher-approved Audiveris source;
 - 22 approved score events;
-- 54 `NO_CORRECTION_NEEDED` labels:
-  - 22 pitch;
-  - 22 duration;
-  - 10 tie;
+- 54 bounded `NO_CORRECTION_NEEDED` labels;
 - 0 accepted correction-needed REAL_OMR labels;
 - 0 correction-safe accepted correction-needed REAL_OMR labels;
 - 0 independent polyphonic REAL_OMR correction-event sources;
 - 0 real teacher-gold calibration records carrying correction-engine confidence.
 
-The 54 labels are valuable negative-regression evidence: they protect known-correct material from false positive correction. They do not prove that expanded automatic correction is safe.
+Therefore E11A remains the only automatic-correction slice. The main remaining blocker is acquisition and teacher review of genuine correction-needed REAL_OMR cases, followed by source-separated calibration/risk evaluation.
 
-## Production automatic-correction boundary
+## 2026-08-28 CE-POLY / CE-EVIDENCE expansion
 
-E11A remains the only automatic-correction slice.
+CE-POLY-02 through CE-POLY-20 are completed. The expansion added versioned error taxonomy, teacher-gold correction-event contracts, source-byte mutation invariants, selective-prediction risk/coverage metrics, calibration research metrics, polyphony-complexity metadata, Voice 3/4 readiness benchmarks, research-only cross-staff reasoning, visual-localization evidence, tie/tuplet/duration/onset anomaly detection, bounded research candidate generation, independent revalidation v2, teacher-workload telemetry, a ScoreMosaic shadow bridge, fail-closed external benchmark intake, and cumulative production-readiness evaluation.
 
-It authorizes one bounded high-confidence `CHANGE_VOICE` patch only when all required evidence, projection and post-correction revalidation gates pass.
+CE-EVIDENCE-01 through CE-EVIDENCE-04 are also completed:
 
-Still not authorized:
+- REAL_OMR gold eligibility requires explicit provenance, exact source SHA-256, engine version and non-ambiguous teacher decision;
+- controlled mutation and synthetic cases cannot silently enter real-OMR calibration evidence;
+- event-level REAL_OMR annotation queues keep teacher-owned decisions empty until explicitly supplied;
+- calibration and final evaluation splits cannot share event IDs or source SHA-256 values;
+- one exact-hash, teacher-approved Audiveris 5.11.0 evidence seed from SesliTab is pinned as a bounded real-world regression source;
+- that seed contains 22 score events and projects 54 `NO_CORRECTION_NEEDED` labels: 22 pitch, 22 duration and 10 tie labels;
+- the 54 labels still represent exactly one independent source and are never reported as 54 independent scores;
+- the approved seed produces zero tie, duration or onset anomaly findings and therefore protects against false positives on that known-correct real Audiveris result.
 
-- production MusicXML overwrite/serialization;
-- broad automatic pitch correction;
-- broad automatic duration correction;
-- broad automatic onset correction;
+Current real-OMR evidence boundary:
+
+- independent exact-hash teacher-approved REAL_OMR sources usable by this engine: 1;
+- approved real-OMR score events represented in the seed: 22;
+- approved no-correction labels derived from the exact whole-score approval: 54;
+- known correction-needed REAL_OMR event labels: 0;
+- independent polyphonic REAL_OMR correction-event sources: 0;
+- calibration records with correction-engine confidence on real teacher-gold events: 0;
+- a leakage-safe calibration/final-evaluation split cannot yet be populated from the single approved source alone.
+
+This means the evidence infrastructure is complete for safe collection, but expanded correction classes remain data-limited. Voice 3, Voice 4, cross-staff, tie, tuplet, duration, onset and pitch must remain `RESEARCH_ONLY` unless later real teacher-gold evidence satisfies the readiness gates. No numeric production threshold has been invented to bypass the missing data.
+
+The seven SesliTab `tests/fixtures/real-omr/*-clean.xml` files remain `REGRESSION_OUTPUT_ONLY / REVIEW_REQUIRED` on SesliTab main because source PDF, expected golden MusicXML, approval record and integrity chain are incomplete. They are not promoted to musical ground truth.
+
+No CE-POLY or CE-EVIDENCE package broadened the production automatic-correction boundary. E11A remains the only automatic-correction slice: one high-confidence `CHANGE_VOICE` patch, exact immutable projection, mandatory independent host revalidation and explicit `ACCEPT` before in-memory selection.
+
+## Verified autonomous boundary
+
+Stages E0-E10I are completed. E11 has started only through the explicitly authorized, narrowly bounded E11A voice-only controlled automatic correction gate. E11A remains the only automatic-correction slice.
+
+The SesliTab integration track has additionally completed two non-production stages:
+
+- compatibility audit / contract mapping;
+- bounded shadow-only evidence bridge.
+
+Neither stage authorizes SesliTab write-back, production correction, quality-gate bypass or teacher-approval inference.
+
+Verified capabilities include:
+
+- provider-agnostic correction contracts and explicit abstention states;
+- stable score/event identities;
+- bounded candidate search;
+- meter and onset constraints;
+- deterministic candidate resolver requiring independent evidence classes;
+- bounded polyphonic voice candidate generation;
+- classical-guitar and piano soft-prior profiles;
+- explicit `VOICE != STAFF` and `HAND != STAFF` invariants;
+- immutable correction projection with stale-before protection;
+- reversible projection for currently supported patch fields;
+- fail-closed unsupported relation correction;
+- pure SesliTab-shaped shadow analysis;
+- deterministic exact-revision-local SesliTab bridge event IDs and immutable reverse mapping;
+- fail-closed SesliTab `NoteObject[]` ↔ timeline ↔ structural-evidence binding;
+- reuse of SesliTab's existing read-only beam evidence without duplicating raw MusicXML parsing;
+- exact `VOICE_OVERLAP` target mapping by measure/voice/staff/onset with abstention on non-unique mappings;
+- per-target validator-evidence isolation;
+- preservation of validator classification/severity/details in evidence;
+- no fabricated stem evidence and no confidence-threshold reduction;
+- explicit teacher-approved provenance;
+- deterministic benchmark reporting correction coverage separately from precision;
+- same-staff temporal voice-continuity evidence;
+- pinned CC0 real-score reference corpus at 6 sources: 3 piano + 3 classical guitar;
+- all six bounded review excerpts explicitly teacher-approved and `GOLD_ELIGIBLE`;
+- 32-case balanced controlled benchmark using source-specific structure from Tárrega, Dowland, Webern and Paradis;
+- E11A controlled in-memory automatic application for a single high-confidence `CHANGE_VOICE` patch only after mandatory host revalidation returns `ACCEPT`.
+
+## E10I controlled benchmark baseline
+
+The resolver threshold remains unchanged at `0.90`.
+
+- total controlled cases: 32;
+- piano cases: 16;
+- classical-guitar cases: 16;
+- high-evidence cases: 16;
+- high-evidence correctly resolved: 16 / 16;
+- partial-evidence guard cases: 16;
+- guard cases safely `AMBIGUOUS`: 16 / 16;
+- incorrect resolved corrections: 0;
+- overall controlled coverage: 0.50;
+- precision among resolved controlled cases: 1.00.
+
+Per-source mutation-case distribution:
+
+- Satie, *Je te veux*: 12 cases — 6 high-evidence + 6 guard;
+- Sor Op. 35 No. 13: 12 cases — 6 high-evidence + 6 guard;
+- Tárrega, *Lágrima*: 2 cases — 1 high-evidence + 1 guard;
+- Dowland, *Fantasia Number 7*: 2 cases — 1 high-evidence + 1 guard;
+- Webern Op. 4 No. 4: 2 cases — 1 high-evidence + 1 guard;
+- Paradis, *An das Klavier*: 2 cases — 1 high-evidence + 1 guard.
+
+This remains a controlled benchmark and is not a universal OMR accuracy claim.
+
+## E11A controlled automatic correction
+
+E11A was explicitly authorized on 2026-08-28 and implemented in PR #29. Issue #27 is closed as completed.
+
+A correction reaches the automatic in-memory apply path only when all of these conditions hold:
+
+- resolver status is `RESOLVED`;
+- result confidence is at least `0.90`;
+- result carries at least two independent evidence sources;
+- exactly one patch is proposed;
+- operation is `CHANGE_VOICE`;
+- patch confidence is at least `0.90`;
+- patch carries at least two independent evidence sources;
+- immutable projection succeeds;
+- post-correction revalidation is supplied and succeeds;
+- host quality gate explicitly returns `ACCEPT`.
+
+`REVIEW` or `BLOCK` revalidation retains the exact source graph. Missing or failed revalidation fails closed to `BLOCK`. The raw source graph is never overwritten.
+
+Controlled E11A regression result:
+
+- 16 / 16 high-evidence teacher-approved cases reached controlled apply only after explicit `ACCEPT` revalidation;
+- 16 / 16 guard cases remained unapplied and did not enter revalidation;
+- incorrect controlled automatic applications: 0;
+- non-voice automatic operations remain rejected;
+- `minConfidence = 0.90` remains unchanged.
+
+E11A technical verification:
+
+- implementation PR: #29;
+- implementation head: `2734fb9f2b1600b315346b1b929ed826fa4d370d`;
+- exact-head `test-and-build`: run #47 (`33164669931`) — SUCCESS;
+- squash-merged main: `0e0e70b7d70bd6b527b0d2b3357ad5ba48a151d5`;
+- exact-main `test-and-build`: run #48 (`33164701779`) — SUCCESS.
+
+## SesliTab shadow-only evidence bridge
+
+The bridge was explicitly authorized on 2026-08-28 after the compatibility audit. Issue #33 is closed as completed through PR #34.
+
+Pinned host baseline used for this stage:
+
+- `seslitab-guitar-reader` main: `95f11139929d1e3d65bd6c295794c316bb04ca84`;
+- host CI: run #237 (`33165513082`) — SUCCESS.
+
+The bridge consumes existing SesliTab-shaped read-only data only:
+
+- exact `NoteObject[]`;
+- structural-validation `timeline`;
+- structural `findings`;
+- existing `evidence.noteEvidence` beam metadata.
+
+It does not parse raw MusicXML and does not duplicate the SesliTab validator.
+
+Verified bridge behavior:
+
+- event IDs are deterministic and exact-revision-local;
+- each event has immutable reverse mapping to source revision, source note index, physical measure key, structural sequence index and source voice;
+- note/timeline/evidence mismatch blocks before candidate generation;
+- only `VOICE_OVERLAP` currently selects a voice target;
+- target mapping requires a unique exact match by `measureKey + voice + staff + actual onset`;
+- zero or multiple target matches abstain as `AMBIGUOUS`;
+- unrelated findings do not create voice candidates;
+- complete valid primary beam groups can become read-only beam-continuity metadata;
+- malformed/incomplete beam evidence is suppressed rather than guessed;
+- current SesliTab structural evidence does not provide stem direction, so the bridge does not invent it;
+- with current host-like beam + temporal evidence but no stem, the tested alternative voice confidence remains `0.70`, below the unchanged `0.90` threshold, so the resolver abstains;
+- an explicitly source-provided valid stem can be passed through and can reach the pre-existing `0.90` shadow boundary when beam and temporal evidence also agree;
+- source notes and structural result remain unchanged;
+- bridge output exposes no apply/write-back capability.
+
+Bridge technical verification:
+
+- implementation PR: #34;
+- implementation head: `2c4a0767c7e1dc8aa33878c2ed59ee29b4c503e6`;
+- exact-head `test-and-build`: run #53 (`33175005768`) — SUCCESS;
+- squash-merged main: `6ad46875d7ac49c3dea0b36e1c8c9ca0ebb3dbeb`;
+- exact-main `test-and-build`: run #54 (`33175087307`) — SUCCESS.
+
+Detailed contract: `docs/SESLITAB-SHADOW-EVIDENCE-BRIDGE.md`.
+
+## Approved real-score corpus state
+
+The pinned CC0 corpus contains six bounded, teacher-approved/gold-eligible excerpts:
+
+1. Piano — Satie, *Je te veux*, measures 1–8.
+2. Classical guitar — Sor Op. 35 No. 13, measures 1–8.
+3. Piano — Paradis, *An das Klavier*, measures 1–8.
+4. Piano — Webern, Op. 4 No. 4 *So ich traurig bin*, measures 1–8.
+5. Classical guitar — Tárrega, *Lágrima*, measures 1–8.
+6. Classical guitar — Dowland, *Fantasia Number 7*, measures 1–8.
+
+Teacher approval provenance remains bounded to the reviewed excerpts.
+
+## Safety boundary
+
+Still not implemented or authorized:
+
+- production MusicXML overwrite or serialization of corrected output;
+- SesliTab production correction/write-back integration;
+- conversion of a shadow `RESOLVED` result into SesliTab quality-gate `ACCEPT`;
+- conversion of machine proposals into teacher approval or teacher-correction provenance;
+- Audiveris runtime/provider modification;
+- Render/network/deployment changes;
+- automatic duration correction;
+- automatic onset correction;
 - automatic staff/cross-staff reassignment;
-- automatic tie/tuplet mutation;
-- multiple-patch unattended correction;
-- SesliTab production write-back;
-- ScoreMosaic automatic winner/merge authority.
+- automatic tie or tuplet mutation;
+- automatic pitch correction;
+- automatic beam/relation/arpeggio/glissando mutation;
+- multiple-patch automatic transactions;
+- pickup or irregular-measure normalization;
+- confidence-threshold reduction;
+- provider/network execution from the core;
+- external AI model dependency;
+- universal 97-99% OMR accuracy claims.
 
-## Primary remaining blocker
-
-The main blocker is now evidence acquisition rather than missing proposal-engine code.
-
-The next scientifically valid milestone is:
-
-1. collect exact-provenance real Audiveris failures;
-2. label actual correction-needed events with teacher decisions;
-3. retain source-level separation between calibration and final evaluation;
-4. measure per-class precision, coverage, risk/coverage and confidence calibration;
-5. promote classes through the readiness ladder only when their evidence supports it.
-
-Teacher labels and correction provenance must remain genuinely human-originated; they are not to be fabricated by automation.
+E11 expansion beyond the verified E11A voice-only gate requires a separate bounded evidence/design decision. Any production-facing SesliTab write-back requires a separately designed machine-proposal provenance/revision path and exact-revision post-projection revalidation. E12 visual second-opinion AI is not started and remains a separate approval boundary.
 
 ## Repository governance
 
-The existing fail-closed repository model remains in force:
-
-- source graphs are immutable;
-- abstention is a valid outcome;
-- proposals do not imply apply authority;
-- independent revalidation is mandatory at production boundaries;
-- no evidence class may self-promote by lowering thresholds or inventing teacher-gold;
-- documentation changes do not alter production behavior.
+`main` is protected by active repository ruleset `main` (id `21713803`). Pull requests are required, `test-and-build` is a strict required status check, branch deletion and non-fast-forward updates are blocked, and no bypass actor is configured.
