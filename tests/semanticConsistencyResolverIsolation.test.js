@@ -12,6 +12,7 @@ import {
   resolveCandidates,
 } from '../src/index.js'
 import { analyzeSemanticConsistency } from '../adapters/semantic/semanticConsistencyBridge.js'
+import { analyzeSemanticSourceProfile } from '../adapters/semantic/semanticSourceProfile.js'
 
 const fixtureDir = new URL('./fixtures/sem-05-semantic-consistency/', import.meta.url)
 const json = async (name) => JSON.parse(await readFile(new URL(name, fixtureDir), 'utf8'))
@@ -52,12 +53,17 @@ test('SEM-05 packet cannot turn one-source AMBIGUOUS resolution into RESOLVED', 
   assert.equal(before.abstainReason, 'insufficient-independent-evidence')
 
   const provenance = await json('provenance.json')
+  const musicXml = await readFile(new URL('semantic-baseline.musicxml', fixtureDir))
   const packet = analyzeSemanticConsistency({
     scoreGraph: graph(),
     provenance,
     semanticSnapshot: await json('semantic-baseline.semantic-snapshot.json'),
     observedSourceSha256: provenance.sourceSha256,
     observedSourceId: provenance.sourceId,
+    sourceProfile: analyzeSemanticSourceProfile({
+      musicXml,
+      expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
+    }),
   })
 
   assert.equal(packet.resolverEligible, false)
