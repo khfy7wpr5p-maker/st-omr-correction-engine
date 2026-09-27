@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import {
   SemanticConsistencyReferenceError,
   analyzeSemanticConsistencyProfile,
@@ -87,4 +88,12 @@ test('SEM-05 profile admits baseline and fails closed on unsupported semantic st
   unsupported.diagnostics = [{ code: 'UNSUPPORTED_STRUCTURE', severity: 'ERROR', source_id: null, message: 'unsupported' }]
   const unsupportedReference = validateSemanticConsistencyReference({ ...input, semanticSnapshot: unsupported })
   assert.equal(analyzeSemanticConsistencyProfile(unsupportedReference).status, 'UNSUPPORTED')
+})
+
+
+test('SEM-05 fixture bytes exactly match pinned provenance SHA', async () => {
+  const provenance = await json('provenance.json')
+  const bytes = await readFile(new URL('semantic-baseline.musicxml', dir))
+  const actual = createHash('sha256').update(bytes).digest('hex')
+  assert.equal(actual, provenance.sourceSha256)
 })
