@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 import { createMeasure, createScoreEvent, createScoreGraph } from '../src/index.js'
 import { analyzeSemanticConsistency } from '../adapters/semantic/semanticConsistencyBridge.js'
+import { analyzeSemanticSourceProfile } from '../adapters/semantic/semanticSourceProfile.js'
 
 const fixtureDir = new URL('./fixtures/sem-05-semantic-consistency/', import.meta.url)
 const semanticDir = new URL('../adapters/semantic/', import.meta.url)
@@ -29,12 +30,17 @@ function graph() {
 
 async function inputs(scoreGraph = graph()) {
   const provenance = await json('provenance.json')
+  const musicXml = await readFile(new URL('semantic-baseline.musicxml', fixtureDir))
   return {
     scoreGraph,
     provenance,
     semanticSnapshot: await json('semantic-baseline.semantic-snapshot.json'),
     observedSourceSha256: provenance.sourceSha256,
     observedSourceId: provenance.sourceId,
+    sourceProfile: analyzeSemanticSourceProfile({
+      musicXml,
+      expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
+    }),
   }
 }
 
@@ -88,4 +94,13 @@ test('SEM-05 semantic adapter source has no resolver/evidence/apply authority im
 
   const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
   assert.deepEqual(pkg.dependencies, { '@tonejs/midi': '2.0.28' })
+})
+
+
+test('SEM-05 bridge fails closed when source-profile admission is missing', async () => {
+  const input = await inputs()
+  delete input.sourceProfile
+  const packet = analyzeSemanticConsistency(input)
+  assert.equal(packet.status, 'UNSUPPORTED')
+  assert.equal(packet.resolverEligible, false)
 })
