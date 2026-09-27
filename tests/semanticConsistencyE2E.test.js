@@ -20,13 +20,13 @@ test('SEM-05 real bounded MusicXML path produces read-only semantic PASS', async
   const before = JSON.stringify(parsed.scoreGraph)
 
   assert.equal(parsed.sha256, provenance.sourceSha256)
-  assert.deepEqual(
-    analyzeSemanticSourceProfile({
-      musicXml: bytes,
-      expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
-    }),
-    { status: 'PASS', diagnostics: [] }
-  )
+  const sourceProfile = analyzeSemanticSourceProfile({
+    musicXml: bytes,
+    expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
+  })
+  assert.equal(sourceProfile.status, 'PASS')
+  assert.deepEqual(sourceProfile.diagnostics, [])
+  assert.equal(sourceProfile.sourceSha256, provenance.sourceSha256)
 
   const packet = analyzeSemanticConsistency({
     scoreGraph: parsed.scoreGraph,
@@ -34,6 +34,7 @@ test('SEM-05 real bounded MusicXML path produces read-only semantic PASS', async
     semanticSnapshot,
     observedSourceSha256: parsed.sha256,
     observedSourceId: parsed.sourceId,
+    sourceProfile,
   })
 
   assert.equal(packet.status, 'PASS')
@@ -82,15 +83,49 @@ test('SEM-05 exact source SHA drift prevents PASS even when musical notes are un
   })
 
   assert.notEqual(parsed.sha256, provenance.sourceSha256)
+  const sourceProfile = analyzeSemanticSourceProfile({
+    musicXml: changed,
+    expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
+  })
   const packet = analyzeSemanticConsistency({
     scoreGraph: parsed.scoreGraph,
     provenance,
     semanticSnapshot,
     observedSourceSha256: parsed.sha256,
     observedSourceId: parsed.sourceId,
+    sourceProfile,
   })
 
   assert.equal(packet.status, 'UNSUPPORTED')
   assert.equal(packet.diagnostics[0]?.code, 'SEMANTIC_SOURCE_MISMATCH')
   assert.equal(packet.resolverEligible, false)
+})
+
+
+test('SEM-05 bridge rejects a PASS source profile from different source bytes', async () => {
+  const provenance = await json('provenance.json')
+  const semanticSnapshot = await json('semantic-baseline.semantic-snapshot.json')
+  const bytes = await xmlBytes()
+  const parsed = parseBoundedMusicXmlScoreGraph(bytes, {
+    sourceId: provenance.sourceId,
+    includeRests: false,
+  })
+  const repacked = bytes.toString('utf8').replace('Semantic Baseline', 'Semantic Baseline Other')
+  const otherProfile = analyzeSemanticSourceProfile({
+    musicXml: repacked,
+    expectedDivisionsPerQuarter: provenance.divisionsPerQuarter,
+  })
+  assert.equal(otherProfile.status, 'PASS')
+
+  const packet = analyzeSemanticConsistency({
+    scoreGraph: parsed.scoreGraph,
+    provenance,
+    semanticSnapshot,
+    observedSourceSha256: parsed.sha256,
+    observedSourceId: parsed.sourceId,
+    sourceProfile: otherProfile,
+  })
+
+  assert.equal(packet.status, 'UNSUPPORTED')
+  assert.equal(packet.diagnostics[0]?.code, 'SEMANTIC_SOURCE_MISMATCH')
 })
