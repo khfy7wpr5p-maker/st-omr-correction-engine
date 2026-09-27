@@ -103,6 +103,24 @@ The engine never grants itself production authority from a proposal alone.
    - ScoreMosaic integration remains shadow/evidence only;
    - core does not depend on host UI, playback, TAB, authentication, deployment or provider runtime.
 
+## SEM-05 shadow semantic consistency boundary
+
+SEM-05 adds an adapter-only reference path:
+
+```text
+exact source MusicXML
+  +--> existing bounded OMR canonicalizer --> immutable ScoreGraph
+  |
+  +--> pinned ST Score Semantic Engine --> SemanticSnapshot + provenance
+                                      |
+                                      v
+                         SemanticConsistencyPacketV1
+```
+
+The packet is diagnostic/revalidation evidence only. Since both interpretations derive from the same source MusicXML, it cannot satisfy the resolver's independent-evidence-source requirement and is deliberately not represented with the normal `createEvidence()` contract. `EVIDENCE_SOURCE`, candidate confidence, resolver policy, teacher-gold provenance, REAL_OMR readiness and E11A remain unchanged.
+
+The admitted profile is bounded and fail-closed: one part, pitched non-rest notes, fixed divisions, full non-implicit measures, structural note comparison, simple tie roles and meter. No Python/Partitura runtime, network service, Render dependency, patch production, source mutation or MusicXML write-back is introduced.
+
 ## CE-E2E correction surface
 
 CE-E2E-01 completed the executable proposal path for deterministic targets:
