@@ -6,6 +6,23 @@ Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
 This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
 
+## 2026-09-27 SEM-05 branch state
+
+SEM-05 implements a branch-only, shadow/reference semantic-consistency path against the qualified ST Score Semantic Engine contract. It compares a provenance-pinned SemanticSnapshot with the existing OMR ScoreGraph without granting correction authority.
+
+The safety result is explicit:
+
+- same-source Semantic Engine output is not independent evidence;
+- semantic diagnostics never enter `candidate.evidence`;
+- `createEvidence()` and `EVIDENCE_SOURCE` are unchanged;
+- resolver thresholds and independent-source counting are unchanged;
+- teacher-gold and REAL_OMR readiness are unchanged;
+- E11A remains the only authorized narrow automatic-correction slice;
+- source ScoreGraph remains immutable;
+- no Python/Partitura runtime, REST/network service, Render change or MusicXML write-back is introduced.
+
+Implementation is tracked in draft PR #94 and remains unmerged. Exact-head CI is required before qualification and before any merge decision.
+
 ## 2026-09-20 CE-E2E architecture synchronization
 
 CE-E2E-01 (PR #90) completed the bounded end-to-end correction proposal path for exact deterministic targets:
