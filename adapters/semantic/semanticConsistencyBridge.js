@@ -62,6 +62,7 @@ export function analyzeSemanticConsistency({
   semanticSnapshot,
   observedSourceSha256,
   observedSourceId,
+  sourceProfile,
 }) {
   if (!scoreGraph || typeof scoreGraph !== 'object') throw new TypeError('scoreGraph is required.')
 
@@ -69,7 +70,22 @@ export function analyzeSemanticConsistency({
   let reference = null
   let comparison = null
 
-  if (scoreGraph.sourceId !== observedSourceId) {
+  if (!sourceProfile || sourceProfile.status !== STATUS.PASS) {
+    comparison = Object.freeze({
+      status: STATUS.UNSUPPORTED,
+      diagnostics: Object.freeze(
+        Array.isArray(sourceProfile?.diagnostics) && sourceProfile.diagnostics.length > 0
+          ? [...sourceProfile.diagnostics]
+          : [Object.freeze({
+              code: CODE.PROFILE_UNSUPPORTED,
+              message: 'A PASS semantic source-profile admission is required.',
+              location: null,
+            })]
+      ),
+    })
+  } else if (sourceProfile.sourceSha256 !== observedSourceSha256) {
+    comparison = sourceMismatch('Semantic source-profile bytes do not match the observed source SHA-256.')
+  } else if (scoreGraph.sourceId !== observedSourceId) {
     comparison = sourceMismatch('ScoreGraph source identity does not match the observed semantic source.')
   } else {
     try {
