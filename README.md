@@ -12,6 +12,14 @@ Production automatic correction remains narrower than proposal generation: E11A 
 
 The REAL_OMR readiness gate additionally requires gold-eligible, teacher-accepted **correction-needed** real OMR evidence before expanded classes can advance toward automatic correction. Known-correct `NO_CORRECTION_NEEDED`, controlled-mutation and synthetic labels cannot substitute for that evidence.
 
+## SEM-05 — Shadow Semantic Consistency
+
+SEM-05 adds a read-only consistency channel between the existing OMR `ScoreGraph` and a provenance-pinned ST Score Semantic Engine snapshot produced from the exact same MusicXML bytes.
+
+Because both views derive from the same source, Semantic Engine output is **not independent correction evidence**. It is kept outside `createEvidence()`, `EVIDENCE_SOURCE`, candidate evidence and resolver inputs. The packet has effective weight 0, `resolverEligible=false`, no patch/apply surface and no teacher-gold/readiness authority.
+
+The first profile compares pitched non-rest notes, measure membership/count, local onset, duration, voice, staff, simple tie boundary roles and meter. Unsupported structures fail closed. There is no OMR runtime dependency on Python/Partitura, no network/Render service and no MusicXML write-back.
+
 ## Safety invariants
 
 - Raw/source MusicXML is immutable.
