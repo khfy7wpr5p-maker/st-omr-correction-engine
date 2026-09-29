@@ -85,6 +85,9 @@ test('teacher structural patch validates operation-specific shapes', () => {
     operation: op.REMOVE_EVENT, measureKey: 'm1', eventId: 'n1', before: {}, after: {},
   }), /after/)
   assert.throws(() => createTeacherStructuralPatch({
+    operation: op.REMOVE_EVENT, measureKey: 'm1', eventId: 'n1', before: {}, after: null,
+  }), /eventIndex/)
+  assert.throws(() => createTeacherStructuralPatch({
     operation: op.CHANGE_EVENT_DURATION, measureKey: 'm1', before: 1, after: 2,
   }), /eventId/)
   assert.throws(() => createTeacherStructuralPatch({
@@ -126,4 +129,30 @@ test('existing automatic correction operation vocabulary is not widened', () => 
   assert.equal(Object.values(api.PATCH_OPERATION).includes('INSERT_EVENT'), false)
   assert.equal(Object.values(api.PATCH_OPERATION).includes('REMOVE_EVENT'), false)
   assert.equal(Object.values(api.PATCH_OPERATION).includes('CHANGE_MEASURE_METER'), false)
+})
+
+
+test('patch set snapshots mutable authorization and patch inputs instead of retaining mutable references', () => {
+  const mutableAuthorization = { mode: 'EXPLICIT_TEACHER_EDIT', actionId: 'mutable-action' }
+  const mutablePatch = {
+    operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION,
+    measureKey: 'm1',
+    eventId: 'n1',
+    before: 1,
+    after: 0.5,
+  }
+  const set = api.createTeacherStructuralPatchSet({
+    patchSetId: 'immutable-set',
+    baseSourceId: 'source-1',
+    baseGraphFingerprint: 'c'.repeat(64),
+    authorization: mutableAuthorization,
+    patches: [mutablePatch],
+  })
+
+  assert.equal(Object.isFrozen(set.authorization), true)
+  assert.equal(Object.isFrozen(set.patches[0]), true)
+  mutableAuthorization.actionId = 'mutated-action'
+  mutablePatch.after = 99
+  assert.equal(set.authorization.actionId, 'mutable-action')
+  assert.equal(set.patches[0].after, 0.5)
 })
