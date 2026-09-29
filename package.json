@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "npm run build:ce-struct-browser && npm run build:ce-analysis-browser && node --test",
-    "check": "node --check src/index.js && node --check browser/ceStructBrowserEntry.js && node --check browser/ceAnalysisBrowserEntry.js && node --check browser/nodeCryptoSha256Shim.js && node --check browser/nodeFsUnavailableShim.js && node --check scripts/buildCeStructBrowserRuntime.mjs && node --check scripts/buildCeAnalysisBrowserRuntime.mjs",
+    "check": "node --check src/index.js && node --check browser/ceStructBrowserEntry.js && node --check browser/ceAnalysisBrowserEntry.js && node --check browser/bufferShim.js && node --check browser/nodeCryptoSha256Shim.js && node --check browser/nodeFsUnavailableShim.js && node --check scripts/buildCeStructBrowserRuntime.mjs && node --check scripts/buildCeAnalysisBrowserRuntime.mjs",
     "build:ce-struct-browser": "node scripts/buildCeStructBrowserRuntime.mjs",
     "build:ce-analysis-browser": "node scripts/buildCeAnalysisBrowserRuntime.mjs"
   },
