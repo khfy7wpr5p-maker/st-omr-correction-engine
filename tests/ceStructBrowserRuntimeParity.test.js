@@ -147,6 +147,94 @@ test('CE-STRUCT browser fingerprint exactly matches Node for canonical and Unico
   }
 })
 
+test('CE-STRUCT browser runtime matches Node for insert positions at beginning middle and end', async () => {
+  const browser = await loadBrowserRuntime()
+
+  for (const eventIndex of [0, 1, 2]) {
+    const nodeSource = makeGraph(nodeRuntime)
+    const browserSource = makeGraph(browser)
+    const eventId = `insert-${eventIndex}`
+
+    const nodePatch = nodeRuntime.createTeacherStructuralPatch({
+      operation: 'INSERT_EVENT',
+      measureKey: 'm1',
+      eventId,
+      eventIndex,
+      before: null,
+      after: insertedEvent(eventId),
+    })
+    const browserPatch = browser.createTeacherStructuralPatch(plain(nodePatch))
+
+    const nodePacket = nodeRuntime.processSesliTabTeacherStructuralEdit({
+      scoreGraph: nodeSource,
+      patchSet: makePatchSet(nodeRuntime, nodeSource, [nodePatch], `insert-position-${eventIndex}`),
+    })
+    const browserPacket = browser.processSesliTabTeacherStructuralEdit({
+      scoreGraph: browserSource,
+      patchSet: makePatchSet(browser, browserSource, [browserPatch], `insert-position-${eventIndex}`),
+    })
+
+    comparePackets(nodePacket, browserPacket)
+    assert.equal(browserPacket.projection.ok, true)
+    assert.equal(browserPacket.revalidation.reversibilityVerified, true)
+    assert.equal(browserPacket.projection.graph.events[eventIndex].id, eventId)
+  }
+})
+
+test('CE-STRUCT browser runtime matches Node for middle removal and exact event-order rollback', async () => {
+  const browser = await loadBrowserRuntime()
+
+  function makeThreeEventGraph(runtime) {
+    return runtime.createScoreGraph({
+      sourceId: 'ce-browser-middle-remove',
+      measures: [runtime.createMeasure({ key: 'm1', beats: 4, beatType: 4 })],
+      events: [
+        runtime.createScoreEvent({
+          id: 'a', measureKey: 'm1', onset: 0, duration: 1,
+          voice: 1, staff: 1, pitch: 60,
+        }),
+        runtime.createScoreEvent({
+          id: 'middle', measureKey: 'm1', onset: 0.5, duration: 0.25,
+          voice: 2, staff: 1, pitch: 64,
+        }),
+        runtime.createScoreEvent({
+          id: 'b', measureKey: 'm1', onset: 1, duration: 1,
+          voice: 1, staff: 1, pitch: 62,
+        }),
+      ],
+    })
+  }
+
+  const nodeSource = makeThreeEventGraph(nodeRuntime)
+  const browserSource = makeThreeEventGraph(browser)
+  const nodePatch = nodeRuntime.createTeacherStructuralPatch({
+    operation: 'REMOVE_EVENT',
+    measureKey: 'm1',
+    eventId: 'middle',
+    eventIndex: 1,
+    before: nodeSource.events[1],
+    after: null,
+  })
+  const browserPatch = browser.createTeacherStructuralPatch(plain(nodePatch))
+
+  const nodePacket = nodeRuntime.processSesliTabTeacherStructuralEdit({
+    scoreGraph: nodeSource,
+    patchSet: makePatchSet(nodeRuntime, nodeSource, [nodePatch], 'middle-remove'),
+  })
+  const browserPacket = browser.processSesliTabTeacherStructuralEdit({
+    scoreGraph: browserSource,
+    patchSet: makePatchSet(browser, browserSource, [browserPatch], 'middle-remove'),
+  })
+
+  comparePackets(nodePacket, browserPacket)
+  assert.equal(browserPacket.projection.ok, true)
+  assert.equal(browserPacket.revalidation.reversibilityVerified, true)
+  assert.deepEqual(
+    plain(browserPacket.projection.graph.events.map((event) => event.id)),
+    ['a', 'b'],
+  )
+})
+
 test('CE-STRUCT browser runtime matches Node for every admitted structural operation', async () => {
   const browser = await loadBrowserRuntime()
 
