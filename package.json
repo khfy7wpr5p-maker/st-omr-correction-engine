@@ -7,13 +7,15 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test",
-    "check": "node --check src/index.js"
+    "test": "npm run build:ce-struct-browser && node --test",
+    "check": "node --check src/index.js",
+    "build:ce-struct-browser": "node scripts/buildCeStructBrowserRuntime.mjs"
   },
   "dependencies": {
     "@tonejs/midi": "2.0.28"
   },
   "devDependencies": {
-    "@noble/hashes": "2.4.0"
+    "@noble/hashes": "2.4.0",
+    "esbuild": "0.28.2"
   }
 }
