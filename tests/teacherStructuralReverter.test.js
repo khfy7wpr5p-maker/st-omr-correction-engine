@@ -73,7 +73,7 @@ test('single structural operations project and revert exactly without mutating e
 
   const patches = [
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2') }),
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', before: source.events[1], after: null }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', eventIndex: 1, before: source.events[1], after: null }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_VOICE, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_STAFF, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
