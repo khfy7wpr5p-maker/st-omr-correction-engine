@@ -133,6 +133,28 @@ The structural operation vocabulary is limited to event insert/remove, event dur
 
 Teacher-edit authorization is an audit proof that the host supplied an explicit edit. It is not final teacher approval. A structural integrity `PASS` can make a host revision eligible to be represented as teacher-corrected, but it cannot mark the score teacher-approved, share it with a student, persist it for learning, serialize corrected MusicXML, or enable unattended automatic correction.
 
+## CE-STRUCT browser runtime boundary
+
+The CE-STRUCT browser artifact is a packaging boundary, not a second correction engine:
+
+```text
+same CE-STRUCT source modules
+        |
+        v
+bounded browser entry
+        |
+        v
+esbuild IIFE bundle
+        |
+        +--> exact checked-out engine revision
+        +--> artifact SHA-256 manifest
+        +--> zero external imports
+```
+
+The browser build aliases only the `node:crypto` SHA-256 call used for ScoreGraph fingerprinting to a tested browser-compatible SHA-256 shim. Node and browser behavior are qualified for the admitted structural operations and rollback semantics; the browser-specific code may not fork projection or revalidation logic.
+
+Pull-request CI checks out the actual PR head SHA before qualification, and the runtime manifest must match that same `git HEAD`. The artifact has no network, persistence, authentication, automatic apply, final teacher approval, student sharing, learning or MusicXML write-back authority. No Render/service/domain is part of this boundary.
+
 ## SEM-05 shadow semantic consistency boundary
 
 SEM-05 adds an adapter-only reference path:
