@@ -15,7 +15,8 @@ export function invertTeacherStructuralPatch(patch) {
       operation: TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT,
       measureKey: patch.measureKey,
       eventId: patch.eventId,
-      before: patch.after,
+      eventIndex: patch.eventIndex,
+      before: createScoreEvent(patch.after),
       after: null,
     })
   }
@@ -25,8 +26,9 @@ export function invertTeacherStructuralPatch(patch) {
       operation: TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
       measureKey: patch.measureKey,
       eventId: patch.eventId,
+      eventIndex: patch.eventIndex,
       before: null,
-      after: patch.before,
+      after: createScoreEvent(patch.before),
     })
   }
 
@@ -39,35 +41,11 @@ export function invertTeacherStructuralPatch(patch) {
   })
 }
 
-function inverseForPatchSet(patch) {
-  if (patch.operation === TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT) {
-    return createTeacherStructuralPatch({
-      operation: TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT,
-      measureKey: patch.measureKey,
-      eventId: patch.eventId,
-      before: createScoreEvent(patch.after),
-      after: null,
-    })
-  }
-
-  if (patch.operation === TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT) {
-    return createTeacherStructuralPatch({
-      operation: TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
-      measureKey: patch.measureKey,
-      eventId: patch.eventId,
-      before: null,
-      after: createScoreEvent(patch.before),
-    })
-  }
-
-  return invertTeacherStructuralPatch(patch)
-}
-
 export function invertTeacherStructuralPatchSet(patchSet, { projectedGraph } = {}) {
   if (!patchSet || typeof patchSet !== 'object') throw new TypeError('patchSet is required.')
   if (!projectedGraph || typeof projectedGraph !== 'object') throw new TypeError('projectedGraph is required.')
 
-  const inversePatches = [...patchSet.patches].reverse().map(inverseForPatchSet)
+  const inversePatches = [...patchSet.patches].reverse().map(invertTeacherStructuralPatch)
   return createTeacherStructuralPatchSet({
     patchSetId: `${patchSet.patchSetId}:revert`,
     baseSourceId: projectedGraph.sourceId,
