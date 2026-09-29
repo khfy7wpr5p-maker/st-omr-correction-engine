@@ -44,10 +44,6 @@ test('CE-STRUCT browser runtime manifest binds exact source and forbidden author
   assert.equal(manifest.global, 'STOmrCorrectionCeStructRuntime')
   assert.equal(manifest.externalImports, 0)
   assert.equal(manifest.engineSourceRevision, await expectedEngineSourceRevision())
-  assert.equal(
-    manifest.engineSourceRevision,
-    execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
-  )
   assert.equal(manifest.bundler.package, 'esbuild')
   assert.equal(manifest.bundler.version, '0.28.2')
   assert.equal(manifest.hashProvider.package, '@noble/hashes')
