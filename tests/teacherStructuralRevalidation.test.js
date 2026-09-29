@@ -51,7 +51,7 @@ test('declared structural diff passes integrity checks without claiming musical 
   const inserted = { id: 'r1', measureKey: 'm1', onset: 2, duration: 0.5, voice: 1, staff: 1, pitch: null, isRest: true, isChordTone: false, metadata: null }
   const patches = [
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'b', before: 1, after: 0.5 }),
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'r1', before: null, after: inserted }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'r1', eventIndex: 2, before: null, after: inserted }),
   ]
   const set = setFor(source, patches)
   const projected = api.projectTeacherStructuralPatchSet(source, set)
