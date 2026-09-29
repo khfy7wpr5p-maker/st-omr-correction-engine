@@ -6,6 +6,27 @@ Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
 This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
 
+## 2026-09-29 CE-STRUCT-01 branch state
+
+CE-STRUCT-01 is implemented on draft PR #96 as a teacher-authorized structural correction lane. It remains unmerged and undeployed.
+
+Branch behavior now includes:
+
+- a dedicated `TeacherStructuralPatchSetV1` contract isolated from `PATCH_OPERATION`;
+- exact base `sourceId` + SHA-256 ScoreGraph fingerprint binding;
+- explicit teacher-action authorization without conflating it with final teacher approval;
+- explicit note/rest insertion and removal;
+- teacher-authored duration, voice, staff, tie and existing-measure meter edits;
+- atomic immutable projection with stale-before failure;
+- deterministic inverse patches and exact rollback;
+- independent structural diff/revalidation with residual/resolved/new finding separation;
+- a read-only SesliTab adapter that can mark only `teacherCorrectedRevisionEligible`;
+- hard false authority flags for automatic apply, final teacher approval, student sharing, MusicXML write-back and learning.
+
+E11A remains exactly the existing one-patch high-confidence `CHANGE_VOICE` automatic slice. Automatic DURATION and other structural correction are not enabled. No persistence, authentication, student-delivery, Render/service/domain, provider, or MusicXML serializer change is introduced.
+
+Pre-documentation branch qualification reached `test-and-build` run #233 — SUCCESS. A fresh exact-head run after documentation is still required before the branch can be reported ready for a merge decision.
+
 ## 2026-09-27 SEM-05 branch state
 
 SEM-05 implements a branch-only, shadow/reference semantic-consistency path against the qualified ST Score Semantic Engine contract. It compares a provenance-pinned SemanticSnapshot with the existing OMR ScoreGraph without granting correction authority.
