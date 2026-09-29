@@ -6,9 +6,24 @@ Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
 This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
 
+## 2026-09-29 CE-STRUCT browser-runtime prerequisite branch state
+
+CE-STRUCT-01 is already merged on `main` at `c11d35b35321c5d7761e7033ce4ce1d91cbeb1c2`. The current draft prerequisite PR #97 packages only that bounded teacher-structural surface for browser consumption.
+
+Current branch behavior includes:
+
+- exact Node/browser SHA-256 fingerprint parity;
+- a bounded browser entry that does not expose automatic correction, approval, persistence, sharing or MusicXML write-back surfaces;
+- an esbuild IIFE artifact with zero external imports;
+- a manifest containing exact checked-out engine revision, artifact byte size and SHA-256;
+- PR CI that checks out the actual PR head rather than GitHub's temporary merge ref before qualification;
+- browser-vs-Node parity coverage across admitted teacher structural operations and hard-false authority flags.
+
+No SesliTab production integration, Render/service/domain, deployment, persistence, authentication, automatic apply, final teacher approval, student sharing, learning, or MusicXML write-back is added by this prerequisite. Merge remains a separate explicit approval gate.
+
 ## 2026-09-29 CE-STRUCT-01 branch state
 
-CE-STRUCT-01 is implemented on draft PR #96 as a teacher-authorized structural correction lane. It remains unmerged and undeployed.
+CE-STRUCT-01 was implemented in PR #96 and is merged on `main` at `c11d35b35321c5d7761e7033ce4ce1d91cbeb1c2`. It remains a teacher-authorized structural correction lane and does not authorize deployment or broader automatic correction.
 
 Branch behavior now includes:
 
