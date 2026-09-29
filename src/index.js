@@ -59,6 +59,7 @@ export { REAL_OMR_ANNOTATION_STATUS, createRealOmrReviewObservation, buildRealOm
 export { createRealOmrEvidenceSplit, summarizeRealOmrEvidenceSplit } from './benchmark/realOmrEvidenceSplit.js'
 export { APPROVED_REAL_OMR_SEED, createApprovedRealOmrSeedFixture, projectApprovedRealOmrNoCorrectionGold, summarizeApprovedRealOmrSeedGold } from './benchmark/approvedRealOmrSeed.js'
 export { TEACHER_REVIEWED_REAL_OMR_CORRECTION_SEED, createTeacherReviewedRealOmrCorrectionGold } from './benchmark/teacherReviewedRealOmrCorrectionSeed.js'
+export { REAL_OMR_STRUCTURAL_FAILURE_CLASS, TEACHER_REVIEWED_REAL_OMR_STRUCTURAL_SEED, createTeacherReviewedRealOmrStructuralEvidence } from './benchmark/teacherReviewedRealOmrStructuralSeed.js'
 export { aggregateRealMidiCorpusMeasurements } from './benchmark/realMidiCorpusAggregate.js'
 export { hashSourceBytes, evaluateSourceMutationInvariant } from './benchmark/sourceMutationInvariant.js'
 export { evaluateSelectivePrediction, selectMetricAtThreshold } from './benchmark/selectivePredictionMetrics.js'
