@@ -28,6 +28,14 @@ The host must supply the exact teacher action and exact base revision. The engin
 
 A successful structural revalidation proves only that the declared teacher edit was represented exactly, introduced no undeclared mutation, and can be rolled back exactly. It does **not** prove musical correctness and does not grant final teacher approval, student sharing, learning/persistence authority, MusicXML write-back, or automatic correction.
 
+## CE-STRUCT browser runtime prerequisite
+
+A bounded browser-consumable CE-STRUCT runtime is built from the same teacher-structural contracts and implementation used by the Node engine. The bundle exposes only the approved score constructors, teacher structural patch constructors/fingerprint, and `processSesliTabTeacherStructuralEdit`.
+
+Each build emits `ce-struct-browser-runtime.js` plus a manifest bound to the exact checked-out engine commit and artifact SHA-256. Pull-request CI checks out the exact PR head before building, so provenance never points at GitHub's temporary merge ref.
+
+The browser runtime adds no network, persistence, authentication, automatic-apply, final-approval, student-share, learning, or MusicXML write-back authority. It exists only as a prerequisite for a later separately reviewed SesliTab pin; no service or deploy is introduced.
+
 ## Safety invariants
 
 - Raw/source MusicXML is immutable.

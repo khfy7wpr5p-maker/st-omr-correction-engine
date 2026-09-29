@@ -3,12 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "test": "node --test",
-    "check": "node --check src/index.js"
+    "test": "npm run build:ce-struct-browser && node --test",
+    "check": "node --check src/index.js && node --check browser/ceStructBrowserEntry.js && node --check browser/nodeCryptoSha256Shim.js && node --check scripts/buildCeStructBrowserRuntime.mjs",
+    "build:ce-struct-browser": "node scripts/buildCeStructBrowserRuntime.mjs"
   },
   "dependencies": {
     "@tonejs/midi": "2.0.28"
+  },
+  "devDependencies": {
+    "@noble/hashes": "2.4.0",
+    "esbuild": "0.28.2"
   }
 }
