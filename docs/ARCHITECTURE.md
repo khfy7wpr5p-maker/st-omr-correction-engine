@@ -103,6 +103,36 @@ The engine never grants itself production authority from a proposal alone.
    - ScoreMosaic integration remains shadow/evidence only;
    - core does not depend on host UI, playback, TAB, authentication, deployment or provider runtime.
 
+## CE-STRUCT-01 teacher-authorized structural correction boundary
+
+CE-STRUCT-01 is deliberately separate from the normal correction-patch and automatic-correction lane:
+
+```text
+explicit teacher editor action
+        |
+        v
+TeacherStructuralPatchSetV1
+        |
+        v
+exact base sourceId + graph fingerprint gate
+        |
+        v
+atomic immutable structural projection
+        |
+        v
+independent structural diff + detector revalidation
+        |
+        v
+exact rollback proof
+        |
+        v
+read-only SesliTab host packet
+```
+
+The structural operation vocabulary is limited to event insert/remove, event duration/voice/staff/tie changes, and meter change on an existing measure. It is not added to `PATCH_OPERATION`, and `controlledAutoCorrection.js`, resolver/candidate authority, REAL_OMR readiness, and E11A remain unchanged.
+
+Teacher-edit authorization is an audit proof that the host supplied an explicit edit. It is not final teacher approval. A structural integrity `PASS` can make a host revision eligible to be represented as teacher-corrected, but it cannot mark the score teacher-approved, share it with a student, persist it for learning, serialize corrected MusicXML, or enable unattended automatic correction.
+
 ## SEM-05 shadow semantic consistency boundary
 
 SEM-05 adds an adapter-only reference path:
