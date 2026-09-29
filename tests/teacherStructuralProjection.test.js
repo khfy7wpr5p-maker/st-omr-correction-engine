@@ -66,12 +66,12 @@ test('single teacher structural operations project onto a new graph without muta
     },
     {
       name: 'remove note',
-      patch: (source) => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'n1', before: source.events[0], after: null }),
+      patch: (source) => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'n1', eventIndex: 0, before: source.events[0], after: null }),
       assertProjected: (graph) => assert.equal(graph.events.some((event) => event.id === 'n1'), false),
     },
     {
       name: 'remove rest',
-      patch: (source) => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', before: source.events[1], after: null }),
+      patch: (source) => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', eventIndex: 1, before: source.events[1], after: null }),
       assertProjected: (graph) => assert.equal(graph.events.some((event) => event.id === 'r1'), false),
     },
     {
@@ -164,4 +164,21 @@ test('a structural patch set cannot be replayed against its projected revision',
   assert.equal(replay.ok, false)
   assert.equal(replay.code, 'STRUCTURAL_BASE_FINGERPRINT_MISMATCH')
   assert.equal(replay.graph, first.graph)
+})
+
+
+test('projector rejects an unsupported structural patch-set schema before applying patches', () => {
+  const project = requireProjector()
+  const source = sourceGraph()
+  const p = api.createTeacherStructuralPatch({
+    operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION,
+    measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5,
+  })
+  const valid = patchSet(source, [p], { patchSetId: 'schema-test' })
+  const incompatible = Object.freeze({ ...valid, schemaVersion: 'teacher-structural-patch-set-v99' })
+
+  const result = project(source, incompatible)
+  assert.equal(result.ok, false)
+  assert.equal(result.code, 'STRUCTURAL_PATCH_SET_SCHEMA_UNSUPPORTED')
+  assert.equal(result.graph, source)
 })
