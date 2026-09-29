@@ -17,6 +17,7 @@ const outDir = path.join(repoRoot, 'dist', 'browser-analysis')
 const entryPath = path.join(repoRoot, 'browser', 'ceAnalysisBrowserEntry.js')
 const cryptoShimPath = path.join(repoRoot, 'browser', 'nodeCryptoSha256Shim.js')
 const fsShimPath = path.join(repoRoot, 'browser', 'nodeFsUnavailableShim.js')
+const bufferShimPath = path.join(repoRoot, 'browser', 'bufferShim.js')
 const artifactPath = path.join(outDir, CE_ANALYSIS_BROWSER_ARTIFACT)
 const manifestPath = path.join(outDir, CE_ANALYSIS_BROWSER_MANIFEST)
 
@@ -102,6 +103,7 @@ export async function buildCeAnalysisBrowserRuntime() {
     minify: true,
     sourcemap: false,
     legalComments: 'eof',
+    inject: [bufferShimPath],
     metafile: true,
     logLevel: 'warning',
     plugins: [{
