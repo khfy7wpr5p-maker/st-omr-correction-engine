@@ -24,6 +24,11 @@ function requiredString(value, name) {
   return value
 }
 
+function requiredEventIndex(value) {
+  if (!Number.isInteger(value) || value < 0) throw new TypeError('eventIndex must be a non-negative integer.')
+  return value
+}
+
 function frozenValue(value) {
   if (Array.isArray(value)) return Object.freeze(value.map(frozenValue))
   if (value && typeof value === 'object') {
@@ -43,6 +48,7 @@ export function createTeacherStructuralPatch({
   operation,
   measureKey,
   eventId = null,
+  eventIndex = null,
   before,
   after,
 } = {}) {
@@ -53,16 +59,20 @@ export function createTeacherStructuralPatch({
     requiredString(eventId, 'eventId')
     if (before !== null) throw new TypeError('INSERT_EVENT before must be null.')
     if (!after || typeof after !== 'object' || Array.isArray(after)) throw new TypeError('INSERT_EVENT after must be an object.')
+    requiredEventIndex(eventIndex)
   } else if (operation === TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT) {
     requiredString(eventId, 'eventId')
     if (!before || typeof before !== 'object' || Array.isArray(before)) throw new TypeError('REMOVE_EVENT before must be an object.')
     if (after !== null) throw new TypeError('REMOVE_EVENT after must be null.')
+    requiredEventIndex(eventIndex)
   } else if (EVENT_FIELD_OPERATIONS.has(operation)) {
     requiredString(eventId, 'eventId')
+    if (eventIndex != null) throw new TypeError('eventIndex is only valid for INSERT_EVENT or REMOVE_EVENT.')
     if (before === undefined) throw new TypeError('before is required.')
     if (after === undefined) throw new TypeError('after is required.')
   } else if (operation === TEACHER_STRUCTURAL_OPERATION.CHANGE_MEASURE_METER) {
     if (eventId != null) throw new TypeError('CHANGE_MEASURE_METER eventId must be absent.')
+    if (eventIndex != null) throw new TypeError('CHANGE_MEASURE_METER eventIndex must be absent.')
     if (!before || typeof before !== 'object' || Array.isArray(before)) throw new TypeError('CHANGE_MEASURE_METER before must be an object.')
     if (!after || typeof after !== 'object' || Array.isArray(after)) throw new TypeError('CHANGE_MEASURE_METER after must be an object.')
   }
@@ -71,6 +81,7 @@ export function createTeacherStructuralPatch({
     operation,
     measureKey,
     eventId,
+    eventIndex,
     before: frozenValue(before),
     after: frozenValue(after),
   })
@@ -92,17 +103,17 @@ export function createTeacherStructuralPatchSet({
     throw new TypeError('Explicit teacher authorization is required.')
   }
   if (!Array.isArray(patches) || patches.length === 0) throw new TypeError('patches must be a non-empty array.')
-  if (patches.some((patch) => !patch || !Object.values(TEACHER_STRUCTURAL_OPERATION).includes(patch.operation))) {
-    throw new TypeError('patches must contain teacher structural patches.')
-  }
+
+  const normalizedAuthorization = createTeacherEditAuthorization({ actionId: authorization.actionId })
+  const normalizedPatches = patches.map((patch) => createTeacherStructuralPatch(patch))
 
   return Object.freeze({
     schemaVersion: TEACHER_STRUCTURAL_PATCH_SCHEMA_VERSION,
     patchSetId,
     baseSourceId,
     baseGraphFingerprint,
-    authorization,
-    patches: Object.freeze([...patches]),
+    authorization: normalizedAuthorization,
+    patches: Object.freeze(normalizedPatches),
     automaticApplyAuthority: false,
     finalTeacherApproval: false,
     studentShareEligible: false,
