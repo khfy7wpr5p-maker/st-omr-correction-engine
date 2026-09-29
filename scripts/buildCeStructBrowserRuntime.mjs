@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -55,27 +54,6 @@ function validRevision(value) {
 }
 
 export function resolveEngineSourceRevision() {
-  const explicit = process.env.ST_OMR_CORRECTION_ENGINE_SOURCE_REVISION?.trim()
-  if (explicit !== undefined) {
-    if (!validRevision(explicit)) {
-      throw new Error('Explicit CE-STRUCT engine source revision is invalid.')
-    }
-    return explicit
-  }
-
-  if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
-    const eventPath = process.env.GITHUB_EVENT_PATH
-    if (typeof eventPath !== 'string' || eventPath.trim() === '') {
-      throw new Error('GitHub pull request event path is required for exact engine revision provenance.')
-    }
-    const event = JSON.parse(readFileSync(eventPath, 'utf8'))
-    const headRevision = event?.pull_request?.head?.sha
-    if (!validRevision(headRevision)) {
-      throw new Error('GitHub pull request head revision is invalid.')
-    }
-    return headRevision
-  }
-
   const headRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
     cwd: repoRoot,
     encoding: 'utf8',
