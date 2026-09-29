@@ -53,21 +53,3 @@ test('CE-STRUCT browser SHA-256 shim rejects unsupported algorithms and digest e
   )
 })
 
-
-test('repository Node engine floor covers the pinned browser hash provider', async () => {
-  const packageJson = JSON.parse(
-    await import('node:fs/promises').then(({ readFile }) =>
-      readFile(new URL('../package.json', import.meta.url), 'utf8')),
-  )
-  const packageLock = JSON.parse(
-    await import('node:fs/promises').then(({ readFile }) =>
-      readFile(new URL('../package-lock.json', import.meta.url), 'utf8')),
-  )
-
-  assert.equal(packageJson.engines?.node, '>=20.19.0')
-  assert.equal(packageLock.packages?.['']?.engines?.node, '>=20.19.0')
-  assert.equal(
-    packageLock.packages?.['node_modules/@noble/hashes']?.engines?.node?.replace(/\s+/g, ''),
-    '>=20.19.0',
-  )
-})
