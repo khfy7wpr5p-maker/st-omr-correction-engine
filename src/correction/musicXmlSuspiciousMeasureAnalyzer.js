@@ -29,6 +29,9 @@ export function analyzeMusicXmlSuspiciousMeasures({
   const id = boundedSourceId(sourceId)
   if (!Number.isFinite(tolerance) || tolerance < 0) throw new RangeError('tolerance must be finite and non-negative.')
 
+  const partIdMatch = xml.match(/<part\b[^>]*\bid="([^"]+)"/i)
+  if (!partIdMatch?.[1]?.trim()) throw new Error('MUSICXML_PART_ID_REQUIRED')
+  const partId = partIdMatch[1].trim()
   const parsed = parseBoundedMusicXmlScoreGraph(xml, { sourceId: id, includeRests: true })
   const analysis = analyzeOmrCorrections({ scoreGraph: parsed.scoreGraph, tolerance })
 
@@ -101,6 +104,7 @@ export function analyzeMusicXmlSuspiciousMeasures({
     mode: 'SHADOW_ONLY',
     sourceId: parsed.sourceId,
     sourceHash: parsed.sha256,
+    partId,
     measureCount: parsed.summary.measureCount,
     eventCount: parsed.summary.eventCount,
     findings: Object.freeze(mapped),
