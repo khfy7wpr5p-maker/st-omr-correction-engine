@@ -36,7 +36,7 @@ test('every structural operation has a deterministic inverse', () => {
   const invert = requireFn('invertTeacherStructuralPatch')
   const source = sourceGraph()
   const patches = [
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2') }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2') }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', eventIndex: 1, before: source.events[1], after: null }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_VOICE, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
@@ -72,7 +72,7 @@ test('single structural operations project and revert exactly without mutating e
   const sourceJson = JSON.stringify(source)
 
   const patches = [
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2') }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2') }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', before: source.events[1], after: null }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_VOICE, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
@@ -105,7 +105,7 @@ test('mixed structural patch set rolls back in reverse order to the exact base g
   const source = sourceGraph()
 
   const patches = [
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2') }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2') }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5 }),
     api.createTeacherStructuralPatch({
       operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_MEASURE_METER,
@@ -184,6 +184,7 @@ test('standalone inverse of INSERT_EVENT is directly projectable against the pro
     operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
     measureKey: 'm1',
     eventId: 'n2',
+    eventIndex: 2,
     before: null,
     after: insertedEvent('n2'),
   })
