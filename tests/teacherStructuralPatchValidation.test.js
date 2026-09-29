@@ -35,8 +35,8 @@ test('explicit inserted note and rest payloads are accepted without deriving mus
   const noteAfter = { id: 'n2', measureKey: 'm1', onset: 2, duration: 0.5, voice: 2, staff: 1, pitch: 64, isRest: false, isChordTone: false, metadata: null }
   const restAfter = { id: 'r2', measureKey: 'm1', onset: 2.5, duration: 0.5, voice: 2, staff: 1, pitch: null, isRest: true, isChordTone: false, metadata: null }
 
-  const note = validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n2', before: null, after: noteAfter }) })
-  const rest = validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'r2', before: null, after: restAfter }) })
+  const note = validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n2', eventIndex: 2, before: null, after: noteAfter }) })
+  const rest = validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'r2', eventIndex: 2, before: null, after: restAfter }) })
 
   assert.equal(note.ok, true)
   assert.equal(rest.ok, true)
@@ -51,13 +51,14 @@ test('insert fails closed for incomplete payload, duplicate id, or unknown measu
   const duplicate = { id: 'n1', measureKey: 'm1', onset: 2, duration: 1, voice: 1, staff: 1, pitch: 64, isRest: false }
   const unknownMeasure = { id: 'n2', measureKey: 'm9', onset: 2, duration: 1, voice: 1, staff: 1, pitch: 64, isRest: false }
 
-  assert.equal(validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n2', before: null, after: incomplete }) }).code, 'INVALID_INSERT_EVENT')
-  assert.equal(validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n1', before: null, after: duplicate }) }).code, 'INSERT_EVENT_ID_ALREADY_EXISTS')
+  assert.equal(validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n2', eventIndex: 2, before: null, after: incomplete }) }).code, 'INVALID_INSERT_EVENT')
+  assert.equal(validate({ scoreGraph: source, patch: patch(api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, { eventId: 'n1', eventIndex: 2, before: null, after: duplicate }) }).code, 'INSERT_EVENT_ID_ALREADY_EXISTS')
 
   const unknownPatch = api.createTeacherStructuralPatch({
     operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
     measureKey: 'm9',
     eventId: 'n2',
+    eventIndex: 2,
     before: null,
     after: unknownMeasure,
   })
