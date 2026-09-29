@@ -80,3 +80,4 @@ export {
 export { AUDIVERIS_MUSICXML_IMPORTER_VERSION, importAudiverisMusicXml } from '../adapters/musicxml/index.js'
 export { parseBoundedMusicXmlScoreGraph } from '../adapters/musicxml/boundedMusicXmlScoreGraphAdapter.js'
 export { analyzeSesliTabShadow, analyzeSesliTabCorrectionShadow } from '../adapters/seslitab/shadowAdapter.js'
+export { processSesliTabTeacherStructuralEdit } from '../adapters/seslitab/teacherStructuralEditAdapter.js'
