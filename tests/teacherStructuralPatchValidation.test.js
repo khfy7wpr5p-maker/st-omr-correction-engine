@@ -25,6 +25,7 @@ function patch(operation, values = {}) {
     eventId: values.eventId ?? 'x1',
     before: values.before,
     after: values.after,
+    eventIndex: values.eventIndex ?? null,
   })
 }
 
@@ -68,16 +69,17 @@ test('remove note or rest requires the exact full current event snapshot', () =>
   const source = fixtureGraph()
 
   for (const event of source.events) {
-    const exact = patch(api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, { eventId: event.id, before: event, after: null })
+    const exact = patch(api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, { eventId: event.id, eventIndex: source.events.indexOf(event), before: event, after: null })
     assert.equal(validate({ scoreGraph: source, patch: exact }).ok, true)
 
     const staleBefore = { ...event, duration: event.duration + 0.25 }
-    const stale = patch(api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, { eventId: event.id, before: staleBefore, after: null })
+    const stale = patch(api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, { eventId: event.id, eventIndex: source.events.indexOf(event), before: staleBefore, after: null })
     assert.equal(validate({ scoreGraph: source, patch: stale }).code, 'STALE_STRUCTURAL_BEFORE_MISMATCH')
   }
 
   const missing = patch(api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, {
     eventId: 'missing',
+    eventIndex: 0,
     before: { id: 'missing', measureKey: 'm1', onset: 0, duration: 1, end: 1, voice: 1, staff: 1, pitch: 60, isRest: false, isChordTone: false, metadata: null },
     after: null,
   })
@@ -144,4 +146,41 @@ test('meter change validates complete supported meter state through createMeasur
     after: { ...after, beatType: 0 },
   })
   assert.equal(validate({ scoreGraph: source, patch: invalid }).code, 'INVALID_STRUCTURAL_AFTER')
+})
+
+
+test('exact snapshot comparison is independent of object key insertion order', () => {
+  const validate = requireValidator()
+  const source = fixtureGraph()
+  const event = source.events[0]
+  const reorderedBefore = {
+    metadata: event.metadata,
+    isChordTone: event.isChordTone,
+    isRest: event.isRest,
+    pitch: event.pitch,
+    staff: event.staff,
+    voice: event.voice,
+    end: event.end,
+    duration: event.duration,
+    onset: event.onset,
+    measureKey: event.measureKey,
+    id: event.id,
+  }
+  const remove = api.createTeacherStructuralPatch({
+    operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT,
+    measureKey: 'm1',
+    eventId: 'n1',
+    eventIndex: 0,
+    before: reorderedBefore,
+    after: null,
+  })
+  assert.equal(validate({ scoreGraph: source, patch: remove }).ok, true)
+
+  const meter = api.createTeacherStructuralPatch({
+    operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_MEASURE_METER,
+    measureKey: 'm1',
+    before: { pickup: false, implicit: false, beatType: 4, beats: 4 },
+    after: { pickup: false, implicit: false, beatType: 4, beats: 3 },
+  })
+  assert.equal(validate({ scoreGraph: source, patch: meter }).ok, true)
 })
