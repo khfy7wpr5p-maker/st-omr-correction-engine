@@ -25,7 +25,7 @@ Branch behavior now includes:
 
 E11A remains exactly the existing one-patch high-confidence `CHANGE_VOICE` automatic slice. Automatic DURATION and other structural correction are not enabled. No persistence, authentication, student-delivery, Render/service/domain, provider, or MusicXML serializer change is introduced.
 
-Guardrails review added RED regressions for nested contract immutability, schema-version rejection, key-order-independent exact snapshots, standalone inverse usability, and non-final event-order rollback. RED run #239 failed on those new tests as expected; GREEN run #251 passed `npm test` and `npm run check`. A fresh exact-head run after the final documentation sync is still required before a merge decision.
+Guardrails review added RED regressions for nested contract immutability, schema-version rejection, key-order-independent exact snapshots, standalone inverse usability, and non-final event-order rollback. RED run #239 failed on those new tests as expected; GREEN run #251 passed `npm test` and `npm run check`. Final post-documentation exact-head CI is tracked on PR #96 / Linear SES-107 / the CE-STRUCT-01 Notion handoff rather than pinning its run number here, because editing this file to record that run would create a new head that requires another qualification.
 
 ## 2026-09-27 SEM-05 branch state
 
