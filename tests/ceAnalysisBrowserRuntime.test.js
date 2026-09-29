@@ -7,8 +7,8 @@ import vm from 'node:vm'
 
 import { analyzeMusicXmlSuspiciousMeasures as analyzeNode } from '../src/correction/musicXmlSuspiciousMeasureAnalyzer.js'
 
-const artifactUrl = new URL('../dist/browser/ce-analysis-browser-runtime.js', import.meta.url)
-const manifestUrl = new URL('../dist/browser/ce-analysis-browser-runtime.manifest.json', import.meta.url)
+const artifactUrl = new URL('../dist/browser-analysis/ce-analysis-browser-runtime.js', import.meta.url)
+const manifestUrl = new URL('../dist/browser-analysis/ce-analysis-browser-runtime.manifest.json', import.meta.url)
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="4.0">
