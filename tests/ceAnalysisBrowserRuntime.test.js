@@ -71,6 +71,7 @@ test('browser analysis exactly matches Node and identifies the overfull second m
 
   assert.deepEqual(plain(browserResult), plain(nodeResult))
   assert.equal(browserResult.mode, 'SHADOW_ONLY')
+  assert.equal(browserResult.partId, 'P1')
   assert.equal(browserResult.automaticApplyAuthority, false)
   assert.equal(browserResult.musicXmlWriteBackAuthority, false)
   assert.deepEqual(plain(browserResult.suspiciousMeasures.map((item) => ({
