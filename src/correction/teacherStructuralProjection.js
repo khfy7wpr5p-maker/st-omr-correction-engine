@@ -1,7 +1,7 @@
 import { createMeasure } from '../model/measure.js'
 import { createScoreEvent } from '../model/scoreEvent.js'
 import { createScoreGraph } from '../model/scoreGraph.js'
-import { fingerprintScoreGraph, TEACHER_STRUCTURAL_OPERATION } from '../contracts/teacherStructuralPatch.js'
+import { fingerprintScoreGraph, TEACHER_STRUCTURAL_OPERATION, TEACHER_STRUCTURAL_PATCH_SCHEMA_VERSION } from '../contracts/teacherStructuralPatch.js'
 import { validateTeacherStructuralPatchAgainstGraph } from './teacherStructuralPatchValidation.js'
 
 function fail(code, sourceGraph) {
@@ -43,11 +43,13 @@ function applyNormalizedPatch({ graph, patch }) {
   let events = [...graph.events]
 
   if (patch.operation === TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT) {
-    events.push(createScoreEvent(patch.after))
+    if (!Number.isInteger(patch.eventIndex) || patch.eventIndex < 0 || patch.eventIndex > events.length) return null
+    events.splice(patch.eventIndex, 0, createScoreEvent(patch.after))
   } else if (patch.operation === TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT) {
-    const index = events.findIndex((event) => event.id === patch.eventId && event.measureKey === patch.measureKey)
-    if (index < 0) return null
-    events.splice(index, 1)
+    if (!Number.isInteger(patch.eventIndex) || patch.eventIndex < 0 || patch.eventIndex >= events.length) return null
+    const target = events[patch.eventIndex]
+    if (!target || target.id !== patch.eventId || target.measureKey !== patch.measureKey) return null
+    events.splice(patch.eventIndex, 1)
   } else if (patch.operation === TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION) {
     const next = replaceEvent(events, patch, (event) => createScoreEvent(eventInput(event, { duration: patch.after })))
     if (!next) return null
@@ -84,6 +86,13 @@ export function projectTeacherStructuralPatchSet(scoreGraph, patchSet) {
   if (!scoreGraph || typeof scoreGraph !== 'object') throw new TypeError('scoreGraph is required.')
   if (!patchSet || typeof patchSet !== 'object') throw new TypeError('patchSet is required.')
 
+  if (patchSet.schemaVersion !== TEACHER_STRUCTURAL_PATCH_SCHEMA_VERSION) return fail('STRUCTURAL_PATCH_SET_SCHEMA_UNSUPPORTED', scoreGraph)
+  if (typeof patchSet.patchSetId !== 'string' || !patchSet.patchSetId.trim()) return fail('STRUCTURAL_PATCH_SET_INVALID', scoreGraph)
+  if (
+    patchSet.automaticApplyAuthority !== false
+    || patchSet.finalTeacherApproval !== false
+    || patchSet.studentShareEligible !== false
+  ) return fail('STRUCTURAL_PATCH_SET_INVALID', scoreGraph)
   if (scoreGraph.sourceId !== patchSet.baseSourceId) return fail('STRUCTURAL_SOURCE_ID_MISMATCH', scoreGraph)
   if (fingerprintScoreGraph(scoreGraph) !== patchSet.baseGraphFingerprint) return fail('STRUCTURAL_BASE_FINGERPRINT_MISMATCH', scoreGraph)
   if (
@@ -118,6 +127,7 @@ export function projectTeacherStructuralPatchSet(scoreGraph, patchSet) {
       operation: normalized.operation,
       measureKey: normalized.measureKey,
       eventId: normalized.eventId,
+      eventIndex: normalized.eventIndex,
       before: normalized.before,
       after: normalized.after,
     }))
