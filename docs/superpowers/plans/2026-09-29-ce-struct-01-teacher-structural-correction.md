@@ -669,3 +669,20 @@ It does **not** authorize:
 ## Execution recommendation
 
 **Native execution is recommended** because Tasks 1–6 form one sequential structural contract with tightly coupled exact interfaces, while the critical risk is authority leakage into the automatic correction path. The plan therefore keeps implementation local to one branch and requires an independent whole-diff Guardrails review before any merge decision.
+
+
+## Guardrails review hardening amendment — 2026-09-29
+
+Final whole-diff review added one implementation constraint required by the plan's existing exact-rollback invariant:
+
+- `INSERT_EVENT` / `REMOVE_EVENT` carry explicit `eventIndex` structural position;
+- projection validates and applies that exact event-array position;
+- inverse patches preserve that position so deleting a non-final event can restore exact original order;
+- patch-set constructors snapshot/freeze nested authorization and patch inputs;
+- projector rejects unsupported structural schema versions before mutation;
+- exact snapshot equality is canonicalized so JavaScript object key insertion order cannot create a false stale mismatch.
+
+RED verification for these review findings: `test-and-build` run #239 failed on the new guard tests as expected.  
+GREEN verification after fixes: `test-and-build` run #251 passed `npm test` and `npm run check`.
+
+This amendment does not widen scope or authority. Merge/deploy remain separate explicit human gates.
