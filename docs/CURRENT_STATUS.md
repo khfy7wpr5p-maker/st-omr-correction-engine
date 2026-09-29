@@ -18,14 +18,14 @@ Branch behavior now includes:
 - explicit note/rest insertion and removal;
 - teacher-authored duration, voice, staff, tie and existing-measure meter edits;
 - atomic immutable projection with stale-before failure;
-- deterministic inverse patches and exact rollback;
+- deterministic inverse patches and exact rollback, including exact `eventIndex` restoration for non-final event removal;
 - independent structural diff/revalidation with residual/resolved/new finding separation;
 - a read-only SesliTab adapter that can mark only `teacherCorrectedRevisionEligible`;
 - hard false authority flags for automatic apply, final teacher approval, student sharing, MusicXML write-back and learning.
 
 E11A remains exactly the existing one-patch high-confidence `CHANGE_VOICE` automatic slice. Automatic DURATION and other structural correction are not enabled. No persistence, authentication, student-delivery, Render/service/domain, provider, or MusicXML serializer change is introduced.
 
-Pre-documentation branch qualification reached `test-and-build` run #233 — SUCCESS. A fresh exact-head run after documentation is still required before the branch can be reported ready for a merge decision.
+Guardrails review added RED regressions for nested contract immutability, schema-version rejection, key-order-independent exact snapshots, standalone inverse usability, and non-final event-order rollback. RED run #239 failed on those new tests as expected; GREEN run #251 passed `npm test` and `npm run check`. A fresh exact-head run after the final documentation sync is still required before a merge decision.
 
 ## 2026-09-27 SEM-05 branch state
 
