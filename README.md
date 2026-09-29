@@ -20,6 +20,14 @@ Because both views derive from the same source, Semantic Engine output is **not 
 
 The first profile compares pitched non-rest notes, measure membership/count, local onset, duration, voice, staff, simple tie boundary roles and meter. Unsupported structures fail closed. There is no OMR runtime dependency on Python/Partitura, no network/Render service and no MusicXML write-back.
 
+## CE-STRUCT-01 — Teacher-authorized structural edits
+
+CE-STRUCT-01 adds a separate teacher-only structural correction lane for explicit editor actions such as inserting/removing note or rest events, changing event duration/voice/staff/tie state, and changing an existing measure's meter.
+
+The host must supply the exact teacher action and exact base revision. The engine does not infer missing musical content. Insert/remove edits also carry an exact event-array `eventIndex` so rollback restores original event order. Structural patch sets are immutable, exact-fingerprint-bound, atomic, reversible, independently revalidated, and kept outside the existing automatic `PATCH_OPERATION` / E11A authority path.
+
+A successful structural revalidation proves only that the declared teacher edit was represented exactly, introduced no undeclared mutation, and can be rolled back exactly. It does **not** prove musical correctness and does not grant final teacher approval, student sharing, learning/persistence authority, MusicXML write-back, or automatic correction.
+
 ## Safety invariants
 
 - Raw/source MusicXML is immutable.

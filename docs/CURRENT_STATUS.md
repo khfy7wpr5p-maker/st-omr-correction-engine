@@ -6,6 +6,27 @@ Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
 
 This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
 
+## 2026-09-29 CE-STRUCT-01 branch state
+
+CE-STRUCT-01 is implemented on draft PR #96 as a teacher-authorized structural correction lane. It remains unmerged and undeployed.
+
+Branch behavior now includes:
+
+- a dedicated `TeacherStructuralPatchSetV1` contract isolated from `PATCH_OPERATION`;
+- exact base `sourceId` + SHA-256 ScoreGraph fingerprint binding;
+- explicit teacher-action authorization without conflating it with final teacher approval;
+- explicit note/rest insertion and removal;
+- teacher-authored duration, voice, staff, tie and existing-measure meter edits;
+- atomic immutable projection with stale-before failure;
+- deterministic inverse patches and exact rollback, including exact `eventIndex` restoration for non-final event removal;
+- independent structural diff/revalidation with residual/resolved/new finding separation;
+- a read-only SesliTab adapter that can mark only `teacherCorrectedRevisionEligible`;
+- hard false authority flags for automatic apply, final teacher approval, student sharing, MusicXML write-back and learning.
+
+E11A remains exactly the existing one-patch high-confidence `CHANGE_VOICE` automatic slice. Automatic DURATION and other structural correction are not enabled. No persistence, authentication, student-delivery, Render/service/domain, provider, or MusicXML serializer change is introduced.
+
+Guardrails review added RED regressions for nested contract immutability, schema-version rejection, key-order-independent exact snapshots, standalone inverse usability, and non-final event-order rollback. RED run #239 failed on those new tests as expected; GREEN run #251 passed `npm test` and `npm run check`. Final post-documentation exact-head CI is tracked on PR #96 / Linear SES-107 / the CE-STRUCT-01 Notion handoff rather than pinning its run number here, because editing this file to record that run would create a new head that requires another qualification.
+
 ## 2026-09-27 SEM-05 branch state
 
 SEM-05 implements a branch-only, shadow/reference semantic-consistency path against the qualified ST Score Semantic Engine contract. It compares a provenance-pinned SemanticSnapshot with the existing OMR ScoreGraph without granting correction authority.
