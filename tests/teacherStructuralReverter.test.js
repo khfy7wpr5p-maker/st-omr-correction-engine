@@ -37,7 +37,7 @@ test('every structural operation has a deterministic inverse', () => {
   const source = sourceGraph()
   const patches = [
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2') }),
-    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', before: source.events[1], after: null }),
+    api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT, measureKey: 'm1', eventId: 'r1', eventIndex: 1, before: source.events[1], after: null }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION, measureKey: 'm1', eventId: 'n1', before: 1, after: 0.5 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_VOICE, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
     api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_STAFF, measureKey: 'm1', eventId: 'n1', before: 1, after: 2 }),
@@ -52,7 +52,7 @@ test('every structural operation has a deterministic inverse', () => {
 
   const [insertInverse, removeInverse, ...rest] = patches.map(invert)
   assert.equal(insertInverse.operation, api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT)
-  assert.deepEqual(insertInverse.before, patches[0].after)
+  assert.deepEqual(insertInverse.before, api.createScoreEvent(patches[0].after))
   assert.equal(insertInverse.after, null)
 
   assert.equal(removeInverse.operation, api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT)
@@ -154,4 +154,52 @@ test('rollback fails closed when projected graph was tampered before revert', ()
   assert.equal(result.ok, false)
   assert.equal(result.code, 'STALE_STRUCTURAL_BEFORE_MISMATCH')
   assert.equal(result.graph, tampered)
+})
+
+
+test('removing a non-final event preserves its original array position across exact rollback', () => {
+  const source = sourceGraph()
+  const removeFirst = api.createTeacherStructuralPatch({
+    operation: api.TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT,
+    measureKey: 'm1',
+    eventId: 'n1',
+    eventIndex: 0,
+    before: source.events[0],
+    after: null,
+  })
+  const set = setFor(source, [removeFirst], 'remove-first')
+  const projected = api.projectTeacherStructuralPatchSet(source, set)
+  assert.equal(projected.ok, true)
+  assert.deepEqual(projected.graph.events.map((event) => event.id), ['r1'])
+
+  const reverted = api.revertTeacherStructuralPatchSet(projected.graph, set)
+  assert.equal(reverted.ok, true)
+  assert.deepEqual(reverted.graph.events.map((event) => event.id), ['n1', 'r1'])
+  assert.deepEqual(reverted.graph, source)
+})
+
+test('standalone inverse of INSERT_EVENT is directly projectable against the projected graph', () => {
+  const source = sourceGraph()
+  const insert = api.createTeacherStructuralPatch({
+    operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
+    measureKey: 'm1',
+    eventId: 'n2',
+    before: null,
+    after: insertedEvent('n2'),
+  })
+  const set = setFor(source, [insert], 'standalone-inverse')
+  const projected = api.projectTeacherStructuralPatchSet(source, set)
+  assert.equal(projected.ok, true)
+
+  const inverse = api.invertTeacherStructuralPatch(insert)
+  const inverseSet = api.createTeacherStructuralPatchSet({
+    patchSetId: 'standalone-inverse:revert',
+    baseSourceId: projected.graph.sourceId,
+    baseGraphFingerprint: api.fingerprintScoreGraph(projected.graph),
+    authorization: set.authorization,
+    patches: [inverse],
+  })
+  const reverted = api.projectTeacherStructuralPatchSet(projected.graph, inverseSet)
+  assert.equal(reverted.ok, true)
+  assert.deepEqual(reverted.graph, source)
 })
