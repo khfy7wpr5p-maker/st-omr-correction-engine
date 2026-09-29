@@ -6,7 +6,7 @@
 
 **Architecture:** Keep the existing CE-STRUCT implementation authoritative. Add a browser-only build seam that aliases only `node:crypto` to a synchronous SHA-256 compatibility shim, bundles the existing CE-STRUCT modules into one IIFE artifact, emits a signed-by-content manifest, and proves parity against the Node implementation. SesliTab will consume this artifact later from an exact engine commit; this plan does not modify SesliTab.
 
-**Tech Stack:** Node.js 20 CI, ESM, node:test, esbuild 0.28.2, @noble/hashes 2.4.0 (build/runtime-bundle input only; bundled output has zero external imports).
+**Tech Stack:** Node.js 20 CI (browser build requires Node 20.19+; GitHub `setup-node: 20` resolves the current 20.x line), ESM, node:test, esbuild 0.28.2, @noble/hashes 2.4.0 (build/runtime-bundle input only; bundled output has zero external imports).
 
 **Spec:** `khfy7wpr5p-maker/seslitab-guitar-reader@8fafbbe274b4a4c955d811f4286a9280d974b0c9:docs/superpowers/specs/2026-09-29-ce-bridge-01-smoosic-structural-revalidation-design.md`
 
@@ -299,9 +299,18 @@ Document only:
 
 Do not claim SesliTab integration is complete.
 
-- [ ] **Step 3: Run exact-head qualification**
+- [ ] **Step 3: Commit the final implementation/docs state before qualification**
 
-Run:
+```bash
+git add package.json package-lock.json README.md docs/ARCHITECTURE.md docs/CURRENT_STATUS.md .github/workflows/test-and-build.yml browser scripts tests
+git commit -m "build: qualify CE-STRUCT browser runtime boundary"
+```
+
+No source/document commit may be added after the exact-head qualification unless the full qualification is rerun.
+
+- [ ] **Step 4: Run exact-head qualification**
+
+Re-read the new exact branch HEAD, then run:
 ```bash
 npm install --ignore-scripts
 npm run build:ce-struct-browser
@@ -311,11 +320,11 @@ npm run check
 
 Expected:
 - all existing tests plus new runtime tests PASS;
-- generated manifest revision equals exact HEAD;
+- generated manifest `engineSourceRevision` equals the exact post-commit HEAD;
 - zero external imports;
 - no authority/capability violation.
 
-- [ ] **Step 4: Run Codex Engineering Guardrails whole-diff verification**
+- [ ] **Step 5: Run Codex Engineering Guardrails whole-diff verification**
 
 Verify independently:
 - no E11A / resolver / readiness / candidate policy change;
@@ -329,12 +338,7 @@ Verify independently:
 
 Critical or Important finding must be repaired test-first before qualification.
 
-- [ ] **Step 5: Commit final qualification/docs**
-
-```bash
-git add package.json package-lock.json README.md docs/ARCHITECTURE.md docs/CURRENT_STATUS.md .github/workflows/test-and-build.yml
-git commit -m "docs: qualify CE-STRUCT browser runtime boundary"
-```
+Guardrails review is read-only at this point. If it finds a Critical/Important issue, return to the owning task, repair test-first, commit, and rerun Steps 4–5 from the new exact HEAD.
 
 ## Final PR Gate
 
