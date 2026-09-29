@@ -1,7 +1,7 @@
 # CE-STRUCT-01 — Teacher-Authorized Structural OMR Correction Architecture
 
 Date: 2026-09-29  
-Status: WRITTEN SPEC — USER REVIEW REQUIRED BEFORE IMPLEMENTATION PLAN  
+Status: APPROVED — IMPLEMENTED ON DRAFT PR #96; MERGE/DEPLOY NOT AUTHORIZED  
 Repository: `khfy7wpr5p-maker/st-omr-correction-engine`  
 Baseline: `589c996ee0945ab6fb1169e7f0c7abfeb56add35`  
 Linear: SES-107
@@ -533,3 +533,22 @@ This written specification must be reviewed and explicitly approved by the user.
 Only after written-spec approval may a Superpowers implementation plan be written.
 
 No production code, test code, merge, or deploy is authorized by this specification alone.
+
+
+## 25. Guardrails review amendment — exact event-array position
+
+Whole-diff verification identified that event insertion/removal must preserve the exact ScoreGraph event-array position to make the existing exact-content rollback requirement true for non-final removals.
+
+Final contract clarification:
+
+- `INSERT_EVENT` and `REMOVE_EVENT` carry an explicit non-negative `eventIndex`;
+- `INSERT_EVENT.eventIndex` is the exact insertion position in the current ScoreGraph event array;
+- `REMOVE_EVENT.eventIndex` must point to the exact current target event;
+- stale or out-of-range positions fail closed;
+- inverse insert/remove patches preserve the same `eventIndex`;
+- rollback must restore both event values **and event order**;
+- this index is structural revision identity only; it is not musical evidence and grants no additional correction authority.
+
+The review also hardened the patch-set boundary so nested authorization/patch inputs are snapshotted into frozen contract objects, unsupported patch-set schema versions fail closed, and exact `before` object comparisons are independent of JavaScript property insertion order.
+
+These are safety corrections to the approved architecture, not scope expansion. Automatic correction, E11A, readiness, persistence, MusicXML write-back, student sharing, Render, and deployment boundaries remain unchanged.
