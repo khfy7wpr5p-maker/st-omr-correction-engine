@@ -56,12 +56,12 @@ test('single teacher structural operations project onto a new graph without muta
   const cases = [
     {
       name: 'insert note',
-      patch: () => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2') }),
+      patch: () => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2') }),
       assertProjected: (graph) => assert.equal(graph.events.some((event) => event.id === 'n2' && event.pitch === 64), true),
     },
     {
       name: 'insert rest',
-      patch: () => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'r2', before: null, after: insertedEvent('r2', { rest: true }) }),
+      patch: () => api.createTeacherStructuralPatch({ operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT, measureKey: 'm1', eventId: 'r2', eventIndex: 2, before: null, after: insertedEvent('r2', { rest: true }) }),
       assertProjected: (graph) => assert.equal(graph.events.some((event) => event.id === 'r2' && event.isRest), true),
     },
     {
@@ -133,7 +133,7 @@ test('mixed patch set is atomic and exposes no partial authoritative graph or au
   const source = sourceGraph()
   const insert = api.createTeacherStructuralPatch({
     operation: api.TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT,
-    measureKey: 'm1', eventId: 'n2', before: null, after: insertedEvent('n2'),
+    measureKey: 'm1', eventId: 'n2', eventIndex: 2, before: null, after: insertedEvent('n2'),
   })
   const stale = api.createTeacherStructuralPatch({
     operation: api.TEACHER_STRUCTURAL_OPERATION.CHANGE_EVENT_DURATION,
