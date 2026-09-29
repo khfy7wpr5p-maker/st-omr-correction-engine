@@ -32,6 +32,7 @@ export { createTeacherWorkloadTelemetry, aggregateTeacherWorkloadTelemetry } fro
 export { projectCorrectionPatches } from './correction/patchProjection.js'
 export { revertCorrectionPatches } from './correction/patchReverter.js'
 export { validateTeacherStructuralPatchAgainstGraph } from './correction/teacherStructuralPatchValidation.js'
+export { projectTeacherStructuralPatchSet } from './correction/teacherStructuralProjection.js'
 export { buildStructuralCorrectionSuggestions } from './correction/structuralSuggestionBuilder.js'
 export { analyzeOmrCorrections } from './correction/omrCorrectionAnalyzer.js'
 export { CONTROLLED_CORRECTION_DECISION, E11A_CONTROLLED_POLICY, applyControlledVoiceCorrection } from './correction/controlledAutoCorrection.js'
