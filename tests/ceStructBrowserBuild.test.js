@@ -9,6 +9,15 @@ const builderUrl = new URL('../scripts/buildCeStructBrowserRuntime.mjs', import.
 const artifactUrl = new URL('../dist/browser/ce-struct-browser-runtime.js', import.meta.url)
 const manifestUrl = new URL('../dist/browser/ce-struct-browser-runtime.manifest.json', import.meta.url)
 
+async function expectedEngineSourceRevision() {
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request' && process.env.GITHUB_EVENT_PATH) {
+    const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8'))
+    const headSha = event?.pull_request?.head?.sha
+    if (typeof headSha === 'string' && /^[0-9a-f]{40}$/.test(headSha)) return headSha
+  }
+  return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+}
+
 test('CE-STRUCT browser runtime builder exists', () => {
   assert.equal(existsSync(builderUrl), true)
 })
@@ -34,7 +43,7 @@ test('CE-STRUCT browser runtime manifest binds exact source and forbidden author
   assert.equal(manifest.target, 'es2022')
   assert.equal(manifest.global, 'STOmrCorrectionCeStructRuntime')
   assert.equal(manifest.externalImports, 0)
-  assert.equal(manifest.engineSourceRevision, execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim())
+  assert.equal(manifest.engineSourceRevision, await expectedEngineSourceRevision())
   assert.equal(manifest.bundler.package, 'esbuild')
   assert.equal(manifest.bundler.version, '0.28.2')
   assert.equal(manifest.hashProvider.package, '@noble/hashes')
