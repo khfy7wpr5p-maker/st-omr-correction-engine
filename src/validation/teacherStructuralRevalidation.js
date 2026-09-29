@@ -1,7 +1,7 @@
 import { createMeasure } from '../model/measure.js'
 import { createScoreEvent } from '../model/scoreEvent.js'
 import { createScoreGraph } from '../model/scoreGraph.js'
-import { fingerprintScoreGraph, TEACHER_STRUCTURAL_OPERATION } from '../contracts/teacherStructuralPatch.js'
+import { fingerprintScoreGraph, TEACHER_STRUCTURAL_OPERATION, TEACHER_STRUCTURAL_PATCH_SCHEMA_VERSION } from '../contracts/teacherStructuralPatch.js'
 import { detectPitchAnomalies } from '../constraints/pitchAnomalyDetector.js'
 import { detectOnsetAnomalies } from '../constraints/onsetAnomalyDetector.js'
 import { detectDurationAnomalies } from '../constraints/durationConstraint.js'
@@ -10,8 +10,16 @@ import { detectTieAnomalies } from '../constraints/tieConstraint.js'
 import { detectTupletAnomalies } from '../constraints/tupletConstraint.js'
 import { revertTeacherStructuralPatchSet } from '../correction/teacherStructuralReverter.js'
 
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonical(value[key])]))
+  }
+  return value
+}
+
 function stable(value) {
-  return JSON.stringify(value)
+  return JSON.stringify(canonical(value))
 }
 
 function sameValue(a, b) {
@@ -55,20 +63,25 @@ function buildExpectedGraph(sourceGraph, patchSet, integrityFindings) {
   let measures = [...sourceGraph.measures]
   let events = [...sourceGraph.events]
 
-  const currentGraph = () => createScoreGraph({ sourceId: sourceGraph.sourceId, measures, events })
-
   for (let order = 0; order < patchSet.patches.length; order += 1) {
     const patch = patchSet.patches[order]
 
     if (patch.operation === TEACHER_STRUCTURAL_OPERATION.INSERT_EVENT) {
-      if (events.some((event) => event.id === patch.eventId) || !measures.some((measure) => measure.key === patch.measureKey)) {
+      if (
+        events.some((event) => event.id === patch.eventId)
+        || !measures.some((measure) => measure.key === patch.measureKey)
+        || !Number.isInteger(patch.eventIndex)
+        || patch.eventIndex < 0
+        || patch.eventIndex > events.length
+      ) {
         integrityFindings.push(finding('STRUCTURAL_PATCH_INVALID', { order, operation: patch.operation }))
         return null
       }
       try {
         const inserted = createScoreEvent(patch.after)
         if (inserted.id !== patch.eventId || inserted.measureKey !== patch.measureKey) throw new TypeError('target mismatch')
-        events = [...events, inserted]
+        events = [...events]
+        events.splice(patch.eventIndex, 0, inserted)
       } catch {
         integrityFindings.push(finding('STRUCTURAL_PATCH_INVALID', { order, operation: patch.operation }))
         return null
@@ -77,12 +90,16 @@ function buildExpectedGraph(sourceGraph, patchSet, integrityFindings) {
     }
 
     if (patch.operation === TEACHER_STRUCTURAL_OPERATION.REMOVE_EVENT) {
-      const index = events.findIndex((event) => event.id === patch.eventId && event.measureKey === patch.measureKey)
-      if (index < 0 || !sameValue(events[index], patch.before)) {
+      if (!Number.isInteger(patch.eventIndex) || patch.eventIndex < 0 || patch.eventIndex >= events.length) {
+        integrityFindings.push(finding('STRUCTURAL_PATCH_INVALID', { order, operation: patch.operation, eventId: patch.eventId }))
+        return null
+      }
+      const target = events[patch.eventIndex]
+      if (!target || target.id !== patch.eventId || target.measureKey !== patch.measureKey || !sameValue(target, patch.before)) {
         integrityFindings.push(finding('STRUCTURAL_PATCH_BEFORE_MISMATCH', { order, operation: patch.operation, eventId: patch.eventId }))
         return null
       }
-      events = events.filter((_, eventIndex) => eventIndex !== index)
+      events = events.filter((_, eventIndex) => eventIndex !== patch.eventIndex)
       continue
     }
 
@@ -144,7 +161,6 @@ function buildExpectedGraph(sourceGraph, patchSet, integrityFindings) {
       return null
     }
 
-    currentGraph()
   }
 
   return createScoreGraph({ sourceId: sourceGraph.sourceId, measures, events })
@@ -268,6 +284,9 @@ export function revalidateTeacherStructuralRevision({ sourceGraph, projectedGrap
   const sourceFingerprintBefore = fingerprintScoreGraph(sourceGraph)
   const integrityFindings = []
 
+  if (patchSet.schemaVersion !== TEACHER_STRUCTURAL_PATCH_SCHEMA_VERSION) {
+    integrityFindings.push(finding('STRUCTURAL_PATCH_SET_SCHEMA_UNSUPPORTED'))
+  }
   if (sourceGraph.sourceId !== patchSet.baseSourceId || sourceFingerprintBefore !== patchSet.baseGraphFingerprint) {
     integrityFindings.push(finding('STRUCTURAL_BASE_REVISION_MISMATCH'))
   }
