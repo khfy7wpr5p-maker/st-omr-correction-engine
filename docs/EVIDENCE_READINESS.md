@@ -2,9 +2,7 @@
 
 Status: **evidence infrastructure complete; production evidence incomplete**.
 
-Technical baseline entering this closure: `ff39ae05f2de074f2b4dab9a8e62909d372a187e` with exact-main `test-and-build` run #103 (`33195531405`) — SUCCESS.
-
-This document becomes authoritative when its own protected-main merge and exact-main CI pass.
+Current source baseline verified 2026-10-28: `main@bdaeb1e6fec8aee27d1cc72347f5be735af3cf30`. See [Current Status](CURRENT_STATUS.md) for fresh tests and historical CI evidence. Readiness capability, teacher evidence and production authority are distinct.
 
 ## What is complete
 
@@ -62,15 +60,28 @@ The 54 labels must never be reported as 54 independent scores.
 
 The approved snapshot is also a real-world negative regression. Current tie, duration and onset anomaly detectors produce zero findings on it.
 
+## Accepted correction-needed event and separate structural evidence
+
+SES-97 / PR #95 adds one exact-provenance Franz Benda measure 6 D4 DURATION event in `src/benchmark/teacherReviewedRealOmrCorrectionSeed.js`. Explicit teacher gold changes 1 quarter beat to 0.25 quarter beats; `teacherDecision=ACCEPT_CORRECTION`, `correctionNeeded=true`, `evidenceAvailable=true`, `correctionSafe=false`.
+
+The executable combined event-gold regression reports:
+
+| Count | Value |
+|---|---:|
+| Eligible REAL_OMR labels | 55 |
+| Known-correct labels | 54 |
+| Independent event-gold sources | 2 |
+| Accepted correction-needed labels | 1 |
+| Independent correction-needed sources | 1 |
+| Correction-safe accepted labels | 0 |
+
+With all lower evidence gates explicitly supplied, this reaches `TEACHER_REVIEW_READY` and rejects `AUTO_CORRECTION_CANDIDATE`. That scenario is not an empirical calibration result or a blanket class promotion.
+
+SES-110 / PR #98 separately records Sor Op.35 No.13 structural failures at measures 21, 28, 29 and 31 in `src/benchmark/teacherReviewedRealOmrStructuralSeed.js`: missing events and voice/timing/onset collapse. Classification is teacher-verified, but corrected-revision approval and exact teacher structural patch values are absent. `readinessEligible=false`, `patchEligible=false`, `automaticCorrectionAuthority=false`, `correctionSafe=false`. These four measures must not be counted as four event-gold corrections or simple DURATION substitutions.
+
 ## Missing evidence
 
-The following values remain zero:
-
-- known correction-needed REAL_OMR event labels: 0;
-- independent polyphonic REAL_OMR correction-event sources: 0;
-- real teacher-gold calibration records carrying correction-engine confidence: 0.
-
-A source-disjoint calibration/final-evaluation split cannot be populated from one independent source. Therefore no empirical calibration, precision/risk or production-readiness claim for expanded correction classes can be made from the current real-OMR evidence.
+There are still zero correction-safe accepted correction-needed labels in the combined event-gold set. One correction-needed source and a readiness-ineligible structural packet do not establish source-separated per-class calibration or selective risk. No real teacher-gold confidence calibration run is demonstrated in this sync. Additional independent correction-needed sources, explicit teacher values and separately justified evidence thresholds remain required before CE-CAL-01 or expanded production promotion.
 
 ## Explicitly excluded material
 
@@ -80,18 +91,9 @@ Those files remain excluded from correction-engine musical ground truth until th
 
 ## Class readiness
 
-The expanded correction areas remain `RESEARCH_ONLY` under the cumulative readiness model:
+Readiness is evaluated from explicit gates and the particular evidence set. The known-correct-only regression reaches `SHADOW_READY`; the SES-97 combined regression reaches `TEACHER_REVIEW_READY` when lower gates are supplied, while automatic-correction candidacy remains blocked by missing correction-safe gold. Structural intake cannot override that result.
 
-- Voice 3;
-- Voice 4;
-- cross-staff;
-- pitch;
-- duration;
-- onset;
-- tie;
-- tuplet.
-
-Voice 3 and Voice 4 also remain below the unchanged current automatic resolver threshold in their bounded readiness fixtures: beam + temporal evidence reaches 0.70 rather than 0.90.
+Voice 3 and Voice 4 remain below the unchanged automatic resolver threshold in their bounded fixtures: beam + temporal evidence reaches 0.70 rather than 0.90. No expanded pitch/duration/onset/staff/tie/tuplet/cross-staff class has acquired broad unattended correction authority.
 
 ## Automatic-correction boundary
 

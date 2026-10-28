@@ -36,6 +36,14 @@ Each build emits `ce-struct-browser-runtime.js` plus a manifest bound to the exa
 
 The browser runtime adds no network, persistence, authentication, automatic-apply, final-approval, student-share, learning, or MusicXML write-back authority. It exists only as a prerequisite for a later separately reviewed SesliTab pin; no service or deploy is introduced.
 
+## CE-E2E-03A — Read-only browser MusicXML analysis
+
+Merged PR #99 / SES-112 adds `analyzeMusicXmlSuspiciousMeasures({ musicxml, sourceId, tolerance })` using the existing bounded MusicXML parser and anomaly analyzer. The `ST_OMR_CORRECTION_ENGINE_SUSPICIOUS_MEASURES_V1` result includes source SHA-256, exact part identity, measure index/number, detector codes and unmapped-finding count. It is `SHADOW_ONLY`; rendering and overlay lifecycle belong to the host.
+
+`npm run build:ce-analysis-browser` emits a separate `dist/browser-analysis/ce-analysis-browser-runtime.js` IIFE and revision/hash-bound manifest. Its global is `STOmrCorrectionAnalysisRuntime`. This analysis artifact is separate from the teacher-authorized CE-STRUCT artifact and grants no automatic apply or MusicXML write-back authority.
+
+Current evidence includes 54 known-correct labels and one teacher-accepted DURATION correction-needed event (`correctionSafe=false`). Sor measures 21/28/29/31 are separately recorded structural failures with `readinessEligible=false`; their missing musical content is not inferred. See [current status](docs/CURRENT_STATUS.md) and the [2026-10-28 architecture refresh](docs/ARCHITECTURE-REALITY-REFRESH-2026-10-28.md) for evidence, integration limits and open SES-263 reanalysis tracking.
+
 ## Safety invariants
 
 - Raw/source MusicXML is immutable.

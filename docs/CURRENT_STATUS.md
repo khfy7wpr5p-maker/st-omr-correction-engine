@@ -1,14 +1,44 @@
 # Current Status
 
-Last verified technical main baseline entering this architecture synchronization: `122725676cb1f2cb0eddb05d791bd11abea13b32`.
+Verified on 2026-10-28 against engine `main@bdaeb1e6fec8aee27d1cc72347f5be735af3cf30` (PR #99, merged 2026-09-29). This is a source/record synchronization; current consumer pins and live deployment are not newly qualified.
 
-Exact-main `test-and-build` after CE-E2E-02: run #187 — SUCCESS.
+## Current merged capabilities
 
-This architecture-refresh change is documentation-only. It does not widen runtime correction authority, alter thresholds or authorize MusicXML write-back.
+| Milestone | Repository evidence | Current boundary |
+|---|---|---|
+| SEM-05 | PR #94, `2425e4e5f2f96d36c2524055f9cba9966d2465e5` | Same-source semantic comparison only; not independent resolver evidence |
+| CE-DATA-01 / SES-97 | PR #95, `589c996ee0945ab6fb1169e7f0c7abfeb56add35` | One eligible DURATION correction-needed teacher-gold event; `correctionSafe=false` |
+| CE-STRUCT-01 / SES-107 | PR #96, `c11d35b35321c5d7761e7033ce4ce1d91cbeb1c2` | Explicit teacher-authored structural patches, immutable projection and exact rollback |
+| CE-STRUCT browser / SES-108 prerequisite | PR #97, `7550e77b3ddff55e63e714b2dbc2b450b69771dc` | Separate bounded structural runtime and exact-source manifest |
+| Sor structural evidence / SES-110 | PR #98, `1a3592327a3918e10da9b288ee39710fc4ebbf9b` | Four teacher-verified failure measures; no exact patch values or readiness promotion |
+| Read-only browser analysis / SES-112 | PR #99, `bdaeb1e6fec8aee27d1cc72347f5be735af3cf30` | MusicXML text → suspicious measures; separate analysis IIFE/manifest; no apply/write-back |
 
-## 2026-09-29 CE-STRUCT browser-runtime prerequisite branch state
+## Current evidence and open records
 
-CE-STRUCT-01 is already merged on `main` at `c11d35b35321c5d7761e7033ce4ce1d91cbeb1c2`. The current draft prerequisite PR #97 packages only that bounded teacher-structural surface for browser consumption.
+The event-gold regression combines 54 known-correct labels with one accepted correction-needed DURATION label: 55 eligible labels, 2 independent sources, 1 correction-needed source and 0 correction-safe accepted events. The Sor structural packet is separate and `readinessEligible=false`; four failure measures are not four safe gold corrections.
+
+Linear checked during this sync: SES-109 is **Todo**, despite older Notion wording saying In Progress; SES-110/111/112/114 are Done. CE-DATA-02 remains an unfinished evidence milestone. CE-CAL-01 needs a separately justified evidence threshold and calibration/final-evaluation source separation.
+
+SES-263 is **Todo**: the teacher reports old suspicious marks remaining after correction and reanalysis. The current record has not established whether the host analyzed old XML, the new result still flags the measure, or presentation retained old results. Root cause/fix and live reanalysis behavior remain unverified. Existing analysis and CE-STRUCT integration completion must not be used to close it.
+
+## Verification evidence
+
+- Existing exact-main [test-and-build run 36605554522](https://github.com/khfy7wpr5p-maker/st-omr-correction-engine/actions/runs/36605554522): success, same `bdaeb1e6...` baseline.
+- Existing exact-main [basic-pitch smoke run 36605554481](https://github.com/khfy7wpr5p-maker/st-omr-correction-engine/actions/runs/36605554481): success; not rerun locally.
+- Fresh local `npm test`: **379 passed, 0 failed, 0 skipped**, both browser artifacts built; Node v24.22.1. CI declares Node 20.
+- Fresh local `npm run check`: **PASS**.
+- No private Sor source replay, consumer browser qualification, production deployment verification or new musical teacher review was performed.
+- This update changes documentation only. A documentation PR requires its own PR-head CI; the successful baseline run is not that PR's result.
+
+See [Architecture](ARCHITECTURE.md), [Evidence Readiness](EVIDENCE_READINESS.md), [Roadmap](ROADMAP.md) and the [2026-10-28 refresh](ARCHITECTURE-REALITY-REFRESH-2026-10-28.md).
+
+## Historical implementation notes
+
+The dated sections below retain implementation-time evidence. Their historical zero counts and old host baselines do not override the current summary above.
+
+## 2026-09-29 CE-STRUCT browser-runtime prerequisite — merged
+
+CE-STRUCT-01 is already merged on `main` at `c11d35b35321c5d7761e7033ce4ce1d91cbeb1c2`. PR #97 subsequently merged at `7550e77b3ddff55e63e714b2dbc2b450b69771dc`, packaging only that bounded teacher-structural surface for browser consumption.
 
 Current branch behavior includes:
 
@@ -19,7 +49,7 @@ Current branch behavior includes:
 - PR CI that checks out the actual PR head rather than GitHub's temporary merge ref before qualification;
 - browser-vs-Node parity coverage across admitted teacher structural operations and hard-false authority flags.
 
-No SesliTab production integration, Render/service/domain, deployment, persistence, authentication, automatic apply, final teacher approval, student sharing, learning, or MusicXML write-back is added by this prerequisite. Merge remains a separate explicit approval gate.
+No SesliTab production integration, Render/service/domain, deployment, persistence, authentication, automatic apply, final teacher approval, student sharing, learning, or MusicXML write-back is added by this prerequisite. Its historical merge gate has been satisfied; deployment is not established by that merge.
 
 ## 2026-09-29 CE-STRUCT-01 branch state
 
@@ -42,9 +72,9 @@ E11A remains exactly the existing one-patch high-confidence `CHANGE_VOICE` autom
 
 Guardrails review added RED regressions for nested contract immutability, schema-version rejection, key-order-independent exact snapshots, standalone inverse usability, and non-final event-order rollback. RED run #239 failed on those new tests as expected; GREEN run #251 passed `npm test` and `npm run check`. Final post-documentation exact-head CI is tracked on PR #96 / Linear SES-107 / the CE-STRUCT-01 Notion handoff rather than pinning its run number here, because editing this file to record that run would create a new head that requires another qualification.
 
-## 2026-09-27 SEM-05 branch state
+## 2026-09-27 SEM-05 — merged
 
-SEM-05 implements a branch-only, shadow/reference semantic-consistency path against the qualified ST Score Semantic Engine contract. It compares a provenance-pinned SemanticSnapshot with the existing OMR ScoreGraph without granting correction authority.
+SEM-05 implements a merged, shadow/reference semantic-consistency path against the qualified ST Score Semantic Engine contract. It compares a provenance-pinned SemanticSnapshot with the existing OMR ScoreGraph without granting correction authority.
 
 The safety result is explicit:
 
@@ -57,7 +87,7 @@ The safety result is explicit:
 - source ScoreGraph remains immutable;
 - no Python/Partitura runtime, REST/network service, Render change or MusicXML write-back is introduced.
 
-Implementation is tracked in draft PR #94 and remains unmerged. Exact-head CI is required before qualification and before any merge decision.
+PR #94 merged on 2026-09-27 at `2425e4e5f2f96d36c2524055f9cba9966d2465e5`; the implementation is present in the verified engine baseline.
 
 ## 2026-09-20 CE-E2E architecture synchronization
 
