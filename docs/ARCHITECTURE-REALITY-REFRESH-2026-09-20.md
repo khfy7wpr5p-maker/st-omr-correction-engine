@@ -1,5 +1,7 @@
 # ST-OMR Correction Engine — Architecture Reality Refresh — 2026-09-20
 
+Historical snapshot. For current merged capabilities and evidence counts, use the [2026-10-28 refresh](ARCHITECTURE-REALITY-REFRESH-2026-10-28.md), [Current Status](CURRENT_STATUS.md) and [Evidence Readiness](EVIDENCE_READINESS.md). The zero correction-needed count below describes the September 20 baseline only.
+
 ## Purpose
 
 Synchronize architecture documentation with the actual verified repository behavior after CE-E2E-01 and CE-E2E-02.

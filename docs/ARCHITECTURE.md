@@ -155,6 +155,28 @@ The browser build aliases only the `node:crypto` SHA-256 call used for ScoreGrap
 
 Pull-request CI checks out the actual PR head SHA before qualification, and the runtime manifest must match that same `git HEAD`. The artifact has no network, persistence, authentication, automatic apply, final teacher approval, student sharing, learning or MusicXML write-back authority. No Render/service/domain is part of this boundary.
 
+## Read-only browser analysis and host presentation boundary
+
+PR #99 / SES-112 adds a second, separate browser artifact:
+
+```mermaid
+flowchart TD
+  A["Exact MusicXML text"] --> B["Bounded parser + existing anomaly analyzer"]
+  B --> C["Immutable suspicious-measure packet"]
+  C --> D["Host source/revision admission"]
+  D --> E["Host whole-measure overlays"]
+  A --> F["Explicit teacher edit"]
+  F --> G["Separate CE-STRUCT validation lane"]
+```
+
+`src/correction/musicXmlSuspiciousMeasureAnalyzer.js` calls `parseBoundedMusicXmlScoreGraph(..., { includeRests: true })` and `analyzeOmrCorrections`. It groups findings by measure and emits `ST_OMR_CORRECTION_ENGINE_SUSPICIOUS_MEASURES_V1`: `sourceId`, text-byte `sourceHash`, `partId`, measure/event counts, findings, ordered suspicious measures and `unmappedFindingCount`. Measure indices are zero-based; measure numbers remain strings. `sourceGraphMutated`, `automaticApplyAuthority` and `musicXmlWriteBackAuthority` are false.
+
+The parser admits one score-partwise part, timed notes/rests, chord members, backup/forward, voice/staff, simple tie metadata and inherited divisions/meter. It explicitly rejects multi-part input, nonzero chromatic transposition, missing required timing data and backup before measure start. This is a bounded regex-based canonicalizer, not a general MusicXML schema validator; do not infer complete coverage of unsupported notation from the fail-closed tests.
+
+`browser/ceAnalysisBrowserEntry.js` exports the analysis function plus contract/version metadata. `scripts/buildCeAnalysisBrowserRuntime.mjs` builds `dist/browser-analysis/ce-analysis-browser-runtime.js` and its manifest with global `STOmrCorrectionAnalysisRuntime`, IIFE/ES2022 format, zero external imports, exact checked-out commit, byte size and SHA-256. SHA-256/Buffer shims preserve admitted Node/browser behavior; filesystem access is unavailable. Network, persistence, authentication, automatic apply, learning and MusicXML write-back capability/authority flags are false.
+
+The engine emits diagnostics, not DOM or renderer changes. Host code owns exact source/revision matching, overlay mapping, cancellation, clearing and refresh after accepted edits. SES-111 and SES-114 are recorded Done in Linear; those historical integration completions do not establish current live behavior. SES-263 remains Todo for stale suspicious marks after correction/reanalysis. Its root cause and fix are unverified in this documentation sync.
+
 ## SEM-05 shadow semantic consistency boundary
 
 SEM-05 adds an adapter-only reference path:
@@ -205,16 +227,17 @@ A controlled automatic correction is limited to exactly one high-confidence `CHA
 
 There is no production MusicXML overwrite or corrected-MusicXML serialization path.
 
-## Evidence boundary as of 2026-09-20
+## Evidence boundary verified 2026-10-28
 
 Current approved REAL_OMR evidence remains deliberately small:
 
-- 1 independent exact-hash teacher-approved Audiveris source;
-- 22 approved score events;
-- 54 bounded `NO_CORRECTION_NEEDED` labels;
-- 0 known correction-needed REAL_OMR event labels;
-- 0 independent polyphonic REAL_OMR correction-event sources;
-- 0 real teacher-gold calibration records carrying correction-engine confidence.
+- the original known-correct Audiveris source: 22 score events, 54 `NO_CORRECTION_NEEDED` labels;
+- SES-97 / PR #95: one eligible teacher-accepted DURATION correction-needed event from an independent Franz Benda source, `correctionSafe=false`;
+- together, those event-label sets contain 55 eligible labels across 2 independent sources, but only 1 correction-needed source and 0 correction-safe accepted events;
+- SES-110 / PR #98: a separate teacher-verified Sor structural-failure packet for measures 21/28/29/31; `readinessEligible=false`, `patchEligible=false`, exact teacher patch values absent;
+- no source-separated real correction-engine confidence calibration has been demonstrated by this sync.
+
+With the lower evidence gates explicitly supplied, the combined event-label regression reaches `TEACHER_REVIEW_READY` and refuses `AUTO_CORRECTION_CANDIDATE`. This is a tested readiness scenario, not a global production promotion. The structural packet does not add four event-level gold corrections. See [Evidence Readiness](EVIDENCE_READINESS.md).
 
 Therefore pitch, duration, onset, staff, tie, tuplets, cross-staff, Voice 3 and Voice 4 must not be promoted to broad unattended production correction solely from the current repository evidence.
 

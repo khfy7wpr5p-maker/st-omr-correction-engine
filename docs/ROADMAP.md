@@ -52,8 +52,15 @@
 | CE-EVIDENCE-04 | Exact-hash teacher-approved Audiveris real-OMR seed + negative detector regression | Completed | None |
 | CE-E2E-01 | End-to-end deterministic correction proposal, reversible projection and independent revalidation surface | Completed — PR #90 | Shadow/proposal; E11A unchanged |
 | CE-E2E-02 | REAL_OMR correction-needed readiness gate | Completed — PR #91 | None |
-| CE-DATA-01 | Collect exact-provenance teacher-reviewed correction-needed REAL_OMR cases | Next evidence milestone | None |
-| CE-CAL-01 | Per-class source-separated calibration + risk/coverage evaluation | Blocked on CE-DATA-01 | None |
+| SEM-05 | Same-source semantic consistency shadow bridge | Completed — PR #94 | None |
+| CE-DATA-01 | First eligible teacher-reviewed correction-needed REAL_OMR event | Completed — PR #95 / SES-97; DURATION, unsafe for automatic correction | None |
+| CE-STRUCT-01 | Explicit teacher structural patches, projection, revalidation and rollback | Completed — PR #96 / SES-107 | Teacher-declared in-memory projection only |
+| CE-STRUCT browser | Bounded same-source structural browser artifact | Completed — PR #97 | No automatic apply/write-back |
+| CE-DATA-02 | Expand independent correction-needed REAL_OMR evidence | Unfinished — SES-109 Todo; Sor structural packet merged in PR #98 / SES-110 Done | None; structural packet readiness-ineligible |
+| CE-E2E-03A | Read-only MusicXML suspicious-measure browser analysis | Completed — PR #99 / SES-112 | None |
+| CE-E2E-03 / CE-INTEG-01 | Host editor/teacher suspicious-measure integration | SES-111 / SES-114 Done in Linear; current live behavior not requalified here | Presentation only |
+| SES-263 | Corrected-score reanalysis / stale suspicious marks diagnosis | Todo; root cause and fix unverified | No new authority |
+| CE-CAL-01 | Per-class source-separated calibration + risk/coverage evaluation | Blocked on sufficient evidence and source-separated policy decision; first event alone is insufficient | None |
 | CE-PROMOTE-* | Promote individual correction classes through readiness ladder | Blocked on evidence | Only after explicit gate |
 | E12 | Optional visual second-opinion AI | Not started | Evidence only |
 
@@ -67,15 +74,13 @@ CE-E2E-02 requires gold-eligible, teacher-accepted, correction-needed REAL_OMR e
 
 ## Real OMR evidence status
 
-The collection/evaluation infrastructure is ready, but the current real-OMR evidence is intentionally small:
+Verified against engine main on 2026-10-28:
 
-- 1 independent exact-hash teacher-approved Audiveris source;
-- 22 approved score events;
-- 54 bounded `NO_CORRECTION_NEEDED` labels: 22 pitch, 22 duration, 10 tie;
-- 0 known correction-needed REAL_OMR event labels;
-- 0 correction-safe accepted correction-needed REAL_OMR labels;
-- 0 independent polyphonic REAL_OMR correction-event sources;
-- 0 real teacher-gold calibration records carrying correction-engine confidence.
+- known-correct seed: 22 represented events and 54 `NO_CORRECTION_NEEDED` labels;
+- SES-97: 1 eligible accepted DURATION correction-needed event, `correctionSafe=false`;
+- combined event-gold regression: 55 eligible labels across 2 independent sources, only 1 correction-needed source and 0 correction-safe accepted events;
+- SES-110: separate Sor structural evidence for measures 21/28/29/31, `readinessEligible=false`, exact teacher patch values absent;
+- source-separated confidence calibration and broad automatic correction readiness are not demonstrated.
 
 The seven SesliTab `real-omr` regression XML fixtures remain regression-only because source/license/golden/approval/integrity evidence is incomplete. They must not be counted as musical ground truth.
 
@@ -85,7 +90,7 @@ Expanded correction classes progress only through the cumulative fail-closed rea
 
 `RESEARCH_ONLY → SHADOW_READY → TEACHER_REVIEW_READY → AUTO_CORRECTION_CANDIDATE → PRODUCTION_APPROVED`
 
-No numeric threshold is invented by the readiness evaluator. Automatic/production promotion requires the lower evidence gates plus an explicit teacher-gold-derived policy, human approval and security review. Current expanded classes remain `RESEARCH_ONLY` because the real correction-needed evidence is not yet sufficient.
+No numeric threshold is invented by the readiness evaluator. Automatic/production promotion requires the lower evidence gates plus an explicit teacher-gold-derived policy, human approval and security review. The SES-97 combined event-gold regression can reach `TEACHER_REVIEW_READY` when lower gates are explicitly supplied, but cannot reach automatic-correction candidacy. This does not promote every correction class or change production behavior.
 
 ## Verified integration shadow boundary
 
@@ -95,7 +100,9 @@ CE-POLY-18 additionally provides a ScoreMosaic shadow evidence packet while pres
 
 ## Next evidence milestone
 
-The next scientifically valid milestone is **CE-DATA-01**: collect exact-provenance real Audiveris failure cases and obtain genuine event-level teacher decisions for correction-needed examples. After source-separated evidence exists, **CE-CAL-01** can measure class-specific precision, coverage, selective risk and confidence calibration before any promotion decision.
+**CE-DATA-02 / SES-109** remains unfinished (Linear Todo). Additional independent genuine correction-needed evidence and exact teacher-authored structural values are needed; the Sor classification packet alone cannot become event-gold or correction-safe evidence. Do not infer missing notes or durations.
+
+**CE-CAL-01** requires a separately justified evidence threshold and source-separated calibration/final-evaluation data. It does not open automatically because CE-DATA-01 or a structural intake completed. **SES-263** separately tracks host reanalysis/result/overlay consistency; no fix is claimed by this architecture sync.
 
 ## Closed production boundaries
 
